@@ -1,0 +1,6 @@
+/.fleet
+/.idea
+/.vscode
+*.log
+*.map
+*.sln
