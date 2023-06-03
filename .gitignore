@@ -4,3 +4,4 @@
 *.log
 *.map
 *.sln
+.DS_Store
