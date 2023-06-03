@@ -5,6 +5,10 @@
     ],
     "indentWidth": 2,
     "lineWidth": 80,
+    "semiColons": true,
     "singleQuote": true
+  },
+  "imports": {
+    "@std/": "https://deno.land/std@0.190.0/"
   }
 }
