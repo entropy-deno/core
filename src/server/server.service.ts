@@ -5,7 +5,11 @@ import { existsSync } from '@std/fs/mod.ts';
 import { dirname } from '@std/path/mod.ts';
 import { contentType } from '@std/media_types/mod.ts';
 import { parse as parseFlags } from '@std/flags/mod.ts';
+import { renderToString } from 'https://jspm.dev/react-dom@18.0.0/server';
+import { createElement } from 'https://jspm.dev/react@18.0.0';
 import { WebClientAlias } from './enums/web_client_alias.enum.ts';
+import { StatusPage } from '../http/pages/status_page.tsx';
+import { StatusCode } from '../http/enums/status_code.enum.ts';
 
 export class Server {
   private checkSystemRequirements(): void {
@@ -37,7 +41,9 @@ export class Server {
       },
     });
 
-    if (request.method === 'GET' && new URL(request.url).pathname.includes('.')) {
+    if (
+      request.method === 'GET' && new URL(request.url).pathname.includes('.')
+    ) {
       const filePath = `${Deno.cwd()}/public${new URL(request.url).pathname}`;
 
       let fileSize;
@@ -50,22 +56,44 @@ export class Server {
         response = new Response(body, {
           headers: {
             'content-length': fileSize.toString(),
-            'content-type': contentType(filePath.split('.')?.pop() ?? '') ?? 'application/octet-stream',
+            'content-type': contentType(filePath.split('.')?.pop() ?? '') ??
+              'application/octet-stream',
           },
         });
       } catch {
-        response = new Response(null, {
-          status: 404,
-        });
+        const status = StatusCode.NotFound;
+
+        response = new Response(
+          renderToString(
+            createElement(StatusPage, {
+              message: Object.keys(StatusCode)
+                .find(
+                  (key: string) =>
+                    (StatusCode as unknown as Record<string, StatusCode>)[
+                      key
+                    ] ===
+                      status,
+                )
+                ?.replace(/([a-z])([A-Z])/g, '$1 $2') ??
+                'Internal Server Error',
+            }),
+          ),
+          {
+            status: status,
+            headers: {
+              'content-type': 'text/html; charset=utf-8',
+            },
+          },
+        );
       }
     }
 
     const timerEnd = performance.now();
 
     console.log(
-      `%c[%c${response.status}%c] %cRequest: ${new URL(request.url).pathname} %c[${
-        (timerEnd - timerStart).toFixed(3)
-      }ms]`,
+      `%c[%c${response.status}%c] %cRequest: ${
+        new URL(request.url).pathname
+      } %c[${(timerEnd - timerStart).toFixed(3)}ms]`,
       'color: gray;',
       'color: blue;',
       'color: gray;',
