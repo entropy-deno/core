@@ -66,6 +66,7 @@ export class Server {
         response = new Response(
           renderToString(
             createElement(StatusPage, {
+              status,
               message: Object.keys(StatusCode)
                 .find(
                   (key: string) =>
@@ -77,7 +78,7 @@ export class Server {
                 ?.replace(/([a-z])([A-Z])/g, '$1 $2') ??
                 'Internal Server Error',
             }),
-          ),
+          ).replaceAll('<!-- -->', ''),
           {
             status: status,
             headers: {
