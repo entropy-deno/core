@@ -31,6 +31,12 @@ export class Server {
   private async serve(request: Request): Promise<Response> {
     const timerStart = performance.now();
 
+    let response = new Response('Hello World!', {
+      headers: {
+        'content-type': 'text/html; charset=utf-8',
+      },
+    });
+
     if (request.method === 'GET' && new URL(request.url).pathname.includes('.')) {
       const filePath = `${Deno.cwd()}/public${new URL(request.url).pathname}`;
 
@@ -38,43 +44,36 @@ export class Server {
 
       try {
         fileSize = (await Deno.stat(filePath)).size;
-      } catch (e) {
-        if (e instanceof Deno.errors.NotFound) {
-          return new Response(null, {
-            status: 404,
-          });
-        }
 
-        return new Response(null, {
-          status: 500,
+        const body = (await Deno.open(filePath)).readable;
+
+        response = new Response(body, {
+          headers: {
+            'content-length': fileSize.toString(),
+            'content-type': contentType(filePath.split('.')?.pop() ?? '') ?? 'application/octet-stream',
+          },
+        });
+      } catch {
+        response = new Response(null, {
+          status: 404,
         });
       }
-
-      const body = (await Deno.open(filePath)).readable;
-
-      return new Response(body, {
-        headers: {
-          'content-length': fileSize.toString(),
-          'content-type': contentType(filePath.split('.')?.pop() ?? '') ?? 'application/octet-stream',
-        },
-      });
     }
 
     const timerEnd = performance.now();
 
     console.log(
-      `%cRequest: ${new URL(request.url).pathname} %c[${
+      `%c[%c${response.status}%c] %cRequest: ${new URL(request.url).pathname} %c[${
         (timerEnd - timerStart).toFixed(3)
       }ms]`,
+      'color: gray;',
+      'color: blue;',
+      'color: gray;',
       'color: green; font-weight: bold;',
       'color: gray;',
     );
 
-    return new Response('Hello World!', {
-      headers: {
-        'content-type': 'text/html; charset=utf-8',
-      },
-    });
+    return response;
   }
 
   private async setupDevelopmentEnvironment(): Promise<void> {
