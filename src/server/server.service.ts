@@ -3,6 +3,7 @@ import { serve } from '@std/http/mod.ts';
 import { env } from '../utils/functions/env.function.ts';
 import { existsSync } from '@std/fs/mod.ts';
 import { dirname } from '@std/path/mod.ts';
+import { contentType } from '@std/media_types/mod.ts';
 import { WebClientAlias } from './enums/web_client_alias.enum.ts';
 
 export class Server {
@@ -26,8 +27,37 @@ export class Server {
     }
   }
 
-  private serve(request: Request): Response {
+  private async serve(request: Request): Promise<Response> {
     const timerStart = performance.now();
+
+    if (request.method === 'GET' && new URL(request.url).pathname.includes('.')) {
+      const filePath = `${Deno.cwd()}/public${new URL(request.url).pathname}`;
+
+      let fileSize;
+
+      try {
+        fileSize = (await Deno.stat(filePath)).size;
+      } catch (e) {
+        if (e instanceof Deno.errors.NotFound) {
+          return new Response(null, {
+            status: 404,
+          });
+        }
+
+        return new Response(null, {
+          status: 500,
+        });
+      }
+
+      const body = (await Deno.open(filePath)).readable;
+
+      return new Response(body, {
+        headers: {
+          'content-length': fileSize.toString(),
+          'content-type': contentType(filePath.split('.')?.pop() ?? '') ?? 'application/octet-stream',
+        },
+      });
+    }
 
     const timerEnd = performance.now();
 
@@ -49,6 +79,14 @@ export class Server {
   private async setupDevelopmentEnvironment(): Promise<void> {
     const port = env('PORT') ?? 5050;
     const tempFilePath = '.temp/server';
+
+    Deno.addSignalListener('SIGINT', async () => {
+      await Deno.remove(dirname(tempFilePath), {
+        recursive: true,
+      });
+
+      Deno.exit();
+    });
 
     if (!existsSync(tempFilePath)) {
       if (!existsSync(dirname(tempFilePath))) {
@@ -74,14 +112,6 @@ export class Server {
       );
 
       openWebClientCommand.spawn();
-
-      Deno.addSignalListener('SIGINT', async () => {
-        await Deno.remove(dirname(tempFilePath), {
-          recursive: true,
-        });
-
-        Deno.exit();
-      });
     }
   }
 
