@@ -4,6 +4,7 @@ import { env } from '../utils/functions/env.function.ts';
 import { existsSync } from '@std/fs/mod.ts';
 import { dirname } from '@std/path/mod.ts';
 import { contentType } from '@std/media_types/mod.ts';
+import { parse as parseFlags } from '@std/flags/mod.ts';
 import { WebClientAlias } from './enums/web_client_alias.enum.ts';
 
 export class Server {
@@ -80,15 +81,24 @@ export class Server {
     const port = env('PORT') ?? 5050;
     const tempFilePath = '.temp/server';
 
+    const flags = parseFlags(Deno.args, {
+      boolean: ['open'],
+      default: {
+        open: false,
+      },
+    });
+
     Deno.addSignalListener('SIGINT', async () => {
-      await Deno.remove(dirname(tempFilePath), {
-        recursive: true,
-      });
+      if (existsSync(dirname(tempFilePath))) {
+        await Deno.remove(dirname(tempFilePath), {
+          recursive: true,
+        });
+      }
 
       Deno.exit();
     });
 
-    if (!existsSync(tempFilePath)) {
+    if (flags.open && !existsSync(tempFilePath)) {
       if (!existsSync(dirname(tempFilePath))) {
         await Deno.mkdir(dirname(tempFilePath));
       }
