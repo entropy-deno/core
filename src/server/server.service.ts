@@ -65,9 +65,9 @@ export class Server {
     const { columns } = Deno.consoleSize();
 
     console.log(
-      `%c[%c${response.status}%c] %cRequest: %c${
+      `\n%c[%c${response.status}%c] %cRequest: %c${
         pathname
-      }${' '.repeat(columns - pathname.length - 25)} %c[${(performance.now() - timerStart).toFixed(3)}ms]`,
+      } %c${'.'.repeat(columns - pathname.length - 26)} [${(performance.now() - timerStart).toFixed(3)}ms]`,
       'color: lightgray;',
       `color: ${statusColor}; font-weight: bold;`,
       'color: lightgray;',
@@ -148,7 +148,7 @@ export class Server {
       port,
       onListen: () => {
         console.log(
-          `%cHTTP server is running on ${
+          `\n%cHTTP server is running on ${
             env<boolean>('DEVELOPMENT') ? 'http://localhost:' : 'port '
           }${port} %c[${Deno.build.os === 'darwin' ? '⌃C' : 'ctrl+c'} to quit]`,
           'color: blue;',
