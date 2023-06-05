@@ -6,6 +6,7 @@ import { dirname } from '@std/path/mod.ts';
 import { parse as parseFlags } from '@std/flags/mod.ts';
 import { WebClientAlias } from './enums/web_client_alias.enum.ts';
 import { Router } from '../router/router.service.ts';
+import { runCommand } from '../utils/functions/run_command.function.ts';
 
 export class Server {
   private readonly router = new Router();
@@ -65,9 +66,9 @@ export class Server {
     const { columns } = Deno.consoleSize();
 
     console.log(
-      `\n%c[%c${response.status}%c] %cRequest: %c${
-        pathname
-      } %c${'.'.repeat(columns - pathname.length - 26)} [${(performance.now() - timerStart).toFixed(3)}ms]`,
+      `\n%c[%c${response.status}%c] %cRequest: %c${pathname} %c${
+        '.'.repeat(columns - pathname.length - 26)
+      } [${(performance.now() - timerStart).toFixed(3)}ms]`,
       'color: lightgray;',
       `color: ${statusColor}; font-weight: bold;`,
       'color: lightgray;',
@@ -99,7 +100,7 @@ export class Server {
             recursive: true,
           });
         }
-  
+
         Deno.exit();
       });
     }
@@ -114,20 +115,13 @@ export class Server {
         'Flavor development server is running...',
       );
 
-      const openWebClientCommand = new Deno.Command(
+      runCommand(
         `${
           WebClientAlias[Deno.build.os as 'darwin' | 'linux' | 'win32'] ??
             'open'
         }`,
-        {
-          args: [`http://localhost:${port}`],
-          stdin: 'null',
-          stdout: 'null',
-          stderr: 'null',
-        },
+        [`http://localhost:${port}`],
       );
-
-      openWebClientCommand.spawn();
     }
   }
 

@@ -58,7 +58,8 @@ export class Router {
     });
 
     if (
-      request.method === HttpMethod.Get && new URL(request.url).pathname.includes('.')
+      request.method === HttpMethod.Get &&
+      new URL(request.url).pathname.includes('.')
     ) {
       return await this.handleFileRequest(request);
     }

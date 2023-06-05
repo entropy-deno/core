@@ -9,12 +9,12 @@ interface Props {
 
 export function StatusPage({ status, message }: Props) {
   return (
-    <html lang="en">
+    <html lang='en'>
       <head>
-        <meta charSet="utf-8" />
-        <meta httpEquiv="x-ua-compatible" content="ie=edge" />
+        <meta charSet='utf-8' />
+        <meta httpEquiv='x-ua-compatible' content='ie=edge' />
 
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name='viewport' content='width=device-width, initial-scale=1.0' />
 
         <title>{status} {message}</title>
       </head>
