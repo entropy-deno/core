@@ -35,14 +35,44 @@ export class Server {
 
     const response = await this.router.respond(request);
 
+    const { status } = response;
+    const { pathname } = new URL(request.url);
+
+    let statusColor = 'blue';
+
+    switch (true) {
+      case status >= 100 && status < 200:
+        statusColor = 'blue';
+
+        break;
+
+      case status >= 200 && status < 400:
+        statusColor = 'green';
+
+        break;
+
+      case status >= 400 && status < 500:
+        statusColor = 'orange';
+
+        break;
+
+      case status >= 500 && status < 600:
+        statusColor = 'red';
+
+        break;
+    }
+
+    const { columns } = Deno.consoleSize();
+
     console.log(
-      `%c[%c${response.status}%c] %cRequest: ${
-        new URL(request.url).pathname
-      } %c[${(performance.now() - timerStart).toFixed(3)}ms]`,
-      'color: gray;',
+      `%c[%c${response.status}%c] %cRequest: %c${
+        pathname
+      }${' '.repeat(columns - pathname.length - 25)} %c[${(performance.now() - timerStart).toFixed(3)}ms]`,
+      'color: lightgray;',
+      `color: ${statusColor}; font-weight: bold;`,
+      'color: lightgray;',
       'color: blue;',
-      'color: gray;',
-      'color: green; font-weight: bold;',
+      'color: lightgray; font-weight: bold;',
       'color: gray;',
     );
 
@@ -121,7 +151,7 @@ export class Server {
           `%cHTTP server is running on ${
             env<boolean>('DEVELOPMENT') ? 'http://localhost:' : 'port '
           }${port} %c[${Deno.build.os === 'darwin' ? '⌃C' : 'ctrl+c'} to quit]`,
-          'color: green; font-weight: bold;',
+          'color: blue;',
           'color: gray;',
         );
       },
