@@ -3,15 +3,13 @@ import { serve } from '@std/http/mod.ts';
 import { env } from '../utils/functions/env.function.ts';
 import { existsSync } from '@std/fs/mod.ts';
 import { dirname } from '@std/path/mod.ts';
-import { contentType } from '@std/media_types/mod.ts';
 import { parse as parseFlags } from '@std/flags/mod.ts';
-import { renderToString } from 'https://jspm.dev/react-dom@18.0.0/server';
-import { createElement } from 'https://jspm.dev/react@18.0.0';
 import { WebClientAlias } from './enums/web_client_alias.enum.ts';
-import { StatusPage } from '../http/pages/status_page.tsx';
-import { StatusCode } from '../http/enums/status_code.enum.ts';
+import { Router } from '../router/router.service.ts';
 
 export class Server {
+  private readonly router = new Router();
+
   private checkSystemRequirements(): void {
     const minimumDenoVersion = '1.34.0';
 
@@ -35,66 +33,12 @@ export class Server {
   private async serve(request: Request): Promise<Response> {
     const timerStart = performance.now();
 
-    let response = new Response('Hello World!', {
-      headers: {
-        'content-type': 'text/html; charset=utf-8',
-      },
-    });
-
-    if (
-      request.method === 'GET' && new URL(request.url).pathname.includes('.')
-    ) {
-      const filePath = `${Deno.cwd()}/public${new URL(request.url).pathname}`;
-
-      let fileSize;
-
-      try {
-        fileSize = (await Deno.stat(filePath)).size;
-
-        const body = (await Deno.open(filePath)).readable;
-
-        response = new Response(body, {
-          headers: {
-            'content-length': fileSize.toString(),
-            'content-type': contentType(filePath.split('.')?.pop() ?? '') ??
-              'application/octet-stream',
-          },
-        });
-      } catch {
-        const status = StatusCode.NotFound;
-
-        response = new Response(
-          renderToString(
-            createElement(StatusPage, {
-              status,
-              message: Object.keys(StatusCode)
-                .find(
-                  (key: string) =>
-                    (StatusCode as unknown as Record<string, StatusCode>)[
-                      key
-                    ] ===
-                      status,
-                )
-                ?.replace(/([a-z])([A-Z])/g, '$1 $2') ??
-                'Internal Server Error',
-            }),
-          ).replaceAll('<!-- -->', ''),
-          {
-            status: status,
-            headers: {
-              'content-type': 'text/html; charset=utf-8',
-            },
-          },
-        );
-      }
-    }
-
-    const timerEnd = performance.now();
+    const response = await this.router.respond(request);
 
     console.log(
       `%c[%c${response.status}%c] %cRequest: ${
         new URL(request.url).pathname
-      } %c[${(timerEnd - timerStart).toFixed(3)}ms]`,
+      } %c[${(performance.now() - timerStart).toFixed(3)}ms]`,
       'color: gray;',
       'color: blue;',
       'color: gray;',
@@ -116,15 +60,19 @@ export class Server {
       },
     });
 
-    Deno.addSignalListener('SIGINT', async () => {
-      if (existsSync(dirname(tempFilePath))) {
-        await Deno.remove(dirname(tempFilePath), {
-          recursive: true,
-        });
-      }
+    const signals: Deno.Signal[] = ['SIGINT', 'SIGTERM', 'SIGQUIT'];
 
-      Deno.exit();
-    });
+    for (const signal of signals) {
+      Deno.addSignalListener(signal, async () => {
+        if (existsSync(dirname(tempFilePath))) {
+          await Deno.remove(dirname(tempFilePath), {
+            recursive: true,
+          });
+        }
+  
+        Deno.exit();
+      });
+    }
 
     if (flags.open && !existsSync(tempFilePath)) {
       if (!existsSync(dirname(tempFilePath))) {
@@ -166,7 +114,7 @@ export class Server {
       await this.setupDevelopmentEnvironment();
     }
 
-    await serve(this.serve, {
+    await serve(async (request) => await this.serve(request), {
       port,
       onListen: () => {
         console.log(
