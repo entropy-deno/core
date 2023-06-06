@@ -7,6 +7,8 @@ import { HttpMethod } from '../http/enums/http_method.enum.ts';
 import { RoutePath } from './types/route_path.type.ts';
 
 export class Router {
+  private readonly routes = new Map<RegExp, () => unknown>();
+
   private async handleFileRequest(request: Request): Promise<Response> {
     const filePath = `public${new URL(request.url).pathname}`;
 
@@ -74,19 +76,42 @@ export class Router {
   }
 
   public async respond(request: Request): Promise<Response> {
-    const response = new Response('Hello World!', {
+    let response = new Response(null, {
+      status: StatusCode.NotFound,
       headers: {
         'content-type': 'text/html; charset=utf-8',
       },
     });
 
-    if (
-      request.method === HttpMethod.Get &&
-      new URL(request.url).pathname.includes('.')
-    ) {
-      return await this.handleFileRequest(request);
+    for (const [pathRegexp, callback] of this.routes) {
+      if (pathRegexp.test(new URL(request.url).pathname)) {
+        response = new Response(callback() as string, {
+          headers: {
+            'content-type': 'text/html; charset=utf-8',
+          },
+        });
+    
+        if (
+          request.method === HttpMethod.Get &&
+          new URL(request.url).pathname.includes('.')
+        ) {
+          return await this.handleFileRequest(request);
+        }
+    
+        break;
+      }
     }
 
     return response;
+  }
+
+  public route(path: RoutePath, method: HttpMethod | `${HttpMethod}`, callback: () => unknown): void {
+    const pathRegexp = this.resolvePathRegexp(path);
+
+    if (this.routes.has(pathRegexp)) {
+      throw new Error(`Duplicate route path: ${path}`);
+    }
+
+    this.routes.set(pathRegexp, callback);
   }
 }

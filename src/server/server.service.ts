@@ -138,6 +138,8 @@ export class Server {
       await this.setupDevelopmentEnvironment();
     }
 
+    this.router.route('/', 'GET', () => 'Hello, world!');
+
     await serve(async (request) => await this.serve(request), {
       port,
       onListen: () => {
