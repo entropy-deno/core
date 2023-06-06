@@ -23,8 +23,8 @@ export class Server {
     if (satisfiesDenoVersion === -1) {
       console.warn(
         `%cFlavor requires Deno version ${minimumDenoVersion} or higher %c[run 'deno upgrade' to update Deno]`,
-        `color: orange; font-weight: bold;`,
-        'color: gray;',
+        `color: orange; font-weight: bold`,
+        'color: gray',
       );
 
       Deno.exit(1);
@@ -67,14 +67,14 @@ export class Server {
 
     console.log(
       `\n%c[%c${response.status}%c] %cRequest: %c${pathname} %c${
-        '.'.repeat(columns - pathname.length - 26)
+        '.'.repeat(columns - pathname.length - 28)
       } [${(performance.now() - timerStart).toFixed(3)}ms]`,
-      'color: lightgray;',
-      `color: ${statusColor}; font-weight: bold;`,
-      'color: lightgray;',
-      'color: blue;',
-      'color: lightgray; font-weight: bold;',
-      'color: gray;',
+      'color: lightgray',
+      `color: ${statusColor}; font-weight: bold`,
+      'color: lightgray',
+      'color: blue',
+      'color: lightgray; font-weight: bold',
+      'color: gray',
     );
 
     return response;
@@ -147,8 +147,8 @@ export class Server {
           `\n%cHTTP server is running on ${
             env<boolean>('DEVELOPMENT') ? 'http://localhost:' : 'port '
           }${port} %c[${Deno.build.os === 'darwin' ? '⌃C' : 'ctrl+c'} to quit]`,
-          'color: blue;',
-          'color: gray;',
+          'color: blue',
+          'color: gray',
         );
       },
     });

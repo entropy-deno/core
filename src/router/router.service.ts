@@ -9,6 +9,32 @@ import { RoutePath } from './types/route_path.type.ts';
 export class Router {
   private readonly routes = new Map<RegExp, () => unknown>();
 
+  private abortResponse(status = StatusCode.NotFound): Response {
+    return new Response(
+      renderToString(
+        createElement(StatusPage, {
+          status,
+          message: Object.keys(StatusCode)
+            .find(
+              (key: string) =>
+                (StatusCode as unknown as Record<string, StatusCode>)[
+                  key
+                ] ===
+                  status,
+            )
+            ?.replace(/([a-z])([A-Z])/g, '$1 $2') ??
+            'Error',
+        }),
+      ).replaceAll('<!-- -->', ''),
+      {
+        status: status,
+        headers: {
+          'content-type': 'text/html; charset=utf-8',
+        },
+      },
+    );
+  }
+
   private async handleFileRequest(request: Request): Promise<Response> {
     const filePath = `public${new URL(request.url).pathname}`;
 
@@ -25,31 +51,7 @@ export class Router {
         },
       });
     } catch {
-      const status = StatusCode.NotFound;
-
-      return new Response(
-        renderToString(
-          createElement(StatusPage, {
-            status,
-            message: Object.keys(StatusCode)
-              .find(
-                (key: string) =>
-                  (StatusCode as unknown as Record<string, StatusCode>)[
-                    key
-                  ] ===
-                    status,
-              )
-              ?.replace(/([a-z])([A-Z])/g, '$1 $2') ??
-              'Internal Server Error',
-          }),
-        ).replaceAll('<!-- -->', ''),
-        {
-          status: status,
-          headers: {
-            'content-type': 'text/html; charset=utf-8',
-          },
-        },
-      );
+      return this.abortResponse(StatusCode.NotFound);
     }
   }
 
@@ -76,12 +78,7 @@ export class Router {
   }
 
   public async respond(request: Request): Promise<Response> {
-    let response = new Response(null, {
-      status: StatusCode.NotFound,
-      headers: {
-        'content-type': 'text/html; charset=utf-8',
-      },
-    });
+    let response = this.abortResponse(StatusCode.NotFound);
 
     for (const [pathRegexp, callback] of this.routes) {
       if (pathRegexp.test(new URL(request.url).pathname)) {
@@ -90,14 +87,14 @@ export class Router {
             'content-type': 'text/html; charset=utf-8',
           },
         });
-    
+
         if (
           request.method === HttpMethod.Get &&
           new URL(request.url).pathname.includes('.')
         ) {
           return await this.handleFileRequest(request);
         }
-    
+
         break;
       }
     }
@@ -105,7 +102,11 @@ export class Router {
     return response;
   }
 
-  public route(path: RoutePath, method: HttpMethod | `${HttpMethod}`, callback: () => unknown): void {
+  public route(
+    path: RoutePath,
+    method: HttpMethod | `${HttpMethod}`,
+    callback: () => unknown,
+  ): void {
     const pathRegexp = this.resolvePathRegexp(path);
 
     if (this.routes.has(pathRegexp)) {
