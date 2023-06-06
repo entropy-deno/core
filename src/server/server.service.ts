@@ -112,7 +112,7 @@ export class Server {
 
       await Deno.writeTextFile(
         tempFilePath,
-        'Flavor development server is running...',
+        'dev [1]',
       );
 
       runCommand(
