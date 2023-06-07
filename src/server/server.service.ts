@@ -3,15 +3,24 @@ import { existsSync } from '@std/fs/mod.ts';
 import { load as loadEnv } from '@std/dotenv/mod.ts';
 import { parse as parseFlags } from '@std/flags/mod.ts';
 import { serve } from '@std/http/mod.ts';
+import { Constructor } from '../utils/interfaces/constructor.interface.ts';
 import { env } from '../utils/functions/env.function.ts';
+import { Module } from './interfaces/module.interface.ts';
 import { Router } from '../router/router.service.ts';
 import { runCommand } from '../utils/functions/run_command.function.ts';
+import { ServerOptions } from './interfaces/server_options.interface.ts';
 import { WebClientAlias } from './enums/web_client_alias.enum.ts';
 
 export class Server {
   private readonly defaultHttpPort = 5050;
 
+  private readonly modules: Constructor<Module>[] = [];
+
   private readonly router = new Router();
+
+  constructor(options: ServerOptions) {
+    this.modules = options.modules;
+  }
 
   private checkSystemRequirements(): void {
     const minimumDenoVersion = '1.34.0';
@@ -82,6 +91,16 @@ export class Server {
     return response;
   }
 
+  private setup(): void {
+    for (const module of this.modules) {
+      const moduleInstance = new module();
+
+      for (const controller of moduleInstance.controllers ?? []) {
+        this.router.registerController(controller);
+      }
+    }
+  }
+
   private async setupDevelopmentEnvironment(): Promise<void> {
     const port = env('PORT') ?? 5050;
     const tempFilePath = '.temp/server';
@@ -141,6 +160,8 @@ export class Server {
     if (env<boolean>('DEVELOPMENT')) {
       await this.setupDevelopmentEnvironment();
     }
+
+    this.setup();
 
     await serve(async (request) => await this.serve(request), {
       port,

@@ -1,6 +1,7 @@
 import { contentType } from '@std/media_types/mod.ts';
 import { createElement } from 'https://jspm.dev/react@18.0.0';
 import { renderToString as renderJsx } from 'https://jspm.dev/react-dom@18.0.0/server';
+import { Constructor } from '../utils/interfaces/constructor.interface.ts';
 import { HttpMethod } from '../http/enums/http_method.enum.ts';
 import { RouteDefinition } from './interfaces/route_definition.interface.ts';
 import { RoutePath } from './types/route_path.type.ts';
@@ -80,6 +81,17 @@ export class Router {
     );
   }
 
+  public registerController(controller: Constructor): void {
+    const instance = new controller();
+
+    for (
+      const [path, method, action] of (instance as { routes: RouteDefinition[] })
+        .routes
+    ) {
+      this.registerRoute(path, method, action.bind(instance));
+    }
+  }
+
   public async respond(request: Request): Promise<Response> {
     const { pathname } = new URL(request.url);
 
@@ -113,7 +125,7 @@ export class Router {
     return response;
   }
 
-  public route(
+  public registerRoute(
     path: RoutePath,
     method: ValuesUnion<HttpMethod>,
     action: (...args: unknown[]) => unknown,
