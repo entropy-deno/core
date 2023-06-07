@@ -3,6 +3,6 @@ import { RoutePath } from '../types/route_path.type.ts';
 
 export interface RouteDefinition {
   action: (...args: unknown[]) => unknown;
-  method: HttpMethod;
+  method: HttpMethod | `${HttpMethod}`;
   path: RoutePath;
 }

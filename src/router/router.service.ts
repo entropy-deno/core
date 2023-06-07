@@ -1,11 +1,11 @@
 import { contentType } from '@std/media_types/mod.ts';
-import { renderToString as renderJsx } from 'https://jspm.dev/react-dom@18.0.0/server';
 import { createElement } from 'https://jspm.dev/react@18.0.0';
-import { StatusPage } from '../http/pages/status_page.tsx';
-import { StatusCode } from '../http/enums/status_code.enum.ts';
+import { renderToString as renderJsx } from 'https://jspm.dev/react-dom@18.0.0/server';
 import { HttpMethod } from '../http/enums/http_method.enum.ts';
-import { RoutePath } from './types/route_path.type.ts';
 import { RouteDefinition } from './interfaces/route_definition.interface.ts';
+import { RoutePath } from './types/route_path.type.ts';
+import { StatusCode } from '../http/enums/status_code.enum.ts';
+import { StatusPage } from '../http/pages/status_page.tsx';
 
 export class Router {
   private readonly routes = new Map<RegExp, RouteDefinition>();
@@ -60,11 +60,13 @@ export class Router {
     const validatedParams: string[] = [];
 
     for (const param of definedParams ?? []) {
-      if (validatedParams.includes(param[1])) {
-        throw new Error(`Duplicate route parameter name: ${param[1]}`);
+      const name = param[1];
+
+      if (validatedParams.includes(name)) {
+        throw new Error(`Duplicate route parameter name: ${name}`);
       }
 
-      validatedParams.push(param[1]);
+      validatedParams.push(name);
     }
 
     return new RegExp(
@@ -87,6 +89,7 @@ export class Router {
         const resolvedParams = Object.values(
           pathRegexp.exec(pathname)?.groups ?? {},
         );
+
         const body = action(request, resolvedParams);
 
         response = new Response(body as string, {
@@ -122,7 +125,7 @@ export class Router {
 
     this.routes.set(pathRegexp, {
       action,
-      method: method as HttpMethod,
+      method,
       path,
     });
   }

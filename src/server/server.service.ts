@@ -1,14 +1,16 @@
+import { dirname } from '@std/path/mod.ts';
+import { existsSync } from '@std/fs/mod.ts';
 import { load as loadEnv } from '@std/dotenv/mod.ts';
+import { parse as parseFlags } from '@std/flags/mod.ts';
 import { serve } from '@std/http/mod.ts';
 import { env } from '../utils/functions/env.function.ts';
-import { existsSync } from '@std/fs/mod.ts';
-import { dirname } from '@std/path/mod.ts';
-import { parse as parseFlags } from '@std/flags/mod.ts';
-import { WebClientAlias } from './enums/web_client_alias.enum.ts';
 import { Router } from '../router/router.service.ts';
 import { runCommand } from '../utils/functions/run_command.function.ts';
+import { WebClientAlias } from './enums/web_client_alias.enum.ts';
 
 export class Server {
+  private readonly defaultHttpPort = 5050;
+
   private readonly router = new Router();
 
   private checkSystemRequirements(): void {
@@ -125,7 +127,9 @@ export class Server {
     }
   }
 
-  public async start(port = env<number>('PORT', 5050)): Promise<void> {
+  public async start(
+    port = env<number>('PORT', this.defaultHttpPort),
+  ): Promise<void> {
     this.checkSystemRequirements();
 
     await loadEnv({
@@ -137,8 +141,6 @@ export class Server {
     if (env<boolean>('DEVELOPMENT')) {
       await this.setupDevelopmentEnvironment();
     }
-
-    this.router.route('/', 'GET', () => 'Hello, world!');
 
     await serve(async (request) => await this.serve(request), {
       port,
