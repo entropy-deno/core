@@ -4,7 +4,7 @@
       "src/"
     ],
     "indentWidth": 2,
-    "lineWidth": 80,
+    "lineWidth": 85,
     "semiColons": true,
     "singleQuote": true
   },

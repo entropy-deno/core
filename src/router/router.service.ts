@@ -36,7 +36,7 @@ export class Router {
     );
   }
 
-  private async handleFileRequest(request: Request): Promise<Response> {
+  private async handleStaticFileRequest(request: Request): Promise<Response> {
     const filePath = `public${new URL(request.url).pathname}`;
 
     try {
@@ -99,7 +99,7 @@ export class Router {
           request.method === HttpMethod.Get &&
           pathname.includes('.')
         ) {
-          return await this.handleFileRequest(request);
+          return await this.handleStaticFileRequest(request);
         }
 
         break;
