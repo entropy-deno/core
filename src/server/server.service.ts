@@ -14,6 +14,8 @@ import { WebClientAlias } from './enums/web_client_alias.enum.ts';
 export class Server {
   private readonly defaultHttpPort = 5050;
 
+  private readonly listenSignals: Deno.Signal[] = ['SIGINT', 'SIGTERM', 'SIGQUIT'];
+
   private readonly modules: Constructor<Module>[] = [];
 
   private readonly router = new Router();
@@ -102,7 +104,6 @@ export class Server {
   }
 
   private async setupDevelopmentEnvironment(): Promise<void> {
-    const port = env('PORT') ?? 5050;
     const tempFilePath = '.temp/server';
 
     const flags = parseFlags(Deno.args, {
@@ -112,9 +113,7 @@ export class Server {
       },
     });
 
-    const signals: Deno.Signal[] = ['SIGINT', 'SIGTERM', 'SIGQUIT'];
-
-    for (const signal of signals) {
+    for (const signal of this.listenSignals) {
       Deno.addSignalListener(signal, async () => {
         if (existsSync(dirname(tempFilePath))) {
           await Deno.remove(dirname(tempFilePath), {
@@ -141,8 +140,22 @@ export class Server {
           WebClientAlias[Deno.build.os as 'darwin' | 'linux' | 'win32'] ??
             'open'
         }`,
-        [`http://localhost:${port}`],
+        [`http://localhost:${env('PORT') ?? this.defaultHttpPort}`],
       );
+    }
+  }
+
+  private setupProductionEnvironment(): void {
+    for (const signal of this.listenSignals) {
+      Deno.addSignalListener(signal, () => {
+        const shouldQuit = confirm(
+          'Are you sure you want to quit production server?',
+        );
+
+        if (shouldQuit) {
+          Deno.exit();
+        }
+      });
     }
   }
 
@@ -157,9 +170,9 @@ export class Server {
       export: true,
     });
 
-    if (env<boolean>('DEVELOPMENT')) {
-      await this.setupDevelopmentEnvironment();
-    }
+    env<boolean>('DEVELOPMENT')
+      ? await this.setupDevelopmentEnvironment()
+      : this.setupProductionEnvironment();
 
     this.setup();
 
