@@ -6,6 +6,7 @@ import { RouteDefinition } from './interfaces/route_definition.interface.ts';
 import { RoutePath } from './types/route_path.type.ts';
 import { StatusCode } from '../http/enums/status_code.enum.ts';
 import { StatusPage } from '../http/pages/status_page.tsx';
+import { ValuesUnion } from '../utils/types/values_union.type.ts';
 
 export class Router {
   private readonly routes = new Map<RegExp, RouteDefinition>();
@@ -114,7 +115,7 @@ export class Router {
 
   public route(
     path: RoutePath,
-    method: HttpMethod | `${HttpMethod}`,
+    method: ValuesUnion<HttpMethod>,
     action: (...args: unknown[]) => unknown,
   ): void {
     const pathRegexp = this.resolvePathRegexp(path);
