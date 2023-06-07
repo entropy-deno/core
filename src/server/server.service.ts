@@ -70,10 +70,10 @@ export class Server {
         '.'.repeat(columns - pathname.length - 28)
       } [${(performance.now() - timerStart).toFixed(3)}ms]`,
       'color: lightgray',
-      `color: ${statusColor}; font-weight: bold`,
+      `color: ${statusColor}`,
       'color: lightgray',
-      'color: blue',
-      'color: lightgray; font-weight: bold',
+      'color: mediumblue',
+      'color: white; font-weight: bold',
       'color: gray',
     );
 
@@ -147,8 +147,8 @@ export class Server {
         console.log(
           `\n%cHTTP server is running on ${
             env<boolean>('DEVELOPMENT') ? 'http://localhost:' : 'port '
-          }${port} %c[${Deno.build.os === 'darwin' ? '⌃C' : 'ctrl+c'} to quit]`,
-          'color: blue',
+          }${port} %c[${Deno.build.os === 'darwin' ? '⌃C' : 'Ctrl+C'} to quit]`,
+          'color: mediumblue',
           'color: gray',
         );
       },
