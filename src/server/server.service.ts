@@ -23,7 +23,7 @@ export class Server {
     if (satisfiesDenoVersion === -1) {
       console.warn(
         `%cFlavor requires Deno version ${minimumDenoVersion} or higher %c[run 'deno upgrade' to update Deno]`,
-        `color: orange; font-weight: bold`,
+        `color: orange`,
         'color: gray',
       );
 
@@ -48,7 +48,7 @@ export class Server {
         break;
 
       case status >= 200 && status < 400:
-        statusColor = 'green';
+        statusColor = 'lime';
 
         break;
 
@@ -72,7 +72,7 @@ export class Server {
       'color: lightgray',
       `color: ${statusColor}`,
       'color: lightgray',
-      'color: mediumblue',
+      'color: blue',
       'color: white; font-weight: bold',
       'color: gray',
     );
