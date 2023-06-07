@@ -142,6 +142,7 @@ export class Server {
 
     await serve(async (request) => await this.serve(request), {
       port,
+      hostname: env<string>('HOST') ?? 'localhost',
       onListen: () => {
         console.log(
           `\n%cHTTP server is running on ${

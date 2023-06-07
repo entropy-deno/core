@@ -1,17 +1,18 @@
 import { contentType } from '@std/media_types/mod.ts';
-import { renderToString } from 'https://jspm.dev/react-dom@18.0.0/server';
+import { renderToString as renderJsx } from 'https://jspm.dev/react-dom@18.0.0/server';
 import { createElement } from 'https://jspm.dev/react@18.0.0';
 import { StatusPage } from '../http/pages/status_page.tsx';
 import { StatusCode } from '../http/enums/status_code.enum.ts';
 import { HttpMethod } from '../http/enums/http_method.enum.ts';
 import { RoutePath } from './types/route_path.type.ts';
+import { RouteDefinition } from './interfaces/route_definition.interface.ts';
 
 export class Router {
-  private readonly routes = new Map<RegExp, () => unknown>();
+  private readonly routes = new Map<RegExp, RouteDefinition>();
 
   private abortResponse(status = StatusCode.NotFound): Response {
     return new Response(
-      renderToString(
+      renderJsx(
         createElement(StatusPage, {
           status,
           message: Object.keys(StatusCode)
@@ -40,7 +41,6 @@ export class Router {
 
     try {
       const fileSize = (await Deno.stat(filePath)).size;
-
       const body = (await Deno.open(filePath)).readable;
 
       return new Response(body, {
@@ -78,11 +78,18 @@ export class Router {
   }
 
   public async respond(request: Request): Promise<Response> {
+    const { pathname } = new URL(request.url);
+
     let response = this.abortResponse(StatusCode.NotFound);
 
-    for (const [pathRegexp, callback] of this.routes) {
-      if (pathRegexp.test(new URL(request.url).pathname)) {
-        response = new Response(callback() as string, {
+    for (const [pathRegexp, { action, method }] of this.routes) {
+      if (request.method === method && pathRegexp.test(pathname)) {
+        const resolvedParams = Object.values(
+          pathRegexp.exec(pathname)?.groups ?? {},
+        );
+        const body = action(request, resolvedParams);
+
+        response = new Response(body as string, {
           headers: {
             'content-type': 'text/html; charset=utf-8',
           },
@@ -90,7 +97,7 @@ export class Router {
 
         if (
           request.method === HttpMethod.Get &&
-          new URL(request.url).pathname.includes('.')
+          pathname.includes('.')
         ) {
           return await this.handleFileRequest(request);
         }
@@ -105,7 +112,7 @@ export class Router {
   public route(
     path: RoutePath,
     method: HttpMethod | `${HttpMethod}`,
-    callback: () => unknown,
+    action: (...args: unknown[]) => unknown,
   ): void {
     const pathRegexp = this.resolvePathRegexp(path);
 
@@ -113,6 +120,10 @@ export class Router {
       throw new Error(`Duplicate route path: ${path}`);
     }
 
-    this.routes.set(pathRegexp, callback);
+    this.routes.set(pathRegexp, {
+      action,
+      method: method as HttpMethod,
+      path,
+    });
   }
 }
