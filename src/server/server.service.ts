@@ -5,6 +5,7 @@ import { parse as parseFlags } from '@std/flags/mod.ts';
 import { serve } from '@std/http/mod.ts';
 import { Constructor } from '../utils/interfaces/constructor.interface.ts';
 import { env } from '../utils/functions/env.function.ts';
+import { inject } from '../injector/functions/inject.function.ts';
 import { Module } from './interfaces/module.interface.ts';
 import { Router } from '../router/router.service.ts';
 import { runCommand } from '../utils/functions/run_command.function.ts';
@@ -18,7 +19,7 @@ export class Server {
 
   private readonly modules: Constructor<Module>[] = [];
 
-  private readonly router = new Router();
+  private readonly router = inject(Router);
 
   constructor(options: ServerOptions) {
     this.modules = options.modules;
