@@ -96,7 +96,7 @@ export class Server {
 
   private setup(): void {
     for (const module of this.modules) {
-      const moduleInstance = new module();
+      const moduleInstance = inject(module);
 
       for (const controller of moduleInstance.controllers ?? []) {
         this.router.registerController(controller);

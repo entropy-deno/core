@@ -3,6 +3,7 @@ import { createElement } from 'https://jspm.dev/react@18.0.0';
 import { renderToString as renderJsx } from 'https://jspm.dev/react-dom@18.0.0/server';
 import { Constructor } from '../utils/interfaces/constructor.interface.ts';
 import { HttpMethod } from '../http/enums/http_method.enum.ts';
+import { inject } from '../injector/functions/inject.function.ts';
 import { RouteDefinition } from './interfaces/route_definition.interface.ts';
 import { RoutePath } from './types/route_path.type.ts';
 import { StatusCode } from '../http/enums/status_code.enum.ts';
@@ -82,10 +83,10 @@ export class Router {
   }
 
   public registerController(controller: Constructor): void {
-    const instance = new controller();
+    const instance = inject(controller);
 
     for (
-      const [path, method, action] of (instance as { routes: RouteDefinition[] })
+      const { path, method, action } of (instance as { routes: RouteDefinition[] })
         .routes
     ) {
       this.registerRoute(path, method, action.bind(instance));
@@ -111,10 +112,7 @@ export class Router {
           },
         });
 
-        if (
-          request.method === HttpMethod.Get &&
-          pathname.includes('.')
-        ) {
+        if (request.method === HttpMethod.Get && pathname.includes('.')) {
           return await this.handleStaticFileRequest(request);
         }
 
