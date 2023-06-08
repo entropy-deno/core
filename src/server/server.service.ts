@@ -2,7 +2,6 @@ import { dirname } from '@std/path/mod.ts';
 import { existsSync } from '@std/fs/mod.ts';
 import { load as loadEnv } from '@std/dotenv/mod.ts';
 import { parse as parseFlags } from '@std/flags/mod.ts';
-import { serve } from '@std/http/mod.ts';
 import { Constructor } from '../utils/interfaces/constructor.interface.ts';
 import { env } from '../utils/functions/env.function.ts';
 import { inject } from '../injector/functions/inject.function.ts';
@@ -45,53 +44,59 @@ export class Server {
     }
   }
 
-  private async serve(request: Request): Promise<Response> {
-    const timerStart = performance.now();
+  private async serveHttp(connection: Deno.Conn): Promise<void> {
+    const httpConnection = Deno.serveHttp(connection);
 
-    const response = await this.router.respond(request);
+    for await (const requestEvent of httpConnection) {
+      const { request } = requestEvent;
 
-    const { status } = response;
-    const { pathname } = new URL(request.url);
+      const timerStart = performance.now();
 
-    let statusColor = 'blue';
+      const response = await this.router.respond(request);
 
-    switch (true) {
-      case status >= 100 && status < 200:
-        statusColor = 'blue';
+      const { status } = response;
+      const { pathname } = new URL(request.url);
 
-        break;
+      let statusColor = 'blue';
 
-      case status >= 200 && status < 400:
-        statusColor = 'lime';
+      switch (true) {
+        case status >= 100 && status < 200:
+          statusColor = 'blue';
 
-        break;
+          break;
 
-      case status >= 400 && status < 500:
-        statusColor = 'orange';
+        case status >= 200 && status < 400:
+          statusColor = 'lime';
 
-        break;
+          break;
 
-      case status >= 500 && status < 600:
-        statusColor = 'red';
+        case status >= 400 && status < 500:
+          statusColor = 'orange';
 
-        break;
+          break;
+
+        case status >= 500 && status < 600:
+          statusColor = 'red';
+
+          break;
+      }
+
+      const { columns } = Deno.consoleSize();
+
+      console.log(
+        `\n%c[%c${response.status}%c] %cRequest: %c${pathname} %c${
+          '.'.repeat(columns - pathname.length - 28)
+        } [${(performance.now() - timerStart).toFixed(3)}ms]`,
+        'color: lightgray',
+        `color: ${statusColor}`,
+        'color: lightgray',
+        'color: blue',
+        'color: white; font-weight: bold',
+        'color: gray',
+      );
+
+      requestEvent.respondWith(response);
     }
-
-    const { columns } = Deno.consoleSize();
-
-    console.log(
-      `\n%c[%c${response.status}%c] %cRequest: %c${pathname} %c${
-        '.'.repeat(columns - pathname.length - 28)
-      } [${(performance.now() - timerStart).toFixed(3)}ms]`,
-      'color: lightgray',
-      `color: ${statusColor}`,
-      'color: lightgray',
-      'color: blue',
-      'color: white; font-weight: bold',
-      'color: gray',
-    );
-
-    return response;
   }
 
   private setup(): void {
@@ -161,7 +166,7 @@ export class Server {
   }
 
   public async start(
-    port = env<number>('PORT', this.defaultHttpPort),
+    port = env<number>('PORT') ?? this.defaultHttpPort,
   ): Promise<void> {
     this.checkSystemRequirements();
 
@@ -177,18 +182,21 @@ export class Server {
 
     this.setup();
 
-    await serve(async (request) => await this.serve(request), {
+    const listener = Deno.listen({
       port,
       hostname: env<string>('HOST') ?? 'localhost',
-      onListen: () => {
-        console.log(
-          `\n%cHTTP server is running on ${
-            env<boolean>('DEVELOPMENT') ? 'http://localhost:' : 'port '
-          }${port} %c[${Deno.build.os === 'darwin' ? '⌃C' : 'Ctrl+C'} to quit]`,
-          'color: mediumblue',
-          'color: gray',
-        );
-      },
     });
+
+    console.log(
+      `\n%cHTTP server is running on ${
+        env<boolean>('DEVELOPMENT') ? 'http://localhost:' : 'port '
+      }${port} %c[${Deno.build.os === 'darwin' ? '⌃C' : 'Ctrl+C'} to quit]`,
+      'color: mediumblue',
+      'color: gray',
+    );
+
+    for await (const connection of listener) {
+      this.serveHttp(connection);
+    }
   }
 }
