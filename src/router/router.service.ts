@@ -4,11 +4,23 @@ import { renderToString as renderJsx } from 'https://jspm.dev/react-dom@18.0.0/s
 import { Constructor } from '../utils/interfaces/constructor.interface.ts';
 import { HttpMethod } from '../http/enums/http_method.enum.ts';
 import { inject } from '../injector/functions/inject.function.ts';
+import { Reflect } from '../utils/reflect.class.ts';
 import { RouteDefinition } from './interfaces/route_definition.interface.ts';
+import { RouteOptions } from './interfaces/route_options.interface.ts';
 import { RoutePath } from './types/route_path.type.ts';
 import { StatusCode } from '../http/enums/status_code.enum.ts';
 import { StatusPage } from '../http/pages/status_page.tsx';
 import { ValuesUnion } from '../utils/types/values_union.type.ts';
+
+type RouteDecoratorFunction<T> = T extends ValuesUnion<HttpMethod>[] ? (
+    path: RoutePath,
+    options?: RouteOptions,
+  ) => MethodDecorator
+  : (
+    methods: ValuesUnion<HttpMethod>[],
+    path: RoutePath,
+    options?: RouteOptions,
+  ) => MethodDecorator;
 
 export class Router {
   private readonly routes = new Map<RegExp, RouteDefinition>();
@@ -82,14 +94,95 @@ export class Router {
     );
   }
 
-  public registerController(controller: Constructor): void {
-    const instance = inject(controller);
+  public createRouteDecorator<
+    T extends ValuesUnion<HttpMethod>[] | undefined = undefined,
+  >(httpMethods?: T): RouteDecoratorFunction<T> {
+    const decoratorCallback = (
+      path: RoutePath,
+      methods: ValuesUnion<HttpMethod>[],
+      options: RouteOptions = {},
+    ): MethodDecorator => {
+      return (originalMethod, context) => {
+        if ((context as unknown as ClassMethodDecoratorContext).private) {
+          throw new Error(
+            `Controller route method ${
+              (context as unknown as ClassMethodDecoratorContext).name.toString()
+            } must be public`,
+          );
+        }
 
-    for (
-      const { path, method, action } of (instance as { routes: RouteDefinition[] })
-        .routes
-    ) {
-      this.registerRoute(path, method, action.bind(instance));
+        if ((context as unknown as ClassMethodDecoratorContext).static) {
+          throw new Error(
+            `Controller route method ${
+              (context as unknown as ClassMethodDecoratorContext).name.toString()
+            } cannot be static`,
+          );
+        }
+
+        if ((context as unknown as ClassMethodDecoratorContext).kind !== 'method') {
+          throw new Error(
+            'Route decorators can only be used for controller methods',
+          );
+        }
+
+        Reflect.defineMetadata<Partial<RouteDefinition>>(
+          'routeDefinition',
+          {
+            methods,
+            path,
+            ...options,
+          },
+          originalMethod as ((...args: unknown[]) => unknown),
+        );
+
+        return originalMethod;
+      };
+    };
+
+    return (
+      Array.isArray(httpMethods)
+        ? (
+          path: RoutePath,
+          options: RouteOptions = {},
+        ) => {
+          return decoratorCallback(path, httpMethods, options);
+        }
+        : (
+          methods: ValuesUnion<HttpMethod>[],
+          path: RoutePath,
+          options: RouteOptions = {},
+        ) => {
+          return decoratorCallback(path, methods, options);
+        }
+    ) as RouteDecoratorFunction<T>;
+  }
+
+  public registerController(controller: Constructor): void {
+    const properties = Object.getOwnPropertyNames(controller.prototype);
+
+    const controllerRouteMethods = properties.filter((property) => {
+      return (
+        typeof controller.prototype[property] === 'function' &&
+        !['constructor', 'toString', 'toLocaleString'].includes(property) &&
+        !property.startsWith('_')
+      );
+    });
+
+    for (const controllerRouteMethod of controllerRouteMethods) {
+      const { methods, path } = Reflect.getMetadata<
+        Exclude<RouteDefinition, 'action'>
+      >(
+        'routeDefinition',
+        controller.prototype[controllerRouteMethod],
+      )!;
+
+      this.registerRoute(path, methods, async (...args: unknown[]) => {
+        const methodResult =
+          (inject(controller) as Record<string, (...args: unknown[]) => unknown>)
+            [controllerRouteMethod](...args);
+
+        return methodResult instanceof Promise ? await methodResult : methodResult;
+      });
     }
   }
 
@@ -98,25 +191,32 @@ export class Router {
 
     let response = this.abortResponse(StatusCode.NotFound);
 
-    for (const [pathRegexp, { action, method }] of this.routes) {
-      if (request.method === method && pathRegexp.test(pathname)) {
-        const resolvedParams = Object.values(
-          pathRegexp.exec(pathname)?.groups ?? {},
-        );
+    routeLookupLoop:
+    for (const [pathRegexp, { action, methods }] of this.routes) {
+      if (!methods.includes(request.method as HttpMethod)) {
+        continue;
+      }
 
-        const body = action(request, resolvedParams);
+      for (const method of methods) {
+        if (request.method === method && pathRegexp.test(pathname)) {
+          const resolvedParams = Object.values(
+            pathRegexp.exec(pathname)?.groups ?? {},
+          );
 
-        response = new Response(body as string, {
-          headers: {
-            'content-type': 'text/html; charset=utf-8',
-          },
-        });
+          const body = await action(resolvedParams);
 
-        if (request.method === HttpMethod.Get && pathname.includes('.')) {
-          return await this.handleStaticFileRequest(request);
+          response = new Response(body as string, {
+            headers: {
+              'content-type': 'text/html; charset=utf-8',
+            },
+          });
+
+          if (request.method === HttpMethod.Get && pathname.includes('.')) {
+            return await this.handleStaticFileRequest(request);
+          }
+
+          break routeLookupLoop;
         }
-
-        break;
       }
     }
 
@@ -125,8 +225,8 @@ export class Router {
 
   public registerRoute(
     path: RoutePath,
-    method: ValuesUnion<HttpMethod>,
-    action: (...args: unknown[]) => unknown,
+    methods: ValuesUnion<HttpMethod>[],
+    action: (...args: unknown[]) => Promise<unknown>,
   ): void {
     const pathRegexp = this.resolvePathRegexp(path);
 
@@ -136,7 +236,7 @@ export class Router {
 
     this.routes.set(pathRegexp, {
       action,
-      method,
+      methods,
       path,
     });
   }
