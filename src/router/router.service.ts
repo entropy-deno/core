@@ -4,6 +4,7 @@ import { renderToString as renderJsx } from 'https://jspm.dev/react-dom@18.0.0/s
 import { Constructor } from '../utils/interfaces/constructor.interface.ts';
 import { HttpMethod } from '../http/enums/http_method.enum.ts';
 import { inject } from '../injector/functions/inject.function.ts';
+import { MethodDecorator } from '../utils/types/method_decorator.type.ts';
 import { Reflect } from '../utils/reflect.class.ts';
 import { RouteDefinition } from './interfaces/route_definition.interface.ts';
 import { RouteOptions } from './interfaces/route_options.interface.ts';
@@ -103,23 +104,19 @@ export class Router {
       options: RouteOptions = {},
     ): MethodDecorator => {
       return (originalMethod, context) => {
-        if ((context as unknown as ClassMethodDecoratorContext).private) {
+        if (context.private) {
           throw new Error(
-            `Controller route method ${
-              (context as unknown as ClassMethodDecoratorContext).name.toString()
-            } must be public`,
+            `Controller route method ${context.name.toString()} must be public`,
           );
         }
 
-        if ((context as unknown as ClassMethodDecoratorContext).static) {
+        if (context.static) {
           throw new Error(
-            `Controller route method ${
-              (context as unknown as ClassMethodDecoratorContext).name.toString()
-            } cannot be static`,
+            `Controller route method ${context.name.toString()} cannot be static`,
           );
         }
 
-        if ((context as unknown as ClassMethodDecoratorContext).kind !== 'method') {
+        if (context.kind !== 'method') {
           throw new Error(
             'Route decorators can only be used for controller methods',
           );
@@ -132,7 +129,7 @@ export class Router {
             path,
             ...options,
           },
-          originalMethod as ((...args: unknown[]) => unknown),
+          originalMethod,
         );
 
         return originalMethod;
