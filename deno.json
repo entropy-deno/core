@@ -1,4 +1,16 @@
 {
+  "compilerOptions": {
+    "allowJs": false,
+    "allowSyntheticDefaultImports": true,
+    "jsx": "react-jsx",
+    "lib": [
+      "ESNext",
+      "DOM",
+      "deno.window"
+    ],
+    "noImplicitAny": true,
+    "strict": true
+  },
   "fmt": {
     "include": [
       "src/"
