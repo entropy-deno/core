@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "allowJs": false,
-    "allowSyntheticDefaultImports": true,
     "jsx": "react-jsx",
     "lib": [
       "ESNext",
