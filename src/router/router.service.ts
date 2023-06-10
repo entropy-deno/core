@@ -6,6 +6,7 @@ import { HttpMethod } from '../http/enums/http_method.enum.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { MethodDecorator } from '../utils/types/method_decorator.type.ts';
 import { Reflect } from '../utils/reflect.class.ts';
+import { createResponse } from '../http/functions/create_response.function.ts';
 import { RouteDefinition } from './interfaces/route_definition.interface.ts';
 import { RouteOptions } from './interfaces/route_options.interface.ts';
 import { RoutePath } from './types/route_path.type.ts';
@@ -27,7 +28,7 @@ export class Router {
   private readonly routes = new Map<RegExp, RouteDefinition>();
 
   private abortResponse(status = StatusCode.NotFound): Response {
-    return new Response(
+    return createResponse(
       renderJsx(
         createElement(StatusPage, {
           status,
@@ -59,7 +60,7 @@ export class Router {
       const fileSize = (await Deno.stat(filePath)).size;
       const body = (await Deno.open(filePath)).readable;
 
-      return new Response(body, {
+      return createResponse(body, {
         headers: {
           'content-length': fileSize.toString(),
           'content-type': contentType(filePath.split('.')?.pop() ?? '') ??
@@ -186,9 +187,10 @@ export class Router {
   public async respond(request: Request): Promise<Response> {
     const { pathname } = new URL(request.url);
 
-    let response = this.abortResponse(StatusCode.NotFound);
+    if (request.method === HttpMethod.Get && pathname.includes('.')) {
+      return await this.handleStaticFileRequest(request);
+    }
 
-    routeLookupLoop:
     for (const [pathRegexp, { action, methods }] of this.routes) {
       if (!methods.includes(request.method as HttpMethod)) {
         continue;
@@ -200,24 +202,43 @@ export class Router {
             pathRegexp.exec(pathname)?.groups ?? {},
           );
 
-          const body = await action(resolvedParams);
+          let body = await action(resolvedParams);
+          let contentType = 'text/html';
 
-          response = new Response(body as string, {
-            headers: {
-              'content-type': 'text/html; charset=utf-8',
-            },
-          });
+          switch (true) {
+            case body instanceof Response:
+              return body as Response;
 
-          if (request.method === HttpMethod.Get && pathname.includes('.')) {
-            return await this.handleStaticFileRequest(request);
+            case Array.isArray(body) ||
+              ((typeof body === 'object' && body !== null) &&
+                (body as Record<string, unknown>).constructor === Object): {
+              body = JSON.stringify(body);
+              contentType = 'application/json';
+
+              break;
+            }
+
+            case ['boolean', 'number', 'undefined'].includes(typeof body) ||
+              body === null: {
+              body = String(body);
+
+              break;
+            }
+
+            default:
+              throw new Error('Invalid response body type');
           }
 
-          break routeLookupLoop;
+          return createResponse(body as string, {
+            headers: {
+              'content-type': `${contentType}; charset=utf-8`,
+            },
+          });
         }
       }
     }
 
-    return response;
+    return this.abortResponse(StatusCode.NotFound);
   }
 
   public registerRoute(
