@@ -1,16 +1,16 @@
 <div align="center">
   <p align="center">
-    <h1>Flavor Framework</h1>
+    <h1>Entropy Framework</h1>
   </p>
 
   <p align="center">Modern and declarative backend development framework for Deno.</p>
 
   <h4>
-    <a href="https://flavor-deno.dev">Website</a>
+    <a href="https://entropy-deno.com">Website</a>
     <span> · </span>
-    <a href="https://flavor-deno.dev/docs/introducing-flavor">Documentation</a>
+    <a href="https://entropy-deno.com/docs/introducing-entropy">Documentation</a>
     <span> · </span>
-    <a href="https://flavor-deno.dev/docs/more/contributing">Contributing</a>
+    <a href="https://entropy-deno.com/docs/more/contributing">Contributing</a>
   </h4>
 </div>
 

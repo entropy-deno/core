@@ -35,7 +35,7 @@ export class Server {
 
     if (satisfiesDenoVersion === -1) {
       console.warn(
-        `%cFlavor requires Deno version ${minimumDenoVersion} or higher %c[run 'deno upgrade' to update Deno]`,
+        `%cEntropy requires Deno version ${minimumDenoVersion} or higher %c[run 'deno upgrade' to update Deno]`,
         `color: orange`,
         'color: gray',
       );
