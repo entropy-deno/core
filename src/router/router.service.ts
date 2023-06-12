@@ -2,6 +2,7 @@ import { contentType } from '@std/media_types/mod.ts';
 import { createElement } from 'https://jspm.dev/react@18.0.0';
 import { renderToString as renderJsx } from 'https://jspm.dev/react-dom@18.0.0/server';
 import { Constructor } from '../utils/interfaces/constructor.interface.ts';
+import { Controller } from '../http/interfaces/controller.interface.ts';
 import { HttpMethod } from '../http/enums/http_method.enum.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { MethodDecorator } from '../utils/types/method_decorator.type.ts';
@@ -155,29 +156,12 @@ export class Router {
     ) as RouteDecoratorFunction<T>;
   }
 
-  public registerController(controller: Constructor): void {
-    const properties = Object.getOwnPropertyNames(controller.prototype);
+  public registerController(controller: Constructor<Controller>): void {
+    const instance = inject(controller);
 
-    const controllerRouteMethods = properties.filter((property) => {
-      return (
-        typeof controller.prototype[property] === 'function' &&
-        !['constructor', 'toString', 'toLocaleString'].includes(property) &&
-        !property.startsWith('_')
-      );
-    });
-
-    for (const controllerRouteMethod of controllerRouteMethods) {
-      const { methods, path } = Reflect.getMetadata<
-        Exclude<RouteDefinition, 'action'>
-      >(
-        'routeDefinition',
-        controller.prototype[controllerRouteMethod],
-      )!;
-
+    for (const { action, methods, path } of instance.routes) {
       this.registerRoute(path, methods, async (...args: unknown[]) => {
-        const methodResult =
-          (inject(controller) as Record<string, (...args: unknown[]) => unknown>)
-            [controllerRouteMethod](...args);
+        const methodResult = (instance as any)[action](...args);
 
         return methodResult instanceof Promise ? await methodResult : methodResult;
       });
@@ -218,7 +202,7 @@ export class Router {
               break;
             }
 
-            case ['boolean', 'number', 'undefined'].includes(typeof body) ||
+            case ['boolean', 'number', 'string', 'undefined'].includes(typeof body) ||
               body === null: {
               body = String(body);
 

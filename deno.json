@@ -21,5 +21,8 @@
   },
   "imports": {
     "@std/": "https://deno.land/std@0.190.0/"
+  },
+  "lint": {
+    "no-explicit-any": false
   }
 }
