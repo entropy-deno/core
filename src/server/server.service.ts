@@ -68,7 +68,7 @@ export class Server {
           break;
 
         case status >= 200 && status < 400:
-          statusColor = 'lime';
+          statusColor = 'green';
 
           break;
 
@@ -85,10 +85,17 @@ export class Server {
 
       const { columns } = Deno.consoleSize();
 
+      const timestamp = new Date().toLocaleString('en-us', {
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: true,
+      });
+
       console.log(
-        `\n%c[%c${response.status}%c] %cRequest: %c${pathname} %c${
-          '.'.repeat(columns - pathname.length - 28)
-        } [${(performance.now() - timerStart).toFixed(3)}ms]`,
+        `\n%c[${timestamp}] %c[%c${response.status}%c] %cRequest: %c${pathname} %c${
+          '.'.repeat(columns - pathname.length - 42)
+        } [${(performance.now() - timerStart).toFixed(2)}ms]`,
+        'color: gray',
         'color: lightgray',
         `color: ${statusColor}`,
         'color: lightgray',
