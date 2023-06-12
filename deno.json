@@ -23,6 +23,10 @@
     "@std/": "https://deno.land/std@0.190.0/"
   },
   "lint": {
-    "no-explicit-any": false
+    "rules": {
+      "exclude": [
+        "no-explicit-any"
+      ]
+    }
   }
 }
