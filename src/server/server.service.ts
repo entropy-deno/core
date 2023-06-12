@@ -92,7 +92,7 @@ export class Server {
       });
 
       console.log(
-        `\n%c[${timestamp}] %c[%c${response.status}%c] %cRequest: %c${pathname} %c${
+        `\n%c[${timestamp}] %c[%c${status}%c] %cRequest: %c${pathname} %c${
           '.'.repeat(columns - pathname.length - 42)
         } [${(performance.now() - timerStart).toFixed(2)}ms]`,
         'color: gray',
@@ -192,8 +192,8 @@ export class Server {
     this.setup();
 
     const listener = Deno.listen({
-      port,
       hostname: env<string>('HOST') ?? 'localhost',
+      port,
     });
 
     console.log(

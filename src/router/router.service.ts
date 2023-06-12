@@ -3,11 +3,11 @@ import { createElement } from 'https://jspm.dev/react@18.0.0';
 import { renderToString as renderJsx } from 'https://jspm.dev/react-dom@18.0.0/server';
 import { Constructor } from '../utils/interfaces/constructor.interface.ts';
 import { Controller } from '../http/interfaces/controller.interface.ts';
+import { createResponse } from '../http/functions/create_response.function.ts';
 import { HttpMethod } from '../http/enums/http_method.enum.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { MethodDecorator } from '../utils/types/method_decorator.type.ts';
 import { Reflect } from '../utils/reflect.class.ts';
-import { createResponse } from '../http/functions/create_response.function.ts';
 import { RouteDefinition } from './interfaces/route_definition.interface.ts';
 import { RouteOptions } from './interfaces/route_options.interface.ts';
 import { RoutePath } from './types/route_path.type.ts';
@@ -47,9 +47,6 @@ export class Router {
       ).replaceAll('<!-- -->', ''),
       {
         status: status,
-        headers: {
-          'content-type': 'text/html; charset=utf-8',
-        },
       },
     );
   }
@@ -161,7 +158,9 @@ export class Router {
 
     for (const { action, methods, path } of instance.routes) {
       this.registerRoute(path, methods, async (...args: unknown[]) => {
-        const methodResult = (instance as any)[action](...args);
+        const methodResult =
+          (instance as unknown as Record<string, (...args: unknown[]) => unknown>)
+            [action](...args);
 
         return methodResult instanceof Promise ? await methodResult : methodResult;
       });
@@ -202,7 +201,9 @@ export class Router {
               break;
             }
 
-            case ['boolean', 'number', 'string', 'undefined'].includes(typeof body) ||
+            case ['boolean', 'number', 'string', 'undefined'].includes(
+              typeof body,
+            ) ||
               body === null: {
               body = String(body);
 
