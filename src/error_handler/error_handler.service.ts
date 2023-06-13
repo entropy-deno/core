@@ -9,7 +9,14 @@ export class ErrorHandler {
   private currentLine: number | null = null;
 
   private readErrorStack(): void {
-    const stack = this.currentError?.stack ?? 'Error\n    at <anonymous>:1:1';
+    const stack = this.currentError?.stack;
+
+    if (!stack) {
+      this.currentFile = 'internal file';
+      this.currentLine = null;
+
+      return;
+    }
 
     if (env<boolean>('DEVELOPER_MODE') ?? false) {
       console.log(`\n%c${stack}`, 'color: gray');
@@ -24,7 +31,7 @@ export class ErrorHandler {
 
     const fileMatch = thrownAt?.match(/\((.*?)\)/);
 
-    this.currentFile = fromFileUrl(fileMatch?.[1] ?? 'uknown').split(':')[0];
+    this.currentFile = (fileMatch?.[1] && fileMatch[1].includes('file://')) ? fromFileUrl(fileMatch[1]).split(':')[0] : 'internal file';
     this.currentLine = +(fileMatch?.[1]?.match(/(.*):(.*):(.*)/)?.[2] ?? 1);
 
     if (this.currentFile.includes('src/')) {
@@ -38,7 +45,7 @@ export class ErrorHandler {
     this.readErrorStack();
 
     console.error(
-      `\n%cError: ${error.message} %c[${this.currentFile}:${this.currentLine}]`,
+      `\n%cError: ${error.message} %c[${this.currentFile}${this.currentLine ? `:${this.currentLine}` : ''}]`,
       `color: red`,
       'color: gray',
     );

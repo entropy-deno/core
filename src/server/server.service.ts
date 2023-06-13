@@ -179,6 +179,14 @@ export class Server {
         }
       });
     }
+
+    if (env<boolean>('DEVELOPMENT')) {
+      console.warn(
+        `\n%cYou are running production server in development mode %c[set 'DEVELOPMENT' .env variable to 'false' to disable dev mode]`,
+        'color: orange',
+        'color: gray',
+      );
+    }
   }
 
   public async start(
@@ -192,7 +200,14 @@ export class Server {
       export: true,
     });
 
-    env<boolean>('DEVELOPMENT')
+    const flags = parseFlags(Deno.args, {
+      boolean: ['dev'],
+      default: {
+        dev: false,
+      },
+    });
+
+    flags.dev
       ? await this.setupDevelopmentEnvironment()
       : this.setupProductionEnvironment();
 
