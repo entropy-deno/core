@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./.github/logo-full.png" height="74" alt="Logo">
+  <img src="./.github/logo-full.png" height="64" alt="Logo">
 
   <p align="center">
     <h1>Entropy Framework</h1>
