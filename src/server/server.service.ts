@@ -218,7 +218,7 @@ export class Server {
         hostname: env<string>('HOST') ?? 'localhost',
         port,
       });
-  
+
       console.log(
         `\n%cHTTP server is running on ${
           env<boolean>('DEVELOPMENT') ? 'http://localhost:' : 'port '
@@ -226,7 +226,7 @@ export class Server {
         'color: mediumblue',
         'color: gray',
       );
-  
+
       for await (const connection of listener) {
         this.serveHttp(connection);
       }

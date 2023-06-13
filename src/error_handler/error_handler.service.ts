@@ -1,5 +1,7 @@
 import { fromFileUrl } from '@std/path/mod.ts';
 import { env } from '../utils/functions/env.function.ts';
+import { inject } from '../injector/functions/inject.function.ts';
+import { TemplateCompiler } from '../template_compiler/template_compiler.service.ts';
 
 export class ErrorHandler {
   private currentError: Error | null = null;
@@ -7,6 +9,8 @@ export class ErrorHandler {
   private currentFile: string | null = null;
 
   private currentLine: number | null = null;
+
+  private readonly templateCompiler = inject(TemplateCompiler);
 
   private readErrorStack(): void {
     const stack = this.currentError?.stack;
@@ -31,7 +35,9 @@ export class ErrorHandler {
 
     const fileMatch = thrownAt?.match(/\((.*?)\)/);
 
-    this.currentFile = (fileMatch?.[1] && fileMatch[1].includes('file://')) ? fromFileUrl(fileMatch[1]).split(':')[0] : 'internal file';
+    this.currentFile = (fileMatch?.[1] && fileMatch[1].includes('file://'))
+      ? fromFileUrl(fileMatch[1]).split(':')[0]
+      : 'internal file';
     this.currentLine = +(fileMatch?.[1]?.match(/(.*):(.*):(.*)/)?.[2] ?? 1);
 
     if (this.currentFile.includes('src/')) {
@@ -45,9 +51,15 @@ export class ErrorHandler {
     this.readErrorStack();
 
     console.error(
-      `\n%cError: ${error.message} %c[${this.currentFile}${this.currentLine ? `:${this.currentLine}` : ''}]`,
+      `\n%cError: ${error.message} %c[${this.currentFile}${
+        this.currentLine ? `:${this.currentLine}` : ''
+      }]`,
       `color: red`,
       'color: gray',
     );
+
+    await this.templateCompiler.compile('error', {
+      error,
+    });
   }
 }
