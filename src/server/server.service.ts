@@ -5,6 +5,7 @@ import { parse as parseFlags } from '@std/flags/mod.ts';
 import { AppConfig } from './interfaces/app_config.interface.ts';
 import { Constructor } from '../utils/interfaces/constructor.interface.ts';
 import { env } from '../utils/functions/env.function.ts';
+import { ErrorHandler } from '../error_handler/error_handler.service.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { Module } from './interfaces/module.interface.ts';
 import { Router } from '../router/router.service.ts';
@@ -16,6 +17,8 @@ export class Server {
   private readonly config: AppConfig = {};
 
   private readonly defaultHttpPort = 5050;
+
+  private readonly errorHandler = inject(ErrorHandler);
 
   private readonly listenSignals: Deno.Signal[] = ['SIGINT', 'SIGTERM', 'SIGQUIT'];
 
@@ -39,7 +42,7 @@ export class Server {
 
     if (satisfiesDenoVersion === -1) {
       console.warn(
-        `%cEntropy requires Deno version ${minimumDenoVersion} or higher %c[run 'deno upgrade' to update Deno]`,
+        `\n%cEntropy requires Deno version ${minimumDenoVersion} or higher %c[run 'deno upgrade' to update Deno]`,
         `color: orange`,
         'color: gray',
       );
@@ -49,62 +52,66 @@ export class Server {
   }
 
   private async serveHttp(connection: Deno.Conn): Promise<void> {
-    const httpConnection = Deno.serveHttp(connection);
+    try {
+      const httpConnection = Deno.serveHttp(connection);
 
-    for await (const { request, respondWith } of httpConnection) {
-      const timerStart = performance.now();
+      for await (const { request, respondWith } of httpConnection) {
+        const timerStart = performance.now();
 
-      const response = await this.router.respond(request);
+        const response = await this.router.respond(request);
 
-      const { status } = response;
-      const { pathname } = new URL(request.url);
+        const { status } = response;
+        const { pathname } = new URL(request.url);
 
-      let statusColor = 'blue';
+        let statusColor = 'blue';
 
-      switch (true) {
-        case status >= 100 && status < 200:
-          statusColor = 'blue';
+        switch (true) {
+          case status >= 100 && status < 200:
+            statusColor = 'blue';
 
-          break;
+            break;
 
-        case status >= 200 && status < 400:
-          statusColor = 'green';
+          case status >= 200 && status < 400:
+            statusColor = 'green';
 
-          break;
+            break;
 
-        case status >= 400 && status < 500:
-          statusColor = 'orange';
+          case status >= 400 && status < 500:
+            statusColor = 'orange';
 
-          break;
+            break;
 
-        case status >= 500 && status < 600:
-          statusColor = 'red';
+          case status >= 500 && status < 600:
+            statusColor = 'red';
 
-          break;
+            break;
+        }
+
+        const { columns } = Deno.consoleSize();
+
+        const timestamp = new Date().toLocaleString('en-us', {
+          hour: 'numeric',
+          minute: 'numeric',
+          hour12: true,
+        });
+
+        console.log(
+          `\n%c[${timestamp}] %c[%c${status}%c] %cRequest: %c${pathname} %c${
+            '.'.repeat(columns - pathname.length - 42)
+          } [${(performance.now() - timerStart).toFixed(2)}ms]`,
+          'color: gray',
+          'color: lightgray',
+          `color: ${statusColor}`,
+          'color: lightgray',
+          'color: blue',
+          'color: white; font-weight: bold',
+          'color: gray',
+        );
+
+        respondWith(response);
       }
-
-      const { columns } = Deno.consoleSize();
-
-      const timestamp = new Date().toLocaleString('en-us', {
-        hour: 'numeric',
-        minute: 'numeric',
-        hour12: true,
-      });
-
-      console.log(
-        `\n%c[${timestamp}] %c[%c${status}%c] %cRequest: %c${pathname} %c${
-          '.'.repeat(columns - pathname.length - 42)
-        } [${(performance.now() - timerStart).toFixed(2)}ms]`,
-        'color: gray',
-        'color: lightgray',
-        `color: ${statusColor}`,
-        'color: lightgray',
-        'color: blue',
-        'color: white; font-weight: bold',
-        'color: gray',
-      );
-
-      respondWith(response);
+    } catch (error) {
+      await this.errorHandler.handle(error);
     }
   }
 
@@ -189,23 +196,27 @@ export class Server {
       ? await this.setupDevelopmentEnvironment()
       : this.setupProductionEnvironment();
 
-    this.setup();
+    try {
+      this.setup();
 
-    const listener = Deno.listen({
-      hostname: env<string>('HOST') ?? 'localhost',
-      port,
-    });
-
-    console.log(
-      `\n%cHTTP server is running on ${
-        env<boolean>('DEVELOPMENT') ? 'http://localhost:' : 'port '
-      }${port} %c[${Deno.build.os === 'darwin' ? '⌃C' : 'Ctrl+C'} to quit]`,
-      'color: mediumblue',
-      'color: gray',
-    );
-
-    for await (const connection of listener) {
-      this.serveHttp(connection);
+      const listener = Deno.listen({
+        hostname: env<string>('HOST') ?? 'localhost',
+        port,
+      });
+  
+      console.log(
+        `\n%cHTTP server is running on ${
+          env<boolean>('DEVELOPMENT') ? 'http://localhost:' : 'port '
+        }${port} %c[${Deno.build.os === 'darwin' ? '⌃C' : 'Ctrl+C'} to quit]`,
+        'color: mediumblue',
+        'color: gray',
+      );
+  
+      for await (const connection of listener) {
+        this.serveHttp(connection);
+      }
+    } catch (error) {
+      await this.errorHandler.handle(error);
     }
   }
 }
