@@ -12,13 +12,15 @@ export class ErrorHandler {
 
   private currentStack: string | null = null;
 
+  private readonly defaultFile = 'internal file';
+
   private readonly templateCompiler = inject(TemplateCompiler);
 
   private readErrorStack(): void {
     const stack = this.currentError?.stack ?? null;
 
     if (!stack) {
-      this.currentFile = 'internal file';
+      this.currentFile = this.defaultFile;
       this.currentLine = null;
 
       return;
@@ -35,9 +37,11 @@ export class ErrorHandler {
 
     this.currentFile = fileMatch[1]
       ? fromFileUrl(`file://${fileMatch[1]}`).split(':')[0]
-      : 'internal file';
+      : this.defaultFile;
     this.currentLine = +(fileMatch[1]?.match(/(.*):(.*):(.*)/)?.[2] ?? 1);
-    this.currentStack = stack;
+    this.currentStack = stack.split('\n').slice(1).map((line) => line.trim()).join(
+      '\n',
+    );
 
     if (this.currentFile.includes('src/')) {
       this.currentFile = `src/${this.currentFile.split('src/')[1]}`;
@@ -51,7 +55,9 @@ export class ErrorHandler {
 
     console.error(
       `\n%cError: ${error.message} %c[${this.currentFile}${
-        this.currentLine ? `:${this.currentLine}` : ''
+        this.currentLine && this.currentFile !== this.defaultFile
+          ? `:${this.currentLine}`
+          : ''
       }]`,
       `color: red`,
       'color: gray',

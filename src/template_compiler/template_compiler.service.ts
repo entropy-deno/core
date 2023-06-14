@@ -244,11 +244,11 @@ export class TemplateCompiler {
           return entities[char as '&' | '<' | '>' | '"' | `'`];
         },
       );
-
+      console.log(renderExpression, escapedRenderExpression);
       const renderFunction = this.getRenderFunction(
         `return ${modifier === '#' ? true : false}
-          ? '${renderExpression}'
-          : '${escapedRenderExpression}';`,
+          ? ${renderExpression}
+          : ${escapedRenderExpression};`,
       );
 
       const renderedExpression = renderFunction();
