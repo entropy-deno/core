@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "allowJs": false,
-    "jsx": "react-jsx",
     "lib": [
       "ESNext",
       "DOM",
