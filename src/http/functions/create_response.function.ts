@@ -17,7 +17,7 @@ export function createResponse(
     headers: {
       'content-type': 'text/html; charset=utf-8',
       'content-security-policy':
-        `default-src 'self' 'unsafe-inline'${developmentCspDirectives};base-uri 'self';connect-src 'self'${developmentCspDirectives};font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src *;object-src 'none';script-src 'self' 'unsafe-inline'${developmentCspDirectives};script-src-attr 'unsafe-inline';style-src 'self' 'unsafe-inline'${developmentCspDirectives};upgrade-insecure-requests`,
+        `default-src 'self' 'unsafe-inline'${developmentCspDirectives};base-uri 'self';connect-src 'self'${developmentCspDirectives};font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src *;object-src 'none';script-src 'self' 'unsafe-inline'${developmentCspDirectives};script-src-attr 'unsafe-inline';style-src 'self' 'unsafe-inline' https://fonts.googleapis.com${developmentCspDirectives};upgrade-insecure-requests`,
       'cross-origin-opener-policy': 'same-origin',
       'cross-origin-resource-policy': 'same-origin',
       'origin-agent-cluster': '?1',

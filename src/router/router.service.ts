@@ -1,6 +1,4 @@
 import { contentType } from '@std/media_types/mod.ts';
-import { createElement } from 'https://jspm.dev/react@18.0.0';
-import { renderToString as renderJsx } from 'https://jspm.dev/react-dom@18.0.0/server';
 import { Constructor } from '../utils/interfaces/constructor.interface.ts';
 import { Controller } from '../http/interfaces/controller.interface.ts';
 import { createResponse } from '../http/functions/create_response.function.ts';
@@ -12,7 +10,8 @@ import { RouteDefinition } from './interfaces/route_definition.interface.ts';
 import { RouteOptions } from './interfaces/route_options.interface.ts';
 import { RoutePath } from './types/route_path.type.ts';
 import { StatusCode } from '../http/enums/status_code.enum.ts';
-import { StatusPage } from '../http/pages/status_page.tsx';
+import { statusPage } from '../http/pages/status_page.ts';
+import { TemplateCompiler } from '../template_compiler/template_compiler.service.ts';
 import { ValuesUnion } from '../utils/types/values_union.type.ts';
 
 type RouteDecoratorFunction<T> = T extends ValuesUnion<HttpMethod>[] ? (
@@ -28,23 +27,23 @@ type RouteDecoratorFunction<T> = T extends ValuesUnion<HttpMethod>[] ? (
 export class Router {
   private readonly routes = new Map<RegExp, RouteDefinition>();
 
-  private abortResponse(status = StatusCode.NotFound): Response {
+  private readonly templateCompiler = inject(TemplateCompiler);
+
+  private async abortResponse(status = StatusCode.NotFound): Promise<Response> {
     return createResponse(
-      renderJsx(
-        createElement(StatusPage, {
-          status,
-          message: Object.keys(StatusCode)
-            .find(
-              (key: string) =>
-                (StatusCode as unknown as Record<string, StatusCode>)[
-                  key
-                ] ===
-                  status,
-            )
-            ?.replace(/([a-z])([A-Z])/g, '$1 $2') ??
-            'Error',
-        }),
-      ).replaceAll('<!-- -->', ''),
+      await this.templateCompiler.compile(statusPage, {
+        status,
+        message: Object.keys(StatusCode)
+          .find(
+            (key: string) =>
+              (StatusCode as unknown as Record<string, StatusCode>)[
+                key
+              ] ===
+                status,
+          )
+          ?.replace(/([a-z])([A-Z])/g, '$1 $2') ??
+          'Error',
+      }),
       {
         status: status,
       },
@@ -66,7 +65,7 @@ export class Router {
         },
       });
     } catch {
-      return this.abortResponse(StatusCode.NotFound);
+      return await this.abortResponse(StatusCode.NotFound);
     }
   }
 
@@ -223,7 +222,7 @@ export class Router {
       }
     }
 
-    return this.abortResponse(StatusCode.NotFound);
+    return await this.abortResponse(StatusCode.NotFound);
   }
 
   public registerRoute(
