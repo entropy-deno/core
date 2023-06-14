@@ -220,28 +220,40 @@ export class TemplateCompiler {
   private parseDataInterpolations(): void {
     const matches = this.html.matchAll(/\{\{(#|@?)(.*?)\}\}/g) ?? [];
 
-    for (const match of matches) {
-      if (match[1] === '@') {
+    for (const [wholeMatch, modifier, matchValue] of matches) {
+      if (modifier === '@') {
         continue;
       }
 
-      const value = match[2].trim();
+      const value = matchValue.trim();
+      const renderExpression = typeof value === 'object'
+        ? JSON.stringify(value)
+        : String(value);
 
-      const renderFunction = this.getRenderFunction(
-        `return ${match[1] === '#' ? true : false}
-          ? String(typeof ${value} === 'object' ? JSON.stringify(${value}) : ${value})
-          : String(typeof ${value} === 'object' ? JSON.stringify(${value}) : ${value}).replace(/[&<>'"]/g, (char) => ({
-          '&': '&amp;',
-          '<': '&lt;',
-          '>': '&gt;',
-          "'": '&#39;',
-          '"': '&quot;',
-        }[char]));`,
+      const escapedRenderExpression = renderExpression.replace(
+        /[&<>'"]/g,
+        (char) => {
+          const entities = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            '\'': '&#39;',
+          };
+
+          return entities[char as '&' | '<' | '>' | '"' | `'`];
+        },
       );
 
-      const returnedValue = renderFunction();
+      const renderFunction = this.getRenderFunction(
+        `return ${modifier === '#' ? true : false}
+          ? '${renderExpression}'
+          : '${escapedRenderExpression}';`,
+      );
 
-      this.html = this.html.replace(match[0], String(returnedValue));
+      const renderedExpression = renderFunction();
+
+      this.html = this.html.replace(wholeMatch, String(renderedExpression));
     }
   }
 
