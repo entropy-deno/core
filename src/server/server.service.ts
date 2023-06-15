@@ -149,7 +149,7 @@ export class Server {
           WebClientAlias[Deno.build.os as 'darwin' | 'linux' | 'win32'] ??
             'open'
         }`,
-        [`http://localhost:${env('PORT') ?? this.defaultHttpPort}`],
+        [`http://localhost:${env<number>('PORT') ?? this.defaultHttpPort}`],
       );
     }
   }

@@ -252,12 +252,10 @@ export class TemplateCompiler {
       /\[each *?\((.*?) (in|of) (.*)\)\](\n|\r\n)?((.*?|\s*?)*?)\[\/each\]/gm,
     ) ?? [];
 
-    for (const match of matches) {
+    for (const [wholeMatch, variableName, , iterableValue, , block] of matches) {
       const renderFunction = this.getRenderFunction(
-        `return ${match[3]};`,
+        `return ${iterableValue};`,
       );
-
-      const variableName = match[1];
 
       let iterable = renderFunction<unknown[]>();
       let result = '';
@@ -267,40 +265,38 @@ export class TemplateCompiler {
         iterable = range(iterable);
       }
 
-      await Promise.all(
-        Object.entries(iterable).map(async ([key, item]) => {
-          if (Object.hasOwn(iterable, key)) {
-            const index = JSON.parse(`"${key}"`);
+      for (const [key, item] of Object.entries(iterable)) {
+        if (Object.hasOwn(iterable, key)) {
+          const index = JSON.parse(`"${key}"`);
 
-            let content = match[5];
+          let content = block;
 
-            const scopeVariables = {
-              [variableName]: item,
-              $even: index % 2 === 0,
-              $first: index === 0,
-              $index: iterator,
-              $key: index,
-              $last: index === Object.keys(iterable).length - 1,
-              $odd: index % 2 === 1,
-            };
+          const scopeVariables = {
+            [variableName]: item,
+            $even: index % 2 === 0,
+            $first: index === 0,
+            $index: iterator,
+            $key: index,
+            $last: index === Object.keys(iterable).length - 1,
+            $odd: index % 2 === 1,
+          };
 
-            iterator += 1;
+          iterator += 1;
 
-            const compiler = inject(TemplateCompiler, {
-              fresh: true,
-            });
+          const compiler = inject(TemplateCompiler, {
+            fresh: true,
+          });
 
-            content = await compiler.compile(content, {
-              ...this.data,
-              ...scopeVariables,
-            });
+          content = await compiler.compile(content, {
+            ...this.data,
+            ...scopeVariables,
+          });
 
-            result += content;
-          }
-        }),
-      );
+          result += content;
+        }
+      }
 
-      this.html = this.html.replace(match[0], result);
+      this.html = this.html.replace(wholeMatch, result);
     }
   }
 
@@ -308,20 +304,20 @@ export class TemplateCompiler {
     const matches =
       this.html.matchAll(/\[if ?(.*?)\](\n|\r\n*?)?((.|\n|\r\n)*?)\[\/if\]/gm) ?? [];
 
-    for (const match of matches) {
+    for (const [wholeMatch, , , content] of matches) {
       const renderFunction = this.getRenderFunction(
-        `return ${match[3]};`,
+        `return ${content};`,
       );
 
       const condition = renderFunction<boolean>();
 
       if (condition) {
-        this.html = this.html.replace(match[0], match[3]);
+        this.html = this.html.replace(wholeMatch, content);
 
         continue;
       }
 
-      this.html = this.html.replace(match[0], '');
+      this.html = this.html.replace(wholeMatch, '');
     }
   }
 
@@ -330,20 +326,20 @@ export class TemplateCompiler {
       /\[if ?(.*?)\](\n|\r\n*?)?((.|\n|\r\n)*?)(\[else\])((.|\n|\r\n)*?)\[\/if\]/gm,
     ) ?? [];
 
-    for (const match of matches) {
+    for (const [wholeMatch, , , value, , , content] of matches) {
       const renderFunction = this.getRenderFunction(
-        `return ${match[3]};`,
+        `return ${value};`,
       );
 
       const condition = renderFunction<boolean>();
 
       if (condition) {
-        this.html = this.html.replace(match[0], match[3]);
+        this.html = this.html.replace(wholeMatch, value);
 
         continue;
       }
 
-      this.html = this.html.replace(match[0], match[6]);
+      this.html = this.html.replace(wholeMatch, content);
     }
   }
 
@@ -353,10 +349,10 @@ export class TemplateCompiler {
 
     let count = 0;
 
-    for (const match of matches) {
-      this.html = this.html.replace(match[0], `$_raw${count}`);
+    for (const [wholeMatch, , content] of matches) {
+      this.html = this.html.replace(wholeMatch, `$_raw${count}`);
 
-      this.rawContent.push(match[2]);
+      this.rawContent.push(content);
 
       count += 1;
     }
@@ -367,13 +363,12 @@ export class TemplateCompiler {
       /\[switch ?(.*?)\](\n|\r\n*?)?((.|\n|\r\n)*?)\[\/switch\]/gm,
     ) ?? [];
 
-    for (const match of matches) {
+    for (const [wholeMatch, , , casesString] of matches) {
       const renderFunction = this.getRenderFunction(
-        `return ${match[3]};`,
+        `return ${casesString};`,
       );
       const switchCondition = renderFunction<unknown>();
 
-      const casesString = match[3];
       const cases = new Map<unknown, string>();
 
       let defaultCaseValue: string | null = null;
@@ -382,63 +377,63 @@ export class TemplateCompiler {
         /\[(case|default) ?(.*?)\](\n|\r\n*?)?((.|\n|\r\n)*?)\[\/(case|default)\]/gm,
       );
 
-      for (const caseMatch of caseMatches) {
-        if (caseMatch[1] === 'default') {
+      for (const [, caseType, caseValue, , caseContent] of caseMatches) {
+        if (caseType === 'default') {
           if (defaultCaseValue) {
             throw new Error(
               'Switch directive can only have one default case',
             );
           }
 
-          defaultCaseValue = caseMatch[4];
+          defaultCaseValue = caseContent;
 
           continue;
         }
 
         const caseRenderFunction = this.getRenderFunction(
-          `return ${caseMatch[2]};`,
+          `return ${caseValue};`,
         );
 
-        cases.set(caseRenderFunction<unknown>(), caseMatch[4]);
+        cases.set(caseRenderFunction<unknown>(), caseContent);
       }
 
       let matchesOneCase = false;
 
-      cases.forEach((value, key) => {
+      for (const [key, value] of cases) {
         if (key === switchCondition) {
-          this.html = this.html.replace(match[0], value);
+          this.html = this.html.replace(wholeMatch, value);
 
           matchesOneCase = true;
 
-          return;
+          break;
         }
-      });
+      }
 
       if (!matchesOneCase && defaultCaseValue) {
-        this.html = this.html.replace(match[0], defaultCaseValue);
+        this.html = this.html.replace(wholeMatch, defaultCaseValue);
 
         return;
       }
 
-      this.html = this.html.replace(match[0], '');
+      this.html = this.html.replace(wholeMatch, '');
     }
   }
 
   private removeComments(): void {
     const matches = this.html.matchAll(/\{\{(@?)--(.*?)--\}\}/g) ?? [];
 
-    for (const match of matches) {
-      this.html = this.html.replace(match[0], '');
+    for (const [wholeMatch] of matches) {
+      this.html = this.html.replace(wholeMatch, '');
     }
   }
 
   private restoreRawContent(): void {
     const matches = this.html.matchAll(/\$_raw([0-9]+)/g) ?? [];
 
-    for (const match of matches) {
-      const index = parseInt(match[1]);
+    for (const [wholeMatch, segmentIndex] of matches) {
+      const index = parseInt(segmentIndex);
 
-      this.html = this.html.replace(match[0], this.rawContent[index]);
+      this.html = this.html.replace(wholeMatch, this.rawContent[index]);
     }
   }
 
@@ -462,50 +457,40 @@ export class TemplateCompiler {
     this.parseDataInterpolations();
     this.parseSwitchDirectives();
 
-    await Promise.all(
-      this.directives.map(async (directive) => {
-        const pattern = directive.type === 'single'
-          ? new RegExp(`\\[${directive.name} *?(\\((.*?)\\))?\\]`, 'g')
-          : new RegExp(
-            `\\[${directive.name} *?(\\((.*?)\\))?\\](\n|\r\n*?)?((.|\n|\r\n)*?)\\[\\/${directive.name}\\]`,
-            'gm',
+    for (const directive of this.directives) {
+      const pattern = directive.type === 'single'
+        ? new RegExp(`\\[${directive.name} *?(\\((.*?)\\))?\\]`, 'g')
+        : new RegExp(
+          `\\[${directive.name} *?(\\((.*?)\\))?\\](\n|\r\n*?)?((.|\n|\r\n)*?)\\[\\/${directive.name}\\]`,
+          'gm',
+        );
+
+      const matches = this.html.matchAll(directive.pattern ?? pattern) ?? [];
+
+      for (const [expression, hasArguments, args, , blockContent] of matches) {
+        const argumentsRenderFunction = hasArguments
+          ? this.getRenderFunction(
+            `return ${`[${args}]`};`,
+          )
+          : () => [];
+
+        const resolvedArguments = hasArguments
+          ? argumentsRenderFunction<unknown[]>()
+          : [];
+
+        const result = directive.type === 'single'
+          ? directive.render(...resolvedArguments)
+          : directive.render(
+            blockContent,
+            ...resolvedArguments,
           );
 
-        const matches = this.html.matchAll(directive.pattern ?? pattern) ?? [];
-
-        enum SegmentIndexes {
-          Expression = 0,
-          Arguments = 2,
-          BlockContent = 4,
-        }
-
-        for (const match of matches) {
-          const hasArguments = match[1];
-
-          const argumentsRenderFunction = hasArguments
-            ? this.getRenderFunction(
-              `return ${`[${match[SegmentIndexes.Arguments]}]`};`,
-            )
-            : () => [];
-
-          const resolvedArguments = hasArguments
-            ? argumentsRenderFunction<unknown[]>()
-            : [];
-
-          const result = directive.type === 'single'
-            ? directive.render(...resolvedArguments)
-            : directive.render(
-              match[SegmentIndexes.BlockContent],
-              ...resolvedArguments,
-            );
-
-          this.html = this.html.replace(
-            match[SegmentIndexes.Expression],
-            result instanceof Promise ? await result : result,
-          );
-        }
-      }),
-    );
+        this.html = this.html.replace(
+          expression,
+          result instanceof Promise ? await result : result,
+        );
+      }
+    }
 
     this.restoreRawContent();
 
