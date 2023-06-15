@@ -2,6 +2,7 @@ import { existsSync } from '@std/fs/mod.ts';
 import * as constants from '../constants.ts';
 import { CompileOptions } from './interfaces/compile_options.interface.ts';
 import { env } from '../utils/functions/env.function.ts';
+import { escape } from '../utils/functions/escape.function.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { range } from '../utils/functions/range.function.ts';
 import {
@@ -17,6 +18,7 @@ export class TemplateCompiler {
 
   private readonly functions = {
     env,
+    escape,
     inject,
     range,
   };
@@ -226,29 +228,17 @@ export class TemplateCompiler {
       }
 
       const value = matchValue.trim();
-      const renderExpression = typeof value === 'object'
-        ? JSON.stringify(value)
-        : String(value);
 
-      const escapedRenderExpression = renderExpression.replace(
-        /[&<>'"]/g,
-        (char) => {
-          const entities = {
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            '\'': '&#39;',
-          };
-
-          return entities[char as '&' | '<' | '>' | '"' | `'`];
-        },
-      );
-      console.log(renderExpression, escapedRenderExpression);
       const renderFunction = this.getRenderFunction(
-        `return ${modifier === '#' ? true : false}
-          ? ${renderExpression}
-          : ${escapedRenderExpression};`,
+        `
+        const expression = typeof ${value} === 'object'
+          ? JSON.stringify(${value})
+          : String(${value});
+
+        return ${modifier === '#' ? true : false}
+          ? expression
+          : escape(expression);
+        `,
       );
 
       const renderedExpression = renderFunction();

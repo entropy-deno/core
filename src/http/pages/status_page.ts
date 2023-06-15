@@ -27,7 +27,7 @@ export const statusPage = `
       <div class="bg-gray-200 dark:bg-gray-700 w-0.5 h-9 rounded-full"></div>
 
       <div>
-        <p class="text-3xl font-medium">{{ message + 'test' }}</p>
+        <p class="text-3xl font-medium">{{ message }}</p>
         <p class="text-xs font-medium opacity-70 uppercase mt-1">Error</p>
       </div>
     </main>
