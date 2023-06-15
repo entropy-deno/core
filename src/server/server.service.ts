@@ -1,5 +1,3 @@
-import { dirname } from '@std/path/mod.ts';
-import { existsSync } from '@std/fs/mod.ts';
 import { load as loadEnv } from '@std/dotenv/mod.ts';
 import { parse as parseFlags } from '@std/flags/mod.ts';
 import { AppConfig } from './interfaces/app_config.interface.ts';
@@ -17,6 +15,8 @@ export class Server {
   private readonly config: AppConfig = {};
 
   private readonly defaultHttpPort = 5050;
+
+  private readonly devServerCheckKey = 'entropy:devServer';
 
   private readonly errorHandler = inject(ErrorHandler);
 
@@ -125,9 +125,7 @@ export class Server {
     }
   }
 
-  private async setupDevelopmentEnvironment(): Promise<void> {
-    const tempFilePath = '.temp/server';
-
+  private setupDevelopmentEnvironment(): void {
     const flags = parseFlags(Deno.args, {
       boolean: ['open'],
       default: {
@@ -136,26 +134,15 @@ export class Server {
     });
 
     for (const signal of this.listenSignals) {
-      Deno.addSignalListener(signal, async () => {
-        if (existsSync(dirname(tempFilePath))) {
-          await Deno.remove(dirname(tempFilePath), {
-            recursive: true,
-          });
-        }
+      Deno.addSignalListener(signal, () => {
+        localStorage.removeItem(this.devServerCheckKey);
 
         Deno.exit();
       });
     }
 
-    if (flags.open && !existsSync(tempFilePath)) {
-      if (!existsSync(dirname(tempFilePath))) {
-        await Deno.mkdir(dirname(tempFilePath));
-      }
-
-      await Deno.writeTextFile(
-        tempFilePath,
-        'dev [1]',
-      );
+    if (flags.open && !localStorage.getItem(this.devServerCheckKey)) {
+      localStorage.setItem(this.devServerCheckKey, 'on');
 
       runCommand(
         `${
@@ -208,7 +195,7 @@ export class Server {
     });
 
     flags.dev
-      ? await this.setupDevelopmentEnvironment()
+      ? this.setupDevelopmentEnvironment()
       : this.setupProductionEnvironment();
 
     try {
