@@ -41,7 +41,7 @@ export class TemplateCompiler {
         },
       },
       {
-        name: 'inline',
+        name: 'embed',
         type: 'single',
         render: async (files: string | string[], minify = false) => {
           if (!Array.isArray(files)) {
@@ -50,45 +50,43 @@ export class TemplateCompiler {
 
           let result = '';
 
-          await Promise.all(
-            files.map(async (file) => {
-              if (!file.endsWith('.js') && !file.endsWith('.css')) {
-                throw new Error(
-                  `Unsupported file extension '.${
-                    file
-                      .split('.')
-                      .pop()
-                  }' for inlined file`,
-                );
-              }
+          for (const file of files) {
+            if (!file.endsWith('.js') && !file.endsWith('.css')) {
+              throw new Error(
+                `Unsupported file extension '.${
+                  file
+                    .split('.')
+                    .pop()
+                }' for embedded file`,
+              );
+            }
 
-              const path = `public/${file}`;
+            const path = `public/${file}`;
 
-              if (!existsSync(path)) {
-                throw new Error(
-                  `File '${file}' not found`,
-                );
-              }
+            if (!existsSync(path)) {
+              throw new Error(
+                `File for embedding '${file}' not found`,
+              );
+            }
 
-              const content = await Deno.readTextFile(path);
+            const content = await Deno.readTextFile(path);
 
-              switch (file.split('.').pop()) {
-                case 'js':
-                  result += `<script>${
-                    minify ? content.replaceAll(/[\n\r\n\t]/g, '') : content
-                  }</script>`;
+            switch (file.split('.').pop()) {
+              case 'js':
+                result += `<script>${
+                  minify ? content.replaceAll(/[\n\r\n\t]/g, '') : content
+                }</script>`;
 
-                  break;
+                break;
 
-                case 'css':
-                  result += `<style>${
-                    minify ? content.replaceAll(/[\n\r\n\t]/g, '') : content
-                  }</style>`;
+              case 'css':
+                result += `<style>${
+                  minify ? content.replaceAll(/[\n\r\n\t]/g, '') : content
+                }</style>`;
 
-                  break;
-              }
-            }),
-          );
+                break;
+            }
+          }
 
           return result;
         },

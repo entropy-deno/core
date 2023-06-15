@@ -1,5 +1,4 @@
-export const statusPage = `
-<!doctype html>
+export const statusPage = `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
