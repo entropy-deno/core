@@ -58,6 +58,16 @@ export class Server {
       for await (const { request, respondWith } of httpConnection) {
         const timerStart = performance.now();
 
+        if (request.headers.get('upgrade')?.toLowerCase() === 'websocket') {
+          const { socket, response } = Deno.upgradeWebSocket(request);
+
+          socket.onopen = () => {
+            console.log('WebSocket connection established');
+          };
+
+          respondWith(response);
+        }
+
         const response = await this.router.respond(request);
 
         const { status } = response;
