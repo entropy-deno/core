@@ -21,7 +21,8 @@ export function createResponse(
       'cross-origin-opener-policy': 'same-origin',
       'cross-origin-resource-policy': 'same-origin',
       'origin-agent-cluster': '?1',
-      'permissions-policy': 'autoplay=(self), camera=(), encrypted-media=(self), geolocation=(self), microphone=(), payment=(), sync-xhr=(self)',
+      'permissions-policy':
+        'autoplay=(self), camera=(), encrypted-media=(self), geolocation=(self), microphone=(), payment=(), sync-xhr=(self)',
       'referrer-policy': 'no-referrer',
       'strict-transport-security': 'max-age=31536000; includeSubDomains',
       'x-content-type-options': 'nosniff',
