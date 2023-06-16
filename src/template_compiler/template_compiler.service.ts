@@ -1,4 +1,3 @@
-import { existsSync } from '@std/fs/mod.ts';
 import * as constants from '../constants.ts';
 import { CompileOptions } from './interfaces/compile_options.interface.ts';
 import { env } from '../utils/functions/env.function.ts';
@@ -63,28 +62,32 @@ export class TemplateCompiler {
 
             const path = `public/${file}`;
 
-            if (!existsSync(path)) {
+            try {
+              const content = await Deno.readTextFile(path);
+
+              switch (file.split('.').pop()) {
+                case 'js':
+                  result += `<script>${
+                    minify ? content.replaceAll(/[\n\r\n\t]/g, '') : content
+                  }</script>`;
+
+                  break;
+
+                case 'css':
+                  result += `<style>${
+                    minify ? content.replaceAll(/[\n\r\n\t]/g, '') : content
+                  }</style>`;
+
+                  break;
+              }
+            } catch (error) {
+              if (!(error instanceof Deno.errors.NotFound)) {
+                throw error;
+              }
+
               throw new Error(
-                `File for embedding '${file}' not found`,
+                `File for embedding '${file}' does not exist`,
               );
-            }
-
-            const content = await Deno.readTextFile(path);
-
-            switch (file.split('.').pop()) {
-              case 'js':
-                result += `<script>${
-                  minify ? content.replaceAll(/[\n\r\n\t]/g, '') : content
-                }</script>`;
-
-                break;
-
-              case 'css':
-                result += `<style>${
-                  minify ? content.replaceAll(/[\n\r\n\t]/g, '') : content
-                }</style>`;
-
-                break;
             }
           }
 
@@ -140,20 +143,24 @@ export class TemplateCompiler {
             this.options.file ? `${this.options.file}/..` : 'app/views'
           }/${partial}.html`;
 
-          if (!existsSync(file)) {
+          try {
+            const compiler = inject(TemplateCompiler, {
+              fresh: true,
+            });
+
+            const fileContent = await Deno.readTextFile(file);
+            const compiledPartial = await compiler.compile(fileContent, this.data);
+
+            return compiledPartial;
+          } catch (error) {
+            if (!(error instanceof Deno.errors.NotFound)) {
+              throw error;
+            }
+
             throw new Error(
               `View partial '${partial}' does not exist`,
             );
           }
-
-          const compiler = inject(TemplateCompiler, {
-            fresh: true,
-          });
-
-          const fileContent = await Deno.readTextFile(file);
-          const compiledPartial = await compiler.compile(fileContent, this.data);
-
-          return compiledPartial;
         },
       },
       {
@@ -164,20 +171,24 @@ export class TemplateCompiler {
             this.options.file ? `${this.options.file}/..` : 'app/views'
           }/${layout}.html`;
 
-          if (!existsSync(file)) {
+          try {
+            const compiler = inject(TemplateCompiler, {
+              fresh: true,
+            });
+
+            const fileContent = await Deno.readTextFile(file);
+            const compiledLayout = await compiler.compile(fileContent, this.data);
+
+            return compiledLayout;
+          } catch (error) {
+            if (!(error instanceof Deno.errors.NotFound)) {
+              throw error;
+            }
+
             throw new Error(
               `View layout '${layout}' does not exist`,
             );
           }
-
-          const compiler = inject(TemplateCompiler, {
-            fresh: true,
-          });
-
-          const fileContent = await Deno.readTextFile(file);
-          const compiledLayout = await compiler.compile(fileContent, this.data);
-
-          return compiledLayout;
         },
       },
       {
