@@ -105,10 +105,12 @@ export class Server {
           hour12: true,
         });
 
+        const responseTime = (performance.now() - timerStart).toFixed(2);
+
         console.log(
           `\n%c[${timestamp}] %c[%c${status}%c] %cRequest: %c${pathname} %c${
-            '.'.repeat(columns - pathname.length - 42)
-          } [${(performance.now() - timerStart).toFixed(2)}ms]`,
+            '.'.repeat(columns - pathname.length - responseTime.length - 40)
+          } [${responseTime}ms]`,
           'color: gray',
           'color: lightgray',
           `color: ${statusColor}`,
