@@ -17,10 +17,10 @@ export class TemplateCompiler {
   private html = '';
 
   private readonly functions = {
-    env,
-    escape,
-    inject,
-    range,
+    '$env': env,
+    '$escape': escape,
+    '$inject': inject,
+    '$range': range,
   };
 
   private options: CompileOptions = {};
@@ -198,7 +198,10 @@ export class TemplateCompiler {
 
   private getRenderFunction(body: string, variables: Record<string, unknown> = {}) {
     const globalVariables = {
-      ...constants,
+      ...Object.keys(constants).reduce((result, key) => ({
+        ...result,
+        [`$${key}`]: (constants as Record<string, unknown>)[key],
+      }), {}),
       ...this.data,
       ...this.functions,
     };
@@ -235,7 +238,7 @@ export class TemplateCompiler {
 
         return ${modifier === '#' ? true : false}
           ? expression
-          : escape(expression);
+          : $escape(expression);
         `,
       );
 
