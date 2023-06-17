@@ -1,7 +1,5 @@
 import { fromFileUrl } from '@std/path/mod.ts';
 import { env } from '../utils/functions/env.function.ts';
-import { inject } from '../injector/functions/inject.function.ts';
-import { TemplateCompiler } from '../template_compiler/template_compiler.service.ts';
 
 export class ErrorHandler {
   private currentError: Error | null = null;
@@ -12,9 +10,7 @@ export class ErrorHandler {
 
   private currentStack: string | null = null;
 
-  private readonly defaultFile = 'internal file';
-
-  private readonly templateCompiler = inject(TemplateCompiler);
+  private readonly defaultFile = 'entropy module';
 
   private readErrorStack(): void {
     const stack = this.currentError?.stack ?? null;
