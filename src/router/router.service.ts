@@ -2,6 +2,7 @@ import { contentType } from '@std/media_types/mod.ts';
 import { Constructor } from '../utils/interfaces/constructor.interface.ts';
 import { Controller } from '../http/interfaces/controller.interface.ts';
 import { createResponse } from '../http/functions/create_response.function.ts';
+import { enumKey } from '../utils/functions/enum_key.function.ts';
 import { env } from '../utils/functions/env.function.ts';
 import { ErrorHandler } from '../error_handler/error_handler.service.ts';
 import { errorPage } from '../error_handler/pages/error_page.ts';
@@ -40,15 +41,7 @@ export class Router {
   ): Promise<Response> {
     const payload = {
       status,
-      message: Object.keys(StatusCode)
-        .find(
-          (key: string) =>
-            (StatusCode as unknown as Record<string, StatusCode>)[
-              key
-            ] ===
-              status,
-        )
-        ?.replace(/([a-z])([A-Z])/g, '$1 $2') ??
+      message: enumKey(status, StatusCode).replace(/([a-z])([A-Z])/g, '$1 $2') ??
         'Error',
     };
 
@@ -95,11 +88,9 @@ export class Router {
     const definedParams = path.match(/\/:(\w+)/g);
     const validatedParams: string[] = [];
 
-    for (const param of definedParams ?? []) {
-      const name = param[1];
-
+    for (const [, name] of definedParams ?? []) {
       if (validatedParams.includes(name)) {
-        throw new Error(`Duplicate route parameter name: ${name}`);
+        throw new Error(`Duplicate route parameter name '${name}'`);
       }
 
       validatedParams.push(name);
