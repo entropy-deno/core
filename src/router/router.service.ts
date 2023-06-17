@@ -34,23 +34,40 @@ export class Router {
 
   private readonly templateCompiler = inject(TemplateCompiler);
 
-  private async abortResponse(status = StatusCode.NotFound): Promise<Response> {
-    return createResponse(
-      await this.templateCompiler.compile(statusPage, {
+  private async abortResponse(
+    request: Request,
+    status = StatusCode.NotFound,
+  ): Promise<Response> {
+    const payload = {
+      status,
+      message: Object.keys(StatusCode)
+        .find(
+          (key: string) =>
+            (StatusCode as unknown as Record<string, StatusCode>)[
+              key
+            ] ===
+              status,
+        )
+        ?.replace(/([a-z])([A-Z])/g, '$1 $2') ??
+        'Error',
+    };
+
+    if (
+      request.headers.get('x-requested-with')?.toLowerCase() === 'xmlhttprequest' ||
+      request.headers.get('accept')?.includes('application/json')
+    ) {
+      return createResponse(JSON.stringify(payload), {
         status,
-        message: Object.keys(StatusCode)
-          .find(
-            (key: string) =>
-              (StatusCode as unknown as Record<string, StatusCode>)[
-                key
-              ] ===
-                status,
-          )
-          ?.replace(/([a-z])([A-Z])/g, '$1 $2') ??
-          'Error',
-      }),
+        headers: {
+          'content-type': 'application/json; charset=utf-8',
+        },
+      });
+    }
+
+    return createResponse(
+      await this.templateCompiler.compile(statusPage, payload),
       {
-        status: status,
+        status,
       },
     );
   }
@@ -70,7 +87,7 @@ export class Router {
         },
       });
     } catch {
-      return await this.abortResponse(StatusCode.NotFound);
+      return await this.abortResponse(request, StatusCode.NotFound);
     }
   }
 
@@ -228,7 +245,7 @@ export class Router {
         }
       }
 
-      return await this.abortResponse(StatusCode.NotFound);
+      return await this.abortResponse(request, StatusCode.NotFound);
     } catch (error) {
       this.errorHandler.handle(error);
 
@@ -241,7 +258,7 @@ export class Router {
             status: StatusCode.InternalServerError,
           },
         )
-        : await this.abortResponse(StatusCode.InternalServerError);
+        : await this.abortResponse(request, StatusCode.InternalServerError);
     }
   }
 
