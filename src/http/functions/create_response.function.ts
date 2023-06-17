@@ -1,12 +1,14 @@
 import { env } from '../../utils/functions/env.function.ts';
 import { StatusCode } from '../enums/status_code.enum.ts';
 
+interface Options {
+  headers?: HeadersInit;
+  status?: StatusCode;
+}
+
 export function createResponse(
   body: ReadableStream | XMLHttpRequestBodyInit | null,
-  { headers = {}, status = StatusCode.Ok }: {
-    headers?: HeadersInit;
-    status?: StatusCode;
-  },
+  { headers = {}, status = StatusCode.Ok }: Options = {},
 ): Response {
   const developmentCspDirectives = env<boolean>('DEVELOPMENT')
     ? ' http://localhost:* ws://localhost:*'

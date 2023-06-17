@@ -50,7 +50,7 @@ export class ErrorHandler {
     }
   }
 
-  public async handle(error: Error): Promise<void> {
+  public handle(error: Error): void {
     this.currentError = error;
 
     this.readErrorStack();
@@ -68,9 +68,5 @@ export class ErrorHandler {
     if (this.currentStack && (env<boolean>('DEVELOPER_MODE') ?? false)) {
       console.log(`\n%c${this.currentStack}`, 'color: gray');
     }
-
-    await this.templateCompiler.compile('error', {
-      error,
-    });
   }
 }

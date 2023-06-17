@@ -123,7 +123,7 @@ export class Server {
         respondWith(response);
       }
     } catch (error) {
-      await this.errorHandler.handle(error);
+      this.errorHandler.handle(error);
     }
   }
 
@@ -230,7 +230,7 @@ export class Server {
         this.serveHttp(connection);
       }
     } catch (error) {
-      await this.errorHandler.handle(error);
+      this.errorHandler.handle(error);
     }
   }
 }

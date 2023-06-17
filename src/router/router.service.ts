@@ -2,6 +2,9 @@ import { contentType } from '@std/media_types/mod.ts';
 import { Constructor } from '../utils/interfaces/constructor.interface.ts';
 import { Controller } from '../http/interfaces/controller.interface.ts';
 import { createResponse } from '../http/functions/create_response.function.ts';
+import { env } from '../utils/functions/env.function.ts';
+import { ErrorHandler } from '../error_handler/error_handler.service.ts';
+import { errorPage } from '../error_handler/pages/error_page.ts';
 import { HttpMethod } from '../http/enums/http_method.enum.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { MethodDecorator } from '../utils/types/method_decorator.type.ts';
@@ -25,6 +28,8 @@ type RouteDecoratorFunction<T> = T extends ValuesUnion<HttpMethod>[] ? (
   ) => MethodDecorator;
 
 export class Router {
+  private readonly errorHandler = inject(ErrorHandler);
+
   private readonly routes = new Map<RegExp, RouteDefinition>();
 
   private readonly templateCompiler = inject(TemplateCompiler);
@@ -167,62 +172,77 @@ export class Router {
   }
 
   public async respond(request: Request): Promise<Response> {
-    const { pathname } = new URL(request.url);
+    try {
+      const { pathname } = new URL(request.url);
 
-    if (request.method === HttpMethod.Get && pathname.includes('.')) {
-      return await this.handleStaticFileRequest(request);
-    }
-
-    for (const [pathRegexp, { action, methods }] of this.routes) {
-      if (!methods.includes(request.method as HttpMethod)) {
-        continue;
+      if (request.method === HttpMethod.Get && pathname.includes('.')) {
+        return await this.handleStaticFileRequest(request);
       }
 
-      for (const method of methods) {
-        if (request.method === method && pathRegexp.test(pathname)) {
-          const resolvedParams = Object.values(
-            pathRegexp.exec(pathname)?.groups ?? {},
-          );
+      for (const [pathRegexp, { action, methods }] of this.routes) {
+        if (!methods.includes(request.method as HttpMethod)) {
+          continue;
+        }
 
-          let body = await action(resolvedParams);
-          let contentType = 'text/html';
+        for (const method of methods) {
+          if (request.method === method && pathRegexp.test(pathname)) {
+            const resolvedParams = Object.values(
+              pathRegexp.exec(pathname)?.groups ?? {},
+            );
 
-          switch (true) {
-            case body instanceof Response:
-              return body as Response;
+            let body = await action(resolvedParams);
+            let contentType = 'text/html';
 
-            case Array.isArray(body) ||
-              ((typeof body === 'object' && body !== null) &&
-                (body as Record<string, unknown>).constructor === Object): {
-              body = JSON.stringify(body);
-              contentType = 'application/json';
+            switch (true) {
+              case body instanceof Response:
+                return body as Response;
 
-              break;
+              case Array.isArray(body) ||
+                ((typeof body === 'object' && body !== null) &&
+                  (body as Record<string, unknown>).constructor === Object): {
+                body = JSON.stringify(body);
+                contentType = 'application/json';
+
+                break;
+              }
+
+              case ['boolean', 'number', 'string', 'undefined'].includes(
+                typeof body,
+              ) ||
+                body === null: {
+                body = String(body);
+
+                break;
+              }
+
+              default:
+                throw new Error('Invalid response body type');
             }
 
-            case ['boolean', 'number', 'string', 'undefined'].includes(
-              typeof body,
-            ) ||
-              body === null: {
-              body = String(body);
-
-              break;
-            }
-
-            default:
-              throw new Error('Invalid response body type');
+            return createResponse(body as string, {
+              headers: {
+                'content-type': `${contentType}; charset=utf-8`,
+              },
+            });
           }
-
-          return createResponse(body as string, {
-            headers: {
-              'content-type': `${contentType}; charset=utf-8`,
-            },
-          });
         }
       }
-    }
 
-    return await this.abortResponse(StatusCode.NotFound);
+      return await this.abortResponse(StatusCode.NotFound);
+    } catch (error) {
+      this.errorHandler.handle(error);
+
+      return env<boolean>('DEVELOPMENT')
+        ? createResponse(
+          await this.templateCompiler.compile(errorPage, {
+            error,
+          }),
+          {
+            status: StatusCode.InternalServerError,
+          },
+        )
+        : await this.abortResponse(StatusCode.InternalServerError);
+    }
   }
 
   public registerRoute(
