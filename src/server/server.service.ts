@@ -14,11 +14,13 @@ import { WebClientAlias } from './enums/web_client_alias.enum.ts';
 export class Server {
   private readonly config: AppConfig = {};
 
-  private readonly defaultHttpPort = 5050;
-
   private readonly devServerCheckKey = 'entropy:devServer';
 
   private readonly errorHandler = inject(ErrorHandler);
+
+  private httpHost = 'localhost';
+
+  private httpPort = 5050;
 
   private readonly listenSignals: Deno.Signal[] = ['SIGINT', 'SIGTERM', 'SIGQUIT'];
 
@@ -154,15 +156,17 @@ export class Server {
     }
 
     if (flags.open && !localStorage.getItem(this.devServerCheckKey)) {
-      localStorage.setItem(this.devServerCheckKey, 'on');
-
-      runCommand(
-        `${
-          WebClientAlias[Deno.build.os as 'darwin' | 'linux' | 'win32'] ??
-            'open'
-        }`,
-        [`http://localhost:${env<number>('PORT') ?? this.defaultHttpPort}`],
-      );
+      try {
+        runCommand(
+          `${
+            WebClientAlias[Deno.build.os as 'darwin' | 'linux' | 'win32'] ??
+              'open'
+          }`,
+          [`http://${this.httpHost}:${this.httpPort}`],
+        );
+      } finally {
+        localStorage.setItem(this.devServerCheckKey, 'on');
+      }
     }
   }
 
@@ -189,9 +193,13 @@ export class Server {
   }
 
   public async start(
-    port = env<number>('PORT') ?? this.defaultHttpPort,
+    port = env<number>('PORT') ?? this.httpPort,
+    host = env<string>('HOST') ?? this.httpHost,
   ): Promise<void> {
     this.checkSystemRequirements();
+
+    this.httpHost = host;
+    this.httpPort = port;
 
     await loadEnv({
       allowEmptyValues: true,
@@ -214,14 +222,14 @@ export class Server {
       this.setup();
 
       const listener = Deno.listen({
-        hostname: env<string>('HOST') ?? 'localhost',
+        hostname: host,
         port,
       });
 
       console.log(
         `\n%cHTTP server is running on ${
-          env<boolean>('DEVELOPMENT') ? 'http://localhost:' : 'port '
-        }${port} %c[${Deno.build.os === 'darwin' ? '⌃C' : 'Ctrl+C'} to quit]`,
+          env<boolean>('DEVELOPMENT') ? `http://${host}:${port}` : `port ${port}`
+        } %c[${Deno.build.os === 'darwin' ? '⌃C' : 'Ctrl+C'} to quit]`,
         'color: mediumblue',
         'color: gray',
       );
