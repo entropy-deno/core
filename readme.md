@@ -37,7 +37,7 @@ To run Entropy, your environment has to meet following requirements:
 
 | Deno      | Operating System         |
 | --------- | ------------------------ |
-| >= 1.34.0 | Windows / macOS / Linux  |
+| 1.34.0+   | macOS / Windows / Linux  |
 
 We recommend to have the latest version of Deno. To update Deno, run the following command:
 
@@ -54,9 +54,8 @@ If you discovered any bug or security issue please open new issue / pull request
 
 ## Information
 
-- Website: [entropy-deno.com](https://entropy-deno.com)
 - Documentation: [entropy-deno.com](https://entropy-deno.com/docs/introducing-entropy)
-- GitHub repository: [github.com/entropy/core](https://github.com/entropy-deno/core)
+- GitHub repository: [github.com/entropy-deno/core](https://github.com/entropy-deno/core)
 - Author: [Dominik Rajkowski](https://github.com/dominiq007)
 
 ## License
