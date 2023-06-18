@@ -27,5 +27,9 @@
         "no-explicit-any"
       ]
     }
+  },
+  "tasks": {
+    "test": "deno test -A --no-check --parallel --watch",
+    "test:cov": "deno test -A --coverage=coverage"
   }
 }
