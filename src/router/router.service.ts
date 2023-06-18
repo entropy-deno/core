@@ -256,10 +256,147 @@ export class Router {
     }
   }
 
+  public any(
+    path: RoutePath,
+    action: (...args: unknown[]) => Promise<unknown>,
+    options: RouteOptions = {},
+  ): void {
+    this.registerRoute(path, Object.values(HttpMethod), action, options);
+  }
+
+  public copy(
+    path: RoutePath,
+    action: (...args: unknown[]) => Promise<unknown>,
+    options: RouteOptions = {},
+  ): void {
+    this.registerRoute(path, [HttpMethod.Copy], action, options);
+  }
+
+  public delete(
+    path: RoutePath,
+    action: (...args: unknown[]) => Promise<unknown>,
+    options: RouteOptions = {},
+  ): void {
+    this.registerRoute(path, [HttpMethod.Delete], action, options);
+  }
+
+  public get(
+    path: RoutePath,
+    action: (...args: unknown[]) => Promise<unknown>,
+    options: RouteOptions = {},
+  ): void {
+    this.registerRoute(path, [HttpMethod.Get], action, options);
+  }
+
+  public head(
+    path: RoutePath,
+    action: (...args: unknown[]) => Promise<unknown>,
+    options: RouteOptions = {},
+  ): void {
+    this.registerRoute(path, [HttpMethod.Head], action, options);
+  }
+
+  public lock(
+    path: RoutePath,
+    action: (...args: unknown[]) => Promise<unknown>,
+    options: RouteOptions = {},
+  ): void {
+    this.registerRoute(path, [HttpMethod.Lock], action, options);
+  }
+
+  public mkcol(
+    path: RoutePath,
+    action: (...args: unknown[]) => Promise<unknown>,
+    options: RouteOptions = {},
+  ): void {
+    this.registerRoute(path, [HttpMethod.Mkcol], action, options);
+  }
+
+  public move(
+    path: RoutePath,
+    action: (...args: unknown[]) => Promise<unknown>,
+    options: RouteOptions = {},
+  ): void {
+    this.registerRoute(path, [HttpMethod.Move], action, options);
+  }
+
+  public options(
+    path: RoutePath,
+    action: (...args: unknown[]) => Promise<unknown>,
+    options: RouteOptions = {},
+  ): void {
+    this.registerRoute(path, [HttpMethod.Options], action, options);
+  }
+
+  public patch(
+    path: RoutePath,
+    action: (...args: unknown[]) => Promise<unknown>,
+    options: RouteOptions = {},
+  ): void {
+    this.registerRoute(path, [HttpMethod.Patch], action, options);
+  }
+
+  public post(
+    path: RoutePath,
+    action: (...args: unknown[]) => Promise<unknown>,
+    options: RouteOptions = {},
+  ): void {
+    this.registerRoute(path, [HttpMethod.Post], action, options);
+  }
+
+  public propFind(
+    path: RoutePath,
+    action: (...args: unknown[]) => Promise<unknown>,
+    options: RouteOptions = {},
+  ): void {
+    this.registerRoute(path, [HttpMethod.PropFind], action, options);
+  }
+
+  public propPatch(
+    path: RoutePath,
+    action: (...args: unknown[]) => Promise<unknown>,
+    options: RouteOptions = {},
+  ): void {
+    this.registerRoute(path, [HttpMethod.PropPatch], action, options);
+  }
+
+  public put(
+    path: RoutePath,
+    action: (...args: unknown[]) => Promise<unknown>,
+    options: RouteOptions = {},
+  ): void {
+    this.registerRoute(path, [HttpMethod.Put], action, options);
+  }
+
+  public search(
+    path: RoutePath,
+    action: (...args: unknown[]) => Promise<unknown>,
+    options: RouteOptions = {},
+  ): void {
+    this.registerRoute(path, [HttpMethod.Search], action, options);
+  }
+
+  public trace(
+    path: RoutePath,
+    action: (...args: unknown[]) => Promise<unknown>,
+    options: RouteOptions = {},
+  ): void {
+    this.registerRoute(path, [HttpMethod.Trace], action, options);
+  }
+
+  public unlock(
+    path: RoutePath,
+    action: (...args: unknown[]) => Promise<unknown>,
+    options: RouteOptions = {},
+  ): void {
+    this.registerRoute(path, [HttpMethod.Unlock], action, options);
+  }
+
   public registerRoute(
     path: RoutePath,
     methods: ValuesUnion<HttpMethod>[],
     action: (...args: unknown[]) => Promise<unknown>,
+    options: RouteOptions = {},
   ): void {
     const pathRegexp = this.resolvePathRegexp(path);
 
@@ -271,6 +408,7 @@ export class Router {
       action,
       methods,
       path,
+      ...options,
     });
   }
 }
