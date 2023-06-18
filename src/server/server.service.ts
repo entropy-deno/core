@@ -193,19 +193,19 @@ export class Server {
   }
 
   public async start(
-    port = env<number>('PORT') ?? this.httpPort,
-    host = env<string>('HOST') ?? this.httpHost,
+    port?: number,
+    host?: string,
   ): Promise<void> {
     this.checkSystemRequirements();
-
-    this.httpHost = host;
-    this.httpPort = port;
 
     await loadEnv({
       allowEmptyValues: true,
       envPath: this.config.envFile ?? '.env',
       export: true,
     });
+
+    this.httpHost = host ?? env<string>('HOST') ?? this.httpHost;
+    this.httpPort = port ?? env<number>('PORT') ?? this.httpPort;
 
     const flags = parseFlags(Deno.args, {
       boolean: ['dev'],
@@ -222,13 +222,15 @@ export class Server {
       this.setup();
 
       const listener = Deno.listen({
-        hostname: host,
-        port,
+        hostname: this.httpHost,
+        port: this.httpPort,
       });
 
       console.log(
         `\n%cHTTP server is running on ${
-          env<boolean>('DEVELOPMENT') ? `http://${host}:${port}` : `port ${port}`
+          env<boolean>('DEVELOPMENT')
+            ? `http://${this.httpHost}:${this.httpPort}`
+            : `port ${this.httpPort}`
         } %c[${Deno.build.os === 'darwin' ? '⌃C' : 'Ctrl+C'} to quit]`,
         'color: mediumblue',
         'color: gray',
