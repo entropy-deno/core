@@ -203,7 +203,7 @@ export class Server {
 
     await loadEnv({
       allowEmptyValues: true,
-      envPath: `${Deno.cwd()}/${this.config.envFile ?? '.env'}`,
+      envPath: this.config.envFile ?? '.env',
       export: true,
     });
 

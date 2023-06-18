@@ -3,19 +3,19 @@ import { StatusCode } from '../enums/status_code.enum.ts';
 
 interface Options {
   headers?: HeadersInit;
-  status?: StatusCode;
+  statusCode?: StatusCode;
 }
 
 export function createResponse(
   body: ReadableStream | XMLHttpRequestBodyInit | null,
-  { headers = {}, status = StatusCode.Ok }: Options = {},
+  { headers = {}, statusCode = StatusCode.Ok }: Options = {},
 ): Response {
   const developmentCspDirectives = env<boolean>('DEVELOPMENT')
     ? ' http://localhost:* ws://localhost:*'
     : '';
 
   return new Response(body, {
-    status,
+    status: statusCode,
     headers: {
       'content-type': 'text/html; charset=utf-8',
       'content-security-policy':

@@ -6,7 +6,7 @@ export const statusPage = `<!doctype html>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>{{ status }} {{ message }}</title>
+    <title>{{ statusCode }} {{ message }}</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,7 +21,7 @@ export const statusPage = `<!doctype html>
 
   <body class="selection:bg-sky-300 dark:selection:bg-gray-600/40 dark:bg-gray-950 text-gray-700 flex h-screen items-center justify-center gap-7 dark:text-slate-200">
     <h1 class="text-5xl text-purple-500 dark:text-purple-400 font-medium">
-      {{ status }}
+      {{ statusCode }}
     </h1>
 
     <div class="bg-gray-400 dark:bg-gray-700 w-[3px] h-9 rounded-full"></div>

@@ -6,6 +6,7 @@ import { enumKey } from '../utils/functions/enum_key.function.ts';
 import { env } from '../utils/functions/env.function.ts';
 import { ErrorHandler } from '../error_handler/error_handler.service.ts';
 import { errorPage } from '../error_handler/pages/error_page.ts';
+import { HttpError } from '../http/http_error.class.ts';
 import { HttpMethod } from '../http/enums/http_method.enum.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { MethodDecorator } from '../utils/types/method_decorator.type.ts';
@@ -37,11 +38,11 @@ export class Router {
 
   private async abortResponse(
     request: Request,
-    status = StatusCode.NotFound,
+    statusCode = StatusCode.NotFound,
   ): Promise<Response> {
     const payload = {
-      status,
-      message: enumKey(status, StatusCode).replace(/([a-z])([A-Z])/g, '$1 $2') ??
+      statusCode,
+      message: enumKey(statusCode, StatusCode).replace(/([a-z])([A-Z])/g, '$1 $2') ??
         'Error',
     };
 
@@ -50,7 +51,7 @@ export class Router {
       request.headers.get('accept')?.includes('application/json')
     ) {
       return createResponse(JSON.stringify(payload), {
-        status,
+        statusCode,
         headers: {
           'content-type': 'application/json; charset=utf-8',
         },
@@ -60,7 +61,7 @@ export class Router {
     return createResponse(
       await this.templateCompiler.compile(statusPage, payload),
       {
-        status,
+        statusCode,
       },
     );
   }
@@ -238,15 +239,17 @@ export class Router {
 
       return await this.abortResponse(request, StatusCode.NotFound);
     } catch (error) {
-      this.errorHandler.handle(error);
+      if (!(error instanceof HttpError)) {
+        this.errorHandler.handle(error);
+      }
 
-      return env<boolean>('DEVELOPMENT')
+      return env<boolean>('DEVELOPMENT') && !(error instanceof HttpError)
         ? createResponse(
           await this.templateCompiler.compile(errorPage, {
             error,
           }),
           {
-            status: StatusCode.InternalServerError,
+            statusCode: StatusCode.InternalServerError,
           },
         )
         : await this.abortResponse(request, StatusCode.InternalServerError);
