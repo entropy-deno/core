@@ -6,9 +6,8 @@
       "dom.iterable",
       "dom.asynciterable",
       "esnext",
-      "deno.window"
+      "deno.ns"
     ],
-    "noImplicitAny": true,
     "strict": true
   },
   "fmt": {
