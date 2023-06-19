@@ -22,6 +22,8 @@ export class Server {
 
   private httpPort = 5050;
 
+  private isDevelopment = false;
+
   private readonly listenSignals: Deno.Signal[] = ['SIGINT', 'SIGTERM', 'SIGQUIT'];
 
   private readonly modules: Constructor<Module>[] = [];
@@ -59,21 +61,36 @@ export class Server {
 
       for await (const { request, respondWith } of httpConnection) {
         const timerStart = performance.now();
+        const url = new URL(request.url).pathname;
 
         if (request.headers.get('upgrade')?.toLowerCase() === 'websocket') {
           const { socket, response } = Deno.upgradeWebSocket(request);
 
-          socket.onopen = () => {
-            console.log('WebSocket connection established');
-          };
+          if (this.isDevelopment && url === '/$entropy/hot-reload') {
+            const watcher = Deno.watchFs('src');
+
+            socket.onopen = async () => {
+              for await (const event of watcher) {
+                if (event.kind === 'modify') {
+                  socket.send(JSON.stringify({
+                    path: event.paths[0],
+                  }));
+                }
+              }
+            };
+
+            socket.onclose = () => {
+              watcher.close();
+            };
+          }
 
           respondWith(response);
+
+          continue;
         }
 
         const response = await this.router.respond(request);
-
         const { status } = response;
-        const { pathname } = new URL(request.url);
 
         let statusColor = 'blue';
 
@@ -110,8 +127,8 @@ export class Server {
         const responseTime = (performance.now() - timerStart).toFixed(2);
 
         console.log(
-          `\n%c[${timestamp}] %c[%c${status}%c] %cRequest: %c${pathname} %c${
-            '.'.repeat(columns - pathname.length - responseTime.length - 40)
+          `\n%c[${timestamp}] %c[%c${status}%c] %cRequest: %c${url} %c${
+            '.'.repeat(columns - url.length - responseTime.length - 40)
           } [${responseTime}ms]`,
           'color: gray',
           'color: lightgray',
@@ -183,7 +200,7 @@ export class Server {
       });
     }
 
-    if (env<boolean>('DEVELOPMENT')) {
+    if (this.isDevelopment) {
       console.warn(
         `\n%cYou are running production server in development mode %c[set 'DEVELOPMENT' .env variable to 'false' to disable dev mode]`,
         'color: orange',
@@ -204,6 +221,7 @@ export class Server {
       export: true,
     });
 
+    this.isDevelopment = env<boolean>('DEVELOPMENT') ?? false;
     this.httpHost = host ?? env<string>('HOST') ?? this.httpHost;
     this.httpPort = port ?? env<number>('PORT') ?? this.httpPort;
 
@@ -228,7 +246,7 @@ export class Server {
 
       console.log(
         `\n%cHTTP server is running on ${
-          env<boolean>('DEVELOPMENT')
+          this.isDevelopment
             ? `http://${this.httpHost}:${this.httpPort}`
             : `port ${this.httpPort}`
         } %c[${Deno.build.os === 'darwin' ? '⌃C' : 'Ctrl+C'} to quit]`,

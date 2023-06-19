@@ -95,6 +95,34 @@ export class TemplateCompiler {
         },
       },
       {
+        name: 'hotReload',
+        type: 'single',
+        render: () => {
+          const isDevelopment = env<boolean>('DEVELOPMENT');
+
+          return isDevelopment
+            ? `
+              <script>
+                const ws = new WebSocket('ws://localhost:${
+              env<number>('PORT')
+            }/$entropy/hot-reload');
+
+                ws.onmessage = (event) => {
+                  if (JSON.parse(event.data).path.endsWith('${
+              this.options
+                .file!.split('/')
+                .pop()
+            }')) {
+                    window.location.reload();
+                  }
+                };
+                ws.onclose = () => console.log('[entropy] Hot reload disconnected');
+              </script>
+            `
+            : '';
+        },
+      },
+      {
         name: 'json',
         type: 'single',
         render: (data: unknown, prettyPrint = false) => {
