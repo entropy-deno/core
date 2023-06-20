@@ -245,16 +245,16 @@ export class Router {
         this.errorHandler.handle(error);
       }
 
-      return this.configurator.entries.isDevelopment && !(error instanceof HttpError)
-        ? createResponse(
+      return this.configurator.entries.isProduction || error instanceof HttpError
+        ? await this.abortResponse(request, StatusCode.InternalServerError)
+        : createResponse(
           await this.templateCompiler.compile(errorPage, {
             error,
           }),
           {
             statusCode: StatusCode.InternalServerError,
           },
-        )
-        : await this.abortResponse(request, StatusCode.InternalServerError);
+        );
     }
   }
 

@@ -2,6 +2,6 @@ export interface AppConfig {
   encryptionKey: string;
   envFile: string;
   host: string;
-  isDevelopment: boolean;
+  isProduction: boolean;
   port: number;
 }

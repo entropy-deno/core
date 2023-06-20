@@ -37,7 +37,7 @@ export class TemplateCompiler {
         name: 'dev',
         type: 'block',
         render: (content: string) => {
-          return this.configurator.entries.isDevelopment ? content : '';
+          return this.configurator.entries.isProduction ? '' : content;
         },
       },
       {
@@ -99,24 +99,22 @@ export class TemplateCompiler {
         name: 'hotReload',
         type: 'single',
         render: () => {
-          return this.configurator.entries.isDevelopment
-            ? `
+          return this.configurator.entries.isProduction ? '' : `
               <script>
                 const ws = new WebSocket('ws://${this.configurator.entries.host}:${this.configurator.entries.port}/$entropy/hot-reload');
 
                 ws.onmessage = (event) => {
                   if (JSON.parse(event.data).path.endsWith('${
-              this.options
-                .file!.split('/')
-                .pop()
-            }')) {
+            this.options
+              .file!.split('/')
+              .pop()
+          }')) {
                     window.location.reload();
                   }
                 };
                 ws.onclose = () => console.log('[entropy] Hot reload disconnected');
               </script>
-            `
-            : '';
+            `;
         },
       },
       {
@@ -139,7 +137,7 @@ export class TemplateCompiler {
         name: 'prod',
         type: 'block',
         render: (content: string) => {
-          return this.configurator.entries.isDevelopment ? '' : content;
+          return this.configurator.entries.isProduction ? content : '';
         },
       },
       {

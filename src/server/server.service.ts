@@ -61,7 +61,7 @@ export class Server {
           const { socket, response } = Deno.upgradeWebSocket(request);
 
           if (
-            this.configurator.entries.isDevelopment && url === '/$entropy/hot-reload'
+            !this.configurator.entries.isProduction && url === '/$entropy/hot-reload'
           ) {
             const watcher = Deno.watchFs('src');
 
@@ -196,9 +196,9 @@ export class Server {
       });
     }
 
-    if (this.configurator.entries.isDevelopment) {
+    if (!this.configurator.entries.isProduction) {
       console.warn(
-        `\n%cYou are running production server in development mode %c[set 'DEVELOPMENT' .env variable to 'false' to disable dev mode]`,
+        `\n%cYou are running production server in development mode %c[set 'PRODUCTION' .env variable to 'true' to disable dev mode]`,
         'color: orange',
         'color: gray',
       );
@@ -235,9 +235,9 @@ export class Server {
 
       console.log(
         `\n%cHTTP server is running on ${
-          this.configurator.entries.isDevelopment
-            ? `http://${this.configurator.entries.host}:${this.configurator.entries.port}`
-            : `port ${this.configurator.entries.port}`
+          this.configurator.entries.isProduction
+            ? `port ${this.configurator.entries.port}`
+            : `http://${this.configurator.entries.host}:${this.configurator.entries.port}`
         } %c[${Deno.build.os === 'darwin' ? '⌃C' : 'Ctrl+C'} to quit]`,
         'color: mediumblue',
         'color: gray',

@@ -13,16 +13,16 @@ export function createResponse(
   body: ReadableStream | XMLHttpRequestBodyInit | null,
   { headers = {}, statusCode = StatusCode.Ok }: Options = {},
 ): Response {
-  const developmentCspDirectives = configurator.entries.isDevelopment
-    ? ` http://${configurator.entries.host}:* ws://${configurator.entries.host}:*`
-    : '';
+  const cspDirectives = configurator.entries.isProduction
+    ? ''
+    : ` http://${configurator.entries.host}:* ws://${configurator.entries.host}:*`;
 
   return new Response(body, {
     status: statusCode,
     headers: {
       'content-type': 'text/html; charset=utf-8',
       'content-security-policy':
-        `default-src 'self' 'unsafe-inline'${developmentCspDirectives};base-uri 'self';connect-src 'self'${developmentCspDirectives};font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src *;object-src 'none';script-src 'self' 'unsafe-inline'${developmentCspDirectives};script-src-attr 'unsafe-inline';style-src 'self' 'unsafe-inline' https://fonts.googleapis.com${developmentCspDirectives};upgrade-insecure-requests`,
+        `default-src 'self' 'unsafe-inline'${cspDirectives};base-uri 'self';connect-src 'self'${cspDirectives};font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src *;object-src 'none';script-src 'self' 'unsafe-inline'${cspDirectives};script-src-attr 'unsafe-inline';style-src 'self' 'unsafe-inline' https://fonts.googleapis.com${cspDirectives};upgrade-insecure-requests`,
       'cross-origin-opener-policy': 'same-origin',
       'cross-origin-resource-policy': 'same-origin',
       'origin-agent-cluster': '?1',

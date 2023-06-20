@@ -6,7 +6,7 @@ export class Configurator {
     encryptionKey: env<string>('ENCRYPTION_KEY') ?? crypto.randomUUID(),
     envFile: '.env',
     host: env<string>('HOST') ?? 'localhost',
-    isDevelopment: env<boolean>('DEVELOPMENT') ?? false,
+    isProduction: env<boolean>('PRODUCTION') ?? false,
     port: env<number>('PORT') ?? 5050,
   };
 
