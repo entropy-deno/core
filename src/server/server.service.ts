@@ -1,10 +1,9 @@
 import { load as loadEnv } from '@std/dotenv/mod.ts';
 import { parse as parseFlags } from '@std/flags/mod.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
-import { Constructor } from '../utils/interfaces/constructor.interface.ts';
 import { ErrorHandler } from '../error_handler/error_handler.service.ts';
 import { inject } from '../injector/functions/inject.function.ts';
-import { Module } from './interfaces/module.interface.ts';
+import { Localizator } from '../localizator/localizator.module.ts';
 import { Router } from '../router/router.service.ts';
 import { runCommand } from '../utils/functions/run_command.function.ts';
 import { ServerOptions } from './interfaces/server_options.interface.ts';
@@ -19,15 +18,11 @@ export class Server {
 
   private readonly listenSignals: Deno.Signal[] = ['SIGINT', 'SIGTERM', 'SIGQUIT'];
 
-  private readonly modules: Constructor<Module>[] = [];
+  private readonly localizator = inject(Localizator);
 
   private readonly router = inject(Router);
 
-  constructor(options: ServerOptions) {
-    this.configurator.setup(options.config);
-
-    this.modules = options.modules;
-  }
+  constructor(private readonly options: ServerOptions) {}
 
   private checkSystemRequirements(): void {
     const minimumDenoVersion = '1.34.0';
@@ -143,7 +138,7 @@ export class Server {
   }
 
   private setup(): void {
-    for (const module of this.modules) {
+    for (const module of this.options.modules) {
       const moduleInstance = inject(module);
 
       for (const controller of moduleInstance.controllers ?? []) {
@@ -172,7 +167,9 @@ export class Server {
       try {
         runCommand(
           `${
-            WebClientAlias[Deno.build.os as 'darwin' | 'linux' | 'win32'] ??
+            WebClientAlias[
+              Deno.build.os as 'darwin' | 'linux' | 'win32' | 'windows'
+            ] ??
               'open'
           }`,
           [`http://${this.configurator.entries.host}:${this.configurator.entries.port}`],
@@ -213,6 +210,10 @@ export class Server {
       envPath: this.configurator.entries.envFile ?? '.env',
       export: true,
     });
+
+    this.configurator.setup(this.options.config);
+
+    await this.localizator.setup();
 
     const flags = parseFlags(Deno.args, {
       boolean: ['dev'],
