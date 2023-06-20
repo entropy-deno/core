@@ -1,5 +1,4 @@
 import { fromFileUrl } from '@std/path/mod.ts';
-import { env } from '../utils/functions/env.function.ts';
 
 export class ErrorHandler {
   private currentError: Error | null = null;
@@ -61,8 +60,6 @@ export class ErrorHandler {
       'color: gray',
     );
 
-    if (this.currentStack && (env<boolean>('DEVELOPER_MODE') ?? false)) {
-      console.log(`\n%c${this.currentStack}`, 'color: gray');
-    }
+    console.log(`\n%c${this.currentStack}`, 'color: gray');
   }
 }

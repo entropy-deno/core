@@ -1,5 +1,6 @@
 import * as constants from '../constants.ts';
 import { CompileOptions } from './interfaces/compile_options.interface.ts';
+import { Configurator } from '../configurator/configurator.service.ts';
 import { env } from '../utils/functions/env.function.ts';
 import { escape } from '../utils/functions/escape.function.ts';
 import { inject } from '../injector/functions/inject.function.ts';
@@ -9,6 +10,8 @@ import {
 } from './interfaces/template_directive_definition.interface.ts';
 
 export class TemplateCompiler {
+  private readonly configurator = inject(Configurator);
+
   private data: Record<string, unknown> = {};
 
   private directives: TemplateDirectiveDefinition[] = [];
@@ -34,9 +37,7 @@ export class TemplateCompiler {
         name: 'dev',
         type: 'block',
         render: (content: string) => {
-          const isDevelopment = env<boolean>('DEVELOPMENT');
-
-          return isDevelopment ? content : '';
+          return this.configurator.entries.isDevelopment ? content : '';
         },
       },
       {
@@ -98,14 +99,10 @@ export class TemplateCompiler {
         name: 'hotReload',
         type: 'single',
         render: () => {
-          const isDevelopment = env<boolean>('DEVELOPMENT');
-
-          return isDevelopment
+          return this.configurator.entries.isDevelopment
             ? `
               <script>
-                const ws = new WebSocket('ws://localhost:${
-              env<number>('PORT')
-            }/$entropy/hot-reload');
+                const ws = new WebSocket('ws://${this.configurator.entries.host}:${this.configurator.entries.port}/$entropy/hot-reload');
 
                 ws.onmessage = (event) => {
                   if (JSON.parse(event.data).path.endsWith('${
@@ -142,9 +139,7 @@ export class TemplateCompiler {
         name: 'prod',
         type: 'block',
         render: (content: string) => {
-          const isDevelopment = env<boolean>('DEVELOPMENT');
-
-          return isDevelopment ? '' : content;
+          return this.configurator.entries.isDevelopment ? '' : content;
         },
       },
       {

@@ -1,9 +1,9 @@
 import { contentType } from '@std/media_types/mod.ts';
+import { Configurator } from '../configurator/configurator.service.ts';
 import { Constructor } from '../utils/interfaces/constructor.interface.ts';
 import { Controller } from '../http/interfaces/controller.interface.ts';
 import { createResponse } from '../http/functions/create_response.function.ts';
 import { enumKey } from '../utils/functions/enum_key.function.ts';
-import { env } from '../utils/functions/env.function.ts';
 import { ErrorHandler } from '../error_handler/error_handler.service.ts';
 import { errorPage } from '../error_handler/pages/error_page.ts';
 import { HttpError } from '../http/http_error.class.ts';
@@ -30,6 +30,8 @@ type RouteDecoratorFunction<T> = T extends ValuesUnion<HttpMethod>[] ? (
   ) => MethodDecorator;
 
 export class Router {
+  private readonly configurator = inject(Configurator);
+
   private readonly errorHandler = inject(ErrorHandler);
 
   private readonly routes = new Map<RegExp, RouteDefinition>();
@@ -243,7 +245,7 @@ export class Router {
         this.errorHandler.handle(error);
       }
 
-      return env<boolean>('DEVELOPMENT') && !(error instanceof HttpError)
+      return this.configurator.entries.isDevelopment && !(error instanceof HttpError)
         ? createResponse(
           await this.templateCompiler.compile(errorPage, {
             error,

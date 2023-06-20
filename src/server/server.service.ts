@@ -1,8 +1,7 @@
 import { load as loadEnv } from '@std/dotenv/mod.ts';
 import { parse as parseFlags } from '@std/flags/mod.ts';
-import { AppConfig } from './interfaces/app_config.interface.ts';
+import { Configurator } from '../configurator/configurator.service.ts';
 import { Constructor } from '../utils/interfaces/constructor.interface.ts';
-import { env } from '../utils/functions/env.function.ts';
 import { ErrorHandler } from '../error_handler/error_handler.service.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { Module } from './interfaces/module.interface.ts';
@@ -12,17 +11,11 @@ import { ServerOptions } from './interfaces/server_options.interface.ts';
 import { WebClientAlias } from './enums/web_client_alias.enum.ts';
 
 export class Server {
-  private readonly config: AppConfig = {};
+  private readonly configurator = inject(Configurator);
 
   private readonly devServerCheckKey = 'entropy:devServer';
 
   private readonly errorHandler = inject(ErrorHandler);
-
-  private httpHost = 'localhost';
-
-  private httpPort = 5050;
-
-  private isDevelopment = false;
 
   private readonly listenSignals: Deno.Signal[] = ['SIGINT', 'SIGTERM', 'SIGQUIT'];
 
@@ -31,7 +24,8 @@ export class Server {
   private readonly router = inject(Router);
 
   constructor(options: ServerOptions) {
-    this.config = options.config ?? {};
+    this.configurator.setup(options.config);
+
     this.modules = options.modules;
   }
 
@@ -66,7 +60,9 @@ export class Server {
         if (request.headers.get('upgrade')?.toLowerCase() === 'websocket') {
           const { socket, response } = Deno.upgradeWebSocket(request);
 
-          if (this.isDevelopment && url === '/$entropy/hot-reload') {
+          if (
+            this.configurator.entries.isDevelopment && url === '/$entropy/hot-reload'
+          ) {
             const watcher = Deno.watchFs('src');
 
             socket.onopen = async () => {
@@ -179,7 +175,7 @@ export class Server {
             WebClientAlias[Deno.build.os as 'darwin' | 'linux' | 'win32'] ??
               'open'
           }`,
-          [`http://${this.httpHost}:${this.httpPort}`],
+          [`http://${this.configurator.entries.host}:${this.configurator.entries.port}`],
         );
       } finally {
         localStorage.setItem(this.devServerCheckKey, 'on');
@@ -200,7 +196,7 @@ export class Server {
       });
     }
 
-    if (this.isDevelopment) {
+    if (this.configurator.entries.isDevelopment) {
       console.warn(
         `\n%cYou are running production server in development mode %c[set 'DEVELOPMENT' .env variable to 'false' to disable dev mode]`,
         'color: orange',
@@ -209,21 +205,14 @@ export class Server {
     }
   }
 
-  public async start(
-    port?: number,
-    host?: string,
-  ): Promise<void> {
+  public async start(): Promise<void> {
     this.checkSystemRequirements();
 
     await loadEnv({
       allowEmptyValues: true,
-      envPath: this.config.envFile ?? '.env',
+      envPath: this.configurator.entries.envFile ?? '.env',
       export: true,
     });
-
-    this.isDevelopment = env<boolean>('DEVELOPMENT') ?? false;
-    this.httpHost = host ?? env<string>('HOST') ?? this.httpHost;
-    this.httpPort = port ?? env<number>('PORT') ?? this.httpPort;
 
     const flags = parseFlags(Deno.args, {
       boolean: ['dev'],
@@ -240,15 +229,15 @@ export class Server {
       this.setup();
 
       const listener = Deno.listen({
-        hostname: this.httpHost,
-        port: this.httpPort,
+        hostname: this.configurator.entries.host,
+        port: this.configurator.entries.port,
       });
 
       console.log(
         `\n%cHTTP server is running on ${
-          this.isDevelopment
-            ? `http://${this.httpHost}:${this.httpPort}`
-            : `port ${this.httpPort}`
+          this.configurator.entries.isDevelopment
+            ? `http://${this.configurator.entries.host}:${this.configurator.entries.port}`
+            : `port ${this.configurator.entries.port}`
         } %c[${Deno.build.os === 'darwin' ? '⌃C' : 'Ctrl+C'} to quit]`,
         'color: mediumblue',
         'color: gray',

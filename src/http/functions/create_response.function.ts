@@ -1,4 +1,5 @@
-import { env } from '../../utils/functions/env.function.ts';
+import { Configurator } from '../../configurator/configurator.service.ts';
+import { inject } from '../../injector/functions/inject.function.ts';
 import { StatusCode } from '../enums/status_code.enum.ts';
 
 interface Options {
@@ -6,12 +7,14 @@ interface Options {
   statusCode?: StatusCode;
 }
 
+const configurator = inject(Configurator);
+
 export function createResponse(
   body: ReadableStream | XMLHttpRequestBodyInit | null,
   { headers = {}, statusCode = StatusCode.Ok }: Options = {},
 ): Response {
-  const developmentCspDirectives = env<boolean>('DEVELOPMENT')
-    ? ' http://localhost:* ws://localhost:*'
+  const developmentCspDirectives = configurator.entries.isDevelopment
+    ? ` http://${configurator.entries.host}:* ws://${configurator.entries.host}:*`
     : '';
 
   return new Response(body, {

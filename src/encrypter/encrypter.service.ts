@@ -1,7 +1,8 @@
-import { env } from '../utils/functions/env.function.ts';
+import { Configurator } from '../configurator/configurator.service.ts';
+import { inject } from '../injector/functions/inject.function.ts';
 
 export class Encrypter {
-  private readonly secretKey = env<string>('CRYPTO_KEY');
+  private readonly configurator = inject(Configurator);
 
   public async compareHash(plainText: string, hash: string): Promise<boolean> {
     return await this.hash(plainText) === hash;
@@ -9,7 +10,7 @@ export class Encrypter {
 
   public async hash(plainText: string): Promise<string> {
     const encoder = new TextEncoder();
-    const keyBuffer = encoder.encode(this.secretKey);
+    const keyBuffer = encoder.encode(this.configurator.entries.encryptionKey);
     const dataBuffer = encoder.encode(plainText);
 
     const hmacKey = await crypto.subtle.importKey(
