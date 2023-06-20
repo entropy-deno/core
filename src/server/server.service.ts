@@ -138,6 +138,10 @@ export class Server {
   }
 
   private setup(): void {
+    for (const controller of this.options.controllers ?? []) {
+      this.router.registerController(controller);
+    }
+
     for (const module of this.options.modules) {
       const moduleInstance = inject(module);
 
