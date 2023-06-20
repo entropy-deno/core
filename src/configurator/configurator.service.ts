@@ -3,6 +3,7 @@ import { env } from '../utils/functions/env.function.ts';
 
 export class Configurator {
   private options: Readonly<AppConfig> = {
+    defaultLocale: 'en',
     encryptionKey: env<string>('ENCRYPTION_KEY') ?? crypto.randomUUID(),
     envFile: '.env',
     host: env<string>('HOST') ?? 'localhost',

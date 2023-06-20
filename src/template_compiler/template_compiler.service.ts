@@ -8,6 +8,7 @@ import { range } from '../utils/functions/range.function.ts';
 import {
   TemplateDirectiveDefinition,
 } from './interfaces/template_directive_definition.interface.ts';
+import { translate } from '../localizator/functions/translate.function.ts';
 
 export class TemplateCompiler {
   private readonly configurator = inject(Configurator);
@@ -19,10 +20,12 @@ export class TemplateCompiler {
   private html = '';
 
   private readonly functions = {
+    '__': translate,
     '$env': env,
     '$escape': escape,
     '$inject': inject,
     '$range': range,
+    '$translate': translate,
   };
 
   private options: CompileOptions = {};
