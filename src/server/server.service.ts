@@ -4,6 +4,7 @@ import { Configurator } from '../configurator/configurator.service.ts';
 import { ErrorHandler } from '../error_handler/error_handler.service.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { Localizator } from '../localizator/localizator.module.ts';
+import { Logger } from '../logger/logger.service.ts';
 import { Router } from '../router/router.service.ts';
 import { runCommand } from '../utils/functions/run_command.function.ts';
 import { ServerOptions } from './interfaces/server_options.interface.ts';
@@ -20,6 +21,8 @@ export class Server {
 
   private readonly localizator = inject(Localizator);
 
+  private readonly logger = inject(Logger);
+
   private readonly router = inject(Router);
 
   constructor(private readonly options: ServerOptions) {}
@@ -34,10 +37,9 @@ export class Server {
       });
 
     if (satisfiesDenoVersion === -1) {
-      console.warn(
-        `\n%cEntropy requires Deno version ${minimumDenoVersion} or higher %c[run 'deno upgrade' to update Deno]`,
-        `color: orange`,
-        'color: gray',
+      this.logger.warn(
+        `Entropy requires Deno version ${minimumDenoVersion} or higher %c[run 'deno upgrade' to update Deno]`,
+        ['gray'],
       );
 
       Deno.exit(1);
@@ -83,7 +85,7 @@ export class Server {
         const response = await this.router.respond(request);
         const { status } = response;
 
-        let statusColor = 'blue';
+        let statusColor: 'blue' | 'green' | 'orange' | 'red' = 'blue';
 
         switch (true) {
           case status >= 100 && status < 200:
@@ -115,16 +117,13 @@ export class Server {
 
         const responseTime = (performance.now() - timerStart).toFixed(1);
 
-        console.log(
-          `\n%c[LOG] ${timestamp} %c[${status}] %c${url.substring(0, 40)} %c${
+        this.logger.log(
+          `%c${timestamp}  %c[${status}] %c${url.substring(0, 40)} %c${
             '.'.repeat(
               columns - url.substring(0, 40).length - responseTime.length - 42,
             )
           } ${responseTime}ms`,
-          'color: gray',
-          `color: ${statusColor}`,
-          'color: white; font-weight: bold',
-          'color: gray',
+          ['lightgray', statusColor, 'white', 'gray'],
         );
 
         respondWith(response);
@@ -235,14 +234,13 @@ export class Server {
         port: this.configurator.entries.port,
       });
 
-      console.log(
-        `\n%cHTTP server is running on ${
+      this.logger.info(
+        `HTTP server is running on ${
           this.configurator.entries.isProduction
             ? `port ${this.configurator.entries.port}`
             : `http://${this.configurator.entries.host}:${this.configurator.entries.port}`
         } %c[${Deno.build.os === 'darwin' ? '⌃C' : 'Ctrl+C'} to quit]`,
-        'color: mediumblue',
-        'color: gray',
+        ['gray'],
       );
 
       for await (const connection of listener) {

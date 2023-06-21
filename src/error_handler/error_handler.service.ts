@@ -1,4 +1,6 @@
 import { fromFileUrl } from '@std/path/mod.ts';
+import { inject } from '../injector/functions/inject.function.ts';
+import { Logger } from '../logger/logger.service.ts';
 
 export class ErrorHandler {
   private currentError: Error | null = null;
@@ -10,6 +12,8 @@ export class ErrorHandler {
   private currentStack: string | null = null;
 
   private readonly defaultFile = 'entropy module';
+
+  private readonly logger = inject(Logger);
 
   private readErrorStack(): void {
     const stack = this.currentError?.stack ?? null;
@@ -50,14 +54,13 @@ export class ErrorHandler {
 
     this.readErrorStack();
 
-    console.error(
-      `\n%cError: ${error.message} %c[${this.currentFile}${
+    this.logger.error(
+      `Error: ${error.message} %c[${this.currentFile}${
         this.currentLine && this.currentFile !== this.defaultFile
           ? `:${this.currentLine}`
           : ''
       }]`,
-      `color: red`,
-      'color: gray',
+      ['gray'],
     );
 
     console.log(`\n%c${this.currentStack}`, 'color: gray');
