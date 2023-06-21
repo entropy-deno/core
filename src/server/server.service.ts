@@ -110,22 +110,19 @@ export class Server {
         const { columns } = Deno.consoleSize();
 
         const timestamp = new Date().toLocaleString('en-us', {
-          hour: 'numeric',
-          minute: 'numeric',
-          hour12: true,
+          timeZone: 'UTC',
         });
 
-        const responseTime = (performance.now() - timerStart).toFixed(2);
+        const responseTime = (performance.now() - timerStart).toFixed(1);
 
         console.log(
-          `\n%c[${timestamp}] %c[%c${status}%c] %cRequest: %c${url} %c${
-            '.'.repeat(columns - url.length - responseTime.length - 40)
-          } [${responseTime}ms]`,
+          `\n%c[LOG] ${timestamp} %c[${status}] %c${url.substring(0, 40)} %c${
+            '.'.repeat(
+              columns - url.substring(0, 40).length - responseTime.length - 42,
+            )
+          } ${responseTime}ms`,
           'color: gray',
-          'color: lightgray',
           `color: ${statusColor}`,
-          'color: lightgray',
-          'color: blue',
           'color: white; font-weight: bold',
           'color: gray',
         );
