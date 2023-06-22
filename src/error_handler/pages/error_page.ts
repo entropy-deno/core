@@ -29,8 +29,6 @@ export const errorPage = `<!doctype html>
 
       <button
         class="bg-purple-500 dark:bg-purple-400 text-white dark:text-gray-900 border-0 border-b-2 border-purple-600 dark:border-purple-500 hover:opacity-95 px-8 py-3 mt-12 rounded-lg select-none"
-        href="https://entropy-deno.com/docs/introduction/introducing-entropy"
-        target="_blank"
         onclick="window.location.reload()"
       >
         Reload Page

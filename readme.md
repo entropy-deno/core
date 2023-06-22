@@ -8,11 +8,11 @@
   <p align="center">Modern and declarative backend development framework for Deno.</p>
 
   <h4>
-    <a href="https://entropy-deno.com">Website</a>
+    <a href="https://entropy.deno.dev">Website</a>
     <span> · </span>
-    <a href="https://entropy-deno.com/docs/introducing-entropy">Documentation</a>
+    <a href="https://entropy.deno.dev/docs/introducing-entropy">Documentation</a>
     <span> · </span>
-    <a href="https://entropy-deno.com/docs/more/contributing">Contributing</a>
+    <a href="https://entropy.deno.dev/docs/more/contributing">Contributing</a>
   </h4>
 </div>
 
@@ -54,7 +54,7 @@ If you discovered any bug or security issue please open new issue / pull request
 
 ## Information
 
-- Documentation: [entropy-deno.com](https://entropy-deno.com/docs/introducing-entropy)
+- Documentation: [entropy.deno.dev](https://entropy.deno.dev/docs/introducing-entropy)
 - GitHub repository: [github.com/entropy-deno/core](https://github.com/entropy-deno/core)
 - Author: [Dominik Rajkowski](https://github.com/dominiq007)
 
