@@ -205,11 +205,13 @@ export class Server {
   public async start(): Promise<void> {
     this.checkSystemRequirements();
 
-    await loadEnv({
-      allowEmptyValues: true,
-      envPath: this.configurator.entries.envFile ?? '.env',
-      export: true,
-    });
+    if (this.configurator.entries.envFile) {
+      await loadEnv({
+        allowEmptyValues: true,
+        envPath: this.configurator.entries.envFile ?? '.env',
+        export: true,
+      });
+    }
 
     this.configurator.setup(this.options.config);
 
