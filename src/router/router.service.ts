@@ -32,6 +32,11 @@ type RouteDecoratorFunction<T> = T extends ValuesUnion<HttpMethod>[] ? (
 export class Router {
   private readonly configurator = inject(Configurator);
 
+  private readonly customHttpHandlers = new Map<
+    StatusCode | undefined,
+    (statusCode: StatusCode) => unknown
+  >();
+
   private readonly errorHandler = inject(ErrorHandler);
 
   private readonly routes = new Map<RegExp, RouteDefinition>();
@@ -83,7 +88,7 @@ export class Router {
         },
       });
     } catch {
-      return await this.abortResponse(request, StatusCode.NotFound);
+      throw new HttpError(StatusCode.NotFound);
     }
   }
 
@@ -164,6 +169,28 @@ export class Router {
     });
 
     for (const controllerRouteMethod of controllerRouteMethods) {
+      const handler = Reflect.getMetadata<{ statusCode?: StatusCode }>(
+        'httpErrorHandler',
+        controller.prototype[controllerRouteMethod],
+      );
+
+      if (handler) {
+        this.customHttpHandlers.set(
+          handler.statusCode,
+          async (statusCode: StatusCode) => {
+            const methodResult =
+              (inject(controller) as Record<string, (...args: unknown[]) => unknown>)
+                [controllerRouteMethod](statusCode);
+
+            return methodResult instanceof Promise
+              ? await methodResult
+              : methodResult;
+          },
+        );
+
+        continue;
+      }
+
       const { methods, path } = Reflect.getMetadata<
         Exclude<RouteDefinition, 'action'>
       >(
@@ -191,6 +218,52 @@ export class Router {
     }
   }
 
+  private async parseResponseBody(body: unknown): Promise<Response> {
+    let contentType = 'text/html';
+
+    if (body instanceof Promise) {
+      body = await body;
+    }
+
+    switch (true) {
+      case body instanceof Response:
+        return body as Response;
+
+      case body instanceof ViewResponse:
+        body = (body as ViewResponse).content;
+
+        break;
+
+      case Array.isArray(body) ||
+        ((typeof body === 'object' && body !== null) &&
+          (body as Record<string, unknown>).constructor === Object): {
+        body = JSON.stringify(body);
+        contentType = 'application/json';
+
+        break;
+      }
+
+      case ['bigint', 'boolean', 'function', 'number', 'string', 'undefined']
+        .includes(
+          typeof body,
+        ) ||
+        body === null: {
+        body = String(body);
+
+        break;
+      }
+
+      default:
+        throw new Error('Invalid response type');
+    }
+
+    return createResponse(body as string, {
+      headers: {
+        'content-type': `${contentType}; charset=utf-8`,
+      },
+    });
+  }
+
   public async respond(request: Request): Promise<Response> {
     try {
       const { pathname } = new URL(request.url);
@@ -210,66 +283,42 @@ export class Router {
               pathRegexp.exec(pathname)?.groups ?? {},
             );
 
-            let body = await action(resolvedParams);
-            let contentType = 'text/html';
-
-            switch (true) {
-              case body instanceof Response:
-                return body as Response;
-
-              case body instanceof ViewResponse:
-                body = (body as ViewResponse).content;
-
-                break;
-
-              case Array.isArray(body) ||
-                ((typeof body === 'object' && body !== null) &&
-                  (body as Record<string, unknown>).constructor === Object): {
-                body = JSON.stringify(body);
-                contentType = 'application/json';
-
-                break;
-              }
-
-              case ['bigint', 'boolean', 'function', 'number', 'string', 'undefined']
-                .includes(
-                  typeof body,
-                ) ||
-                body === null: {
-                body = String(body);
-
-                break;
-              }
-
-              default:
-                throw new Error('Invalid response body type');
-            }
-
-            return createResponse(body as string, {
-              headers: {
-                'content-type': `${contentType}; charset=utf-8`,
-              },
-            });
+            return await this.parseResponseBody(await action(resolvedParams));
           }
         }
       }
 
-      return await this.abortResponse(request, StatusCode.NotFound);
+      throw new HttpError(StatusCode.NotFound);
     } catch (error) {
       if (!(error instanceof HttpError)) {
         this.errorHandler.handle(error, false);
       }
 
-      return this.configurator.entries.isProduction || error instanceof HttpError
-        ? await this.abortResponse(request, StatusCode.InternalServerError)
-        : createResponse(
-          await this.templateCompiler.compile(errorPage, {
-            error,
-          }),
-          {
-            statusCode: StatusCode.InternalServerError,
-          },
-        );
+      const { statusCode } = error;
+
+      if (this.configurator.entries.isProduction || error instanceof HttpError) {
+        if (
+          this.customHttpHandlers.has(undefined) ||
+          this.customHttpHandlers.has(statusCode)
+        ) {
+          const body = this.customHttpHandlers.get(
+            this.customHttpHandlers.has(statusCode) ? statusCode : undefined,
+          )?.(statusCode);
+
+          return this.parseResponseBody(body);
+        }
+
+        return await this.abortResponse(request, StatusCode.InternalServerError);
+      }
+
+      return createResponse(
+        await this.templateCompiler.compile(errorPage, {
+          error,
+        }),
+        {
+          statusCode: StatusCode.InternalServerError,
+        },
+      );
     }
   }
 
