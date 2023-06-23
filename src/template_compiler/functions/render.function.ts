@@ -3,6 +3,7 @@ import { CompileOptions } from '../interfaces/compile_options.interface.ts';
 import { inject } from '../../injector/functions/inject.function.ts';
 import { resolveViewFile } from './resolve_view_file.function.ts';
 import { TemplateCompiler } from '../template_compiler.service.ts';
+import { ViewResponse } from '../../http/view_response.class.ts';
 
 export async function render(
   file: string,
@@ -27,9 +28,11 @@ export async function render(
 
     TemplateCompiler.stacks.clear();
 
-    return await inject(TemplateCompiler).compile(html, data, {
+    const compiled = await inject(TemplateCompiler).compile(html, data, {
       file,
     });
+
+    return new ViewResponse(compiled);
   } catch (error) {
     if (!(error instanceof Deno.errors.NotFound)) {
       throw error;

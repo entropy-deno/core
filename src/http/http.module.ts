@@ -4,3 +4,4 @@ export * from './functions/create_response.function.ts';
 export * from './interfaces/controller.interface.ts';
 export * from './http_client.service.ts';
 export * from './http_error.class.ts';
+export * from './view_response.class.ts';

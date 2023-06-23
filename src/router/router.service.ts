@@ -17,6 +17,7 @@ import { StatusCode } from '../http/enums/status_code.enum.ts';
 import { statusPage } from '../http/pages/status_page.ts';
 import { TemplateCompiler } from '../template_compiler/template_compiler.service.ts';
 import { ValuesUnion } from '../utils/types/values_union.type.ts';
+import { ViewResponse } from '../http/view_response.class.ts';
 
 type RouteDecoratorFunction<T> = T extends ValuesUnion<HttpMethod>[] ? (
     path: RoutePath,
@@ -215,6 +216,11 @@ export class Router {
             switch (true) {
               case body instanceof Response:
                 return body as Response;
+
+              case body instanceof ViewResponse:
+                body = (body as ViewResponse).content;
+
+                break;
 
               case Array.isArray(body) ||
                 ((typeof body === 'object' && body !== null) &&
