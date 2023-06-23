@@ -92,6 +92,56 @@ export class Router {
     }
   }
 
+  private async parseResponse(
+    body: unknown,
+    statusCode = StatusCode.Ok,
+  ): Promise<Response> {
+    let contentType = 'text/html';
+
+    if (body instanceof Promise) {
+      body = await body;
+    }
+
+    switch (true) {
+      case body instanceof Response:
+        return body as Response;
+
+      case body instanceof ViewResponse:
+        body = (body as ViewResponse).content;
+
+        break;
+
+      case Array.isArray(body) ||
+        ((typeof body === 'object' && body !== null) &&
+          (body as Record<string, unknown>).constructor === Object): {
+        body = JSON.stringify(body);
+        contentType = 'application/json';
+
+        break;
+      }
+
+      case ['bigint', 'boolean', 'function', 'number', 'string', 'undefined']
+        .includes(
+          typeof body,
+        ) ||
+        body === null: {
+        body = String(body);
+
+        break;
+      }
+
+      default:
+        throw new Error('Invalid response type');
+    }
+
+    return createResponse(body as string, {
+      statusCode,
+      headers: {
+        'content-type': `${contentType}; charset=utf-8`,
+      },
+    });
+  }
+
   private resolvePathRegexp(path: RoutePath): RegExp {
     const definedParams = path.match(/\/:(\w+)/g);
     const validatedParams: string[] = [];
@@ -218,52 +268,6 @@ export class Router {
     }
   }
 
-  private async parseResponseBody(body: unknown): Promise<Response> {
-    let contentType = 'text/html';
-
-    if (body instanceof Promise) {
-      body = await body;
-    }
-
-    switch (true) {
-      case body instanceof Response:
-        return body as Response;
-
-      case body instanceof ViewResponse:
-        body = (body as ViewResponse).content;
-
-        break;
-
-      case Array.isArray(body) ||
-        ((typeof body === 'object' && body !== null) &&
-          (body as Record<string, unknown>).constructor === Object): {
-        body = JSON.stringify(body);
-        contentType = 'application/json';
-
-        break;
-      }
-
-      case ['bigint', 'boolean', 'function', 'number', 'string', 'undefined']
-        .includes(
-          typeof body,
-        ) ||
-        body === null: {
-        body = String(body);
-
-        break;
-      }
-
-      default:
-        throw new Error('Invalid response type');
-    }
-
-    return createResponse(body as string, {
-      headers: {
-        'content-type': `${contentType}; charset=utf-8`,
-      },
-    });
-  }
-
   public async respond(request: Request): Promise<Response> {
     try {
       const { pathname } = new URL(request.url);
@@ -283,7 +287,7 @@ export class Router {
               pathRegexp.exec(pathname)?.groups ?? {},
             );
 
-            return await this.parseResponseBody(await action(resolvedParams));
+            return await this.parseResponse(await action(resolvedParams));
           }
         }
       }
@@ -305,7 +309,7 @@ export class Router {
             this.customHttpHandlers.has(statusCode) ? statusCode : undefined,
           )?.(statusCode);
 
-          return this.parseResponseBody(body);
+          return this.parseResponse(body, statusCode);
         }
 
         return await this.abortResponse(request, StatusCode.InternalServerError);
