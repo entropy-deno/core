@@ -257,7 +257,7 @@ export class Router {
       return await this.abortResponse(request, StatusCode.NotFound);
     } catch (error) {
       if (!(error instanceof HttpError)) {
-        this.errorHandler.handle(error);
+        this.errorHandler.handle(error, false);
       }
 
       return this.configurator.entries.isProduction || error instanceof HttpError

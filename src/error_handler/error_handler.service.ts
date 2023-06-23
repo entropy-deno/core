@@ -1,8 +1,11 @@
 import { fromFileUrl } from '@std/path/mod.ts';
+import { Configurator } from '../configurator/configurator.service.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { Logger } from '../logger/logger.service.ts';
 
 export class ErrorHandler {
+  private readonly configurator = inject(Configurator);
+
   private currentError: Error | null = null;
 
   private currentFile: string | null = null;
@@ -49,7 +52,7 @@ export class ErrorHandler {
     }
   }
 
-  public handle(error: Error): void {
+  public handle(error: Error, die = this.configurator.entries.isProduction): void {
     this.currentError = error;
 
     this.readErrorStack();
@@ -64,5 +67,9 @@ export class ErrorHandler {
     );
 
     console.log(`\n%c${this.currentStack}\n`, 'color: gray');
+
+    if (die) {
+      Deno.exit(1);
+    }
   }
 }
