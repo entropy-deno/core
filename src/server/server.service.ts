@@ -192,18 +192,17 @@ export class Server {
         }
       });
     }
-
-    if (!this.configurator.entries.isProduction) {
-      console.warn(
-        `\n%cYou are running production server in development mode %c[set 'PRODUCTION' .env variable to 'true' to disable dev mode]`,
-        'color: orange',
-        'color: gray',
-      );
-    }
   }
 
   public async start(): Promise<void> {
     this.checkSystemRequirements();
+
+    const flags = parseFlags(Deno.args, {
+      boolean: ['dev'],
+      default: {
+        dev: false,
+      },
+    });
 
     if (this.configurator.entries.envFile) {
       await loadEnv({
@@ -213,16 +212,11 @@ export class Server {
       });
     }
 
+    Deno.env.set('PRODUCTION', flags.dev ? 'false' : 'true');
+
     this.configurator.setup(this.options.config);
 
     await this.localizator.setup();
-
-    const flags = parseFlags(Deno.args, {
-      boolean: ['dev'],
-      default: {
-        dev: false,
-      },
-    });
 
     flags.dev
       ? this.setupDevelopmentEnvironment()
