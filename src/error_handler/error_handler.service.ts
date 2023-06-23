@@ -63,6 +63,6 @@ export class ErrorHandler {
       ['gray'],
     );
 
-    console.log(`\n%c${this.currentStack}`, 'color: gray');
+    console.log(`\n%c${this.currentStack}\n`, 'color: gray');
   }
 }

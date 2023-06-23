@@ -9,7 +9,6 @@ import { errorPage } from '../error_handler/pages/error_page.ts';
 import { HttpError } from '../http/http_error.class.ts';
 import { HttpMethod } from '../http/enums/http_method.enum.ts';
 import { inject } from '../injector/functions/inject.function.ts';
-import { MethodDecorator } from '../utils/types/method_decorator.type.ts';
 import { Reflect } from '../utils/reflect.class.ts';
 import { RouteDefinition } from './interfaces/route_definition.interface.ts';
 import { RouteOptions } from './interfaces/route_options.interface.ts';
@@ -117,25 +116,7 @@ export class Router {
       methods: ValuesUnion<HttpMethod>[],
       options: RouteOptions = {},
     ): MethodDecorator => {
-      return (originalMethod, context) => {
-        if (context.private) {
-          throw new Error(
-            `Controller route method ${context.name.toString()} must be public`,
-          );
-        }
-
-        if (context.static) {
-          throw new Error(
-            `Controller route method ${context.name.toString()} cannot be static`,
-          );
-        }
-
-        if (context.kind !== 'method') {
-          throw new Error(
-            'Route decorators can only be used for controller methods',
-          );
-        }
-
+      return (_target, _methodName, descriptor) => {
         Reflect.defineMetadata<Partial<RouteDefinition>>(
           'routeDefinition',
           {
@@ -143,10 +124,10 @@ export class Router {
             path,
             ...options,
           },
-          originalMethod,
+          descriptor.value as ((...args: unknown[]) => unknown),
         );
 
-        return originalMethod;
+        return descriptor;
       };
     };
 
@@ -171,7 +152,34 @@ export class Router {
   public registerController(controller: Constructor<Controller>): void {
     const instance = inject(controller);
 
-    for (const { action, methods, path } of instance.routes) {
+    const properties = Object.getOwnPropertyNames(controller.prototype);
+
+    const controllerRouteMethods = properties.filter((property) => {
+      return (
+        typeof controller.prototype[property] === 'function' &&
+        !['constructor', 'toString', 'toLocaleString'].includes(property) &&
+        !property.startsWith('_')
+      );
+    });
+
+    for (const controllerRouteMethod of controllerRouteMethods) {
+      const { methods, path } = Reflect.getMetadata<
+        Exclude<RouteDefinition, 'action'>
+      >(
+        'routeDefinition',
+        controller.prototype[controllerRouteMethod],
+      )!;
+
+      this.registerRoute(path, methods, async (...args: unknown[]) => {
+        const methodResult =
+          (inject(controller) as Record<string, (...args: unknown[]) => unknown>)
+            [controllerRouteMethod](...args);
+
+        return methodResult instanceof Promise ? await methodResult : methodResult;
+      });
+    }
+
+    for (const { action, methods, path } of instance.routes ?? []) {
       this.registerRoute(path, methods, async (...args: unknown[]) => {
         const methodResult =
           (instance as unknown as Record<string, (...args: unknown[]) => unknown>)
