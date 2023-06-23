@@ -225,9 +225,10 @@ export class Router {
                 break;
               }
 
-              case ['boolean', 'number', 'string', 'undefined'].includes(
-                typeof body,
-              ) ||
+              case ['bigint', 'boolean', 'function', 'number', 'string', 'undefined']
+                .includes(
+                  typeof body,
+                ) ||
                 body === null: {
                 body = String(body);
 
