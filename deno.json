@@ -2,11 +2,11 @@
   "compilerOptions": {
     "allowJs": false,
     "lib": [
+      "deno.ns",
       "dom",
-      "dom.iterable",
       "dom.asynciterable",
-      "esnext",
-      "deno.ns"
+      "dom.iterable",
+      "esnext"
     ],
     "strict": true
   },
@@ -20,7 +20,7 @@
     "singleQuote": true
   },
   "imports": {
-    "@std/": "https://deno.land/std@0.191.0/"
+    "@std/": "https://deno.land/std@0.192.0/"
   },
   "lint": {
     "rules": {
