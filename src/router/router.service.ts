@@ -228,9 +228,11 @@ export class Router {
         this.customHttpHandlers.set(
           handler.statusCode,
           async (statusCode: StatusCode) => {
-            const methodResult =
-              (inject(controller) as Record<string, (...args: unknown[]) => unknown>)
-                [controllerRouteMethod](statusCode);
+            const methodResult = (inject(controller) as unknown as Record<
+              string,
+              (...args: unknown[]) => unknown
+            >)
+              [controllerRouteMethod](statusCode);
 
             return methodResult instanceof Promise
               ? await methodResult
@@ -249,9 +251,11 @@ export class Router {
       )!;
 
       this.registerRoute(path, methods, async (...args: unknown[]) => {
-        const methodResult =
-          (inject(controller) as Record<string, (...args: unknown[]) => unknown>)
-            [controllerRouteMethod](...args);
+        const methodResult = (inject(controller) as unknown as Record<
+          string,
+          (...args: unknown[]) => unknown
+        >)
+          [controllerRouteMethod](...args);
 
         return methodResult instanceof Promise ? await methodResult : methodResult;
       });

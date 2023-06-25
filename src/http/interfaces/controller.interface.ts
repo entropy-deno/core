@@ -6,6 +6,8 @@ type ClassMethodNameUnion<T> = {
 }[keyof T];
 
 export interface Controller<T = any> {
+  index?: (...args: any[]) => unknown;
+
   routes?: (Omit<RouteDefinition, 'action'> & RouteOptions & {
     action: ClassMethodNameUnion<T>;
   })[];
