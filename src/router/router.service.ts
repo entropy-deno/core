@@ -1,4 +1,4 @@
-import { contentType } from '@std/media_types/mod.ts';
+import { contentType } from '@std/media_types/content_type.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
 import { Constructor } from '../utils/interfaces/constructor.interface.ts';
 import { Controller } from '../http/interfaces/controller.interface.ts';
