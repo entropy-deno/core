@@ -39,7 +39,9 @@ export class Server {
     if (satisfiesDenoVersion === -1) {
       this.logger.warn(
         `Entropy requires Deno version ${minimumDenoVersion} or higher %c[run 'deno upgrade' to update Deno]`,
-        ['gray'],
+        {
+          colors: ['gray'],
+        },
       );
 
       Deno.exit(1);
@@ -118,12 +120,15 @@ export class Server {
         const responseTime = (performance.now() - timerStart).toFixed(1);
 
         this.logger.log(
-          `%c${timestamp}  %c[${status}] %c${url.substring(0, 40)} %c${
+          `%c${timestamp} %c[${status}] %c${url.substring(0, 40)} %c${
             '.'.repeat(
               columns - url.substring(0, 40).length - responseTime.length - 42,
             )
           } ${responseTime}ms`,
-          ['lightgray', statusColor, 'white', 'gray'],
+          {
+            badge: 'Request',
+            colors: ['lightgray', statusColor, 'white', 'gray'],
+          },
         );
 
         respondWith(response);
@@ -236,7 +241,10 @@ export class Server {
             ? `port ${this.configurator.entries.port}`
             : `http://${this.configurator.entries.host}:${this.configurator.entries.port}`
         } %c[${Deno.build.os === 'darwin' ? '⌃C' : 'Ctrl+C'} to quit]`,
-        ['gray'],
+        {
+          badge: 'Server',
+          colors: ['gray'],
+        },
       );
 
       for await (const connection of listener) {

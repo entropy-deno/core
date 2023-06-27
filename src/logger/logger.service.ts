@@ -1,38 +1,48 @@
+interface LogOptions {
+  badge?: string;
+  colors?: string[];
+}
+
 export class Logger {
-  public error(message: string, colors: string[] = []): void {
+  public error(message: string, { badge = 'Error', colors = [] }: LogOptions): void {
     console.error(
-      `\n%c[ERROR] %c${message}`,
-      'color: gray',
+      `%c${badge[0]?.toUpperCase() ?? ''}${badge.slice(1) ?? ''} %c${message}`,
       'color: red',
-      ...colors.map((color) => `color: ${color}`),
-    );
-  }
-
-  public info(message: string, colors: string[] = []): void {
-    console.log(
-      `\n%c[INFO] %c${message}`,
-      'color: gray',
-      'color: mediumblue',
-      ...colors.map((color) => `color: ${color}`),
-    );
-  }
-
-  public log(message: string, colors: string[] = []): void {
-    const output = `\n%c[LOG] %c${message}`;
-
-    console.log(
-      output,
-      'color: gray',
       'color: lightgray',
       ...colors.map((color) => `color: ${color}`),
     );
   }
 
-  public warn(message: string, colors: string[] = []): void {
+  public info(message: string, { badge = 'Info', colors = [] }: LogOptions): void {
+    console.log(
+      `%c${badge[0]?.toUpperCase() ?? ''}${badge.slice(1) ?? ''} %c${message}`,
+      'color: blue',
+      'color: lightgray',
+      ...colors.map((color) => `color: ${color}`),
+    );
+  }
+
+  public log(message: string, { badge = 'Log', colors = [] }: LogOptions): void {
+    const output = `%c${badge[0]?.toUpperCase() ?? ''}${
+      badge.slice(1) ?? ''
+    } %c${message}`;
+
+    console.log(
+      output,
+      'color: blue',
+      'color: lightgray',
+      ...colors.map((color) => `color: ${color}`),
+    );
+  }
+
+  public warn(
+    message: string,
+    { badge = 'Warning', colors = [] }: LogOptions,
+  ): void {
     console.warn(
-      `\n%c[WARN] %c${message}`,
-      'color: gray',
+      `%c${badge[0]?.toUpperCase() ?? ''}${badge.slice(1) ?? ''} %c${message}`,
       'color: orange',
+      'color: lightgray',
       ...colors.map((color) => `color: ${color}`),
     );
   }

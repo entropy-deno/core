@@ -63,7 +63,9 @@ export class ErrorHandler {
           ? `:${this.currentLine}`
           : ''
       }]`,
-      ['gray'],
+      {
+        colors: ['gray'],
+      },
     );
 
     console.log(`\n%c${this.currentStack}\n`, 'color: gray');
