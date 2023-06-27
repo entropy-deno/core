@@ -201,10 +201,6 @@ export class Server {
   }
 
   public async start(): Promise<void> {
-    if (!env<string>('DENO_DEPLOYMENT_ID')) {
-      this.checkSystemRequirements();
-    }
-
     const flags = parseFlags(Deno.args, {
       boolean: ['dev'],
       default: {
@@ -212,12 +208,16 @@ export class Server {
       },
     });
 
-    if (this.configurator.entries.envFile) {
-      await loadEnv({
-        allowEmptyValues: true,
-        envPath: this.configurator.entries.envFile ?? '.env',
-        export: true,
-      });
+    if (!env<string>('DENO_DEPLOYMENT_ID')) {
+      this.checkSystemRequirements();
+
+      if (this.configurator.entries.envFile) {
+        await loadEnv({
+          allowEmptyValues: true,
+          envPath: this.configurator.entries.envFile ?? '.env',
+          export: true,
+        });
+      }
     }
 
     Deno.env.set('PRODUCTION', flags.dev ? 'false' : 'true');
