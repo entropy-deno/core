@@ -154,13 +154,21 @@ export class Router {
       validatedParams.push(name);
     }
 
+    const replacements: Record<string, [RegExp, string]> = {
+      path: [/(.+)\/$/, '$1\\/?'],
+      optionalParam: [/\/:(\w+)\?/g, '/(?<$1>.+)\\?'],
+      requiredParam: [/\/:(\w+)/g, '/(?<$1>.+)'],
+      regexConstrainedParam: [/\/:(\w+)\((.+)\)/g, '/(?<$1>$2+)'],
+    };
+
+    let resultPattern: string = path;
+
+    for (const [, [pattern, replacement]] of Object.entries(replacements)) {
+      resultPattern = resultPattern.replace(pattern, replacement);
+    }
+
     return new RegExp(
-      `^${
-        path.replace(/(.+)\/$/, '$1\\/?').replace(
-          /\/:(\w+)\?/g,
-          '/(?<$1>.+)\\?',
-        ).replace(/\/:(\w+)/g, '/(?<$1>.+)')
-      }(\\?.*)?$`,
+      `^${resultPattern}(\\?.*)?$`,
     );
   }
 
@@ -291,7 +299,7 @@ export class Router {
               pathRegexp.exec(pathname)?.groups ?? {},
             );
 
-            return await this.parseResponse(await action(resolvedParams));
+            return await this.parseResponse(await action(...resolvedParams));
           }
         }
       }
