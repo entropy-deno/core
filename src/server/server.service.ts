@@ -1,6 +1,7 @@
 import { load as loadEnv } from '@std/dotenv/mod.ts';
 import { parse as parseFlags } from '@std/flags/mod.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
+import { env } from '../utils/functions/env.function.ts';
 import { ErrorHandler } from '../error_handler/error_handler.service.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { Localizator } from '../localizator/localizator.module.ts';
@@ -235,17 +236,19 @@ export class Server {
         port: this.configurator.entries.port,
       });
 
-      this.logger.info(
-        `HTTP server is running on ${
-          this.configurator.entries.isProduction
-            ? `port ${this.configurator.entries.port}`
-            : `http://${this.configurator.entries.host}:${this.configurator.entries.port}`
-        } %c[${Deno.build.os === 'darwin' ? '⌃C' : 'Ctrl+C'} to quit]`,
-        {
-          badge: 'Server',
-          colors: ['gray'],
-        },
-      );
+      if (!env<string>('DENO_DEPLOYMENT_ID')) {
+        this.logger.info(
+          `HTTP server is running on %c${
+            this.configurator.entries.isProduction
+              ? `port ${this.configurator.entries.port}`
+              : `http://${this.configurator.entries.host}:${this.configurator.entries.port}`
+          } %c[${Deno.build.os === 'darwin' ? '⌃C' : 'Ctrl+C'} to quit]`,
+          {
+            badge: 'Server',
+            colors: ['blue', 'gray'],
+          },
+        );
+      }
 
       for await (const connection of listener) {
         this.serveHttp(connection);
