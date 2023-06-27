@@ -1,6 +1,6 @@
 import { fromFileUrl } from '@std/path/mod.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
-import { env } from '../utils/functions/env.function.ts'
+import { env } from '../utils/functions/env.function.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { Logger } from '../logger/logger.service.ts';
 
