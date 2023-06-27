@@ -201,7 +201,9 @@ export class Server {
   }
 
   public async start(): Promise<void> {
-    this.checkSystemRequirements();
+    if (!env<string>('DENO_DEPLOYMENT_ID')) {
+      this.checkSystemRequirements();
+    }
 
     const flags = parseFlags(Deno.args, {
       boolean: ['dev'],
@@ -224,9 +226,11 @@ export class Server {
 
     await this.localizator.setup();
 
-    flags.dev
-      ? this.setupDevelopmentEnvironment()
-      : this.setupProductionEnvironment();
+    if (!env<string>('DENO_DEPLOYMENT_ID')) {
+      flags.dev
+        ? this.setupDevelopmentEnvironment()
+        : this.setupProductionEnvironment();
+    }
 
     try {
       this.setup();

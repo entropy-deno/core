@@ -1,5 +1,6 @@
 import { fromFileUrl } from '@std/path/mod.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
+import { env } from '../utils/functions/env.function.ts'
 import { inject } from '../injector/functions/inject.function.ts';
 import { Logger } from '../logger/logger.service.ts';
 
@@ -70,7 +71,7 @@ export class ErrorHandler {
 
     console.log(`\n%c${this.currentStack}\n`, 'color: gray');
 
-    if (die) {
+    if (die && !env<string>('DENO_DEPLOYMENT_ID')) {
       Deno.exit(1);
     }
   }
