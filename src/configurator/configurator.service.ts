@@ -10,6 +10,10 @@ export class Configurator {
     isDenoDeploy: !!env<string>('DENO_DEPLOYMENT_ID') ?? false,
     isProduction: env<boolean>('PRODUCTION') ?? false,
     port: env<number>('PORT') ?? 5050,
+    tlsCertificate: env<string>('TLS_CERTIFICATE') ?? false,
+    tlsCertificateFile: false,
+    tlsKey: env<string>('TLS_KEY') ?? false,
+    tlsKeyFile: false,
   };
 
   public all(): AppConfig {

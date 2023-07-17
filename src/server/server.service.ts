@@ -227,7 +227,23 @@ export class Server {
     try {
       this.setup();
 
+      const tlsCertificate = this.configurator.entries.tlsCertificate ??
+        (this.configurator.entries.tlsCertificateFile
+          ? await Deno.readTextFile(this.configurator.entries.tlsCertificateFile)
+          : false);
+
+      const tlsKey = this.configurator.entries.tlsKey ??
+        (this.configurator.entries.tlsKeyFile
+          ? await Deno.readTextFile(this.configurator.entries.tlsKeyFile)
+          : false);
+
       Deno.serve({
+        ...(tlsCertificate && tlsKey
+          ? {
+            cert: tlsCertificate,
+            key: tlsKey,
+          }
+          : {}),
         hostname: this.configurator.entries.host,
         port: this.configurator.entries.port,
         onListen: () => {
