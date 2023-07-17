@@ -118,7 +118,8 @@ export class Server {
         this.configurator.entries.isDenoDeploy ? '' : `${timestamp} `
       }%c[${status}] %c${url.substring(0, 40)} %c${
         '.'.repeat(
-          columns - url.substring(0, 40).length - responseTime.length - 42,
+          columns - url.substring(0, 40).length - responseTime.length -
+            (this.configurator.entries.isDenoDeploy ? 60 : 42),
         )
       } ${responseTime}ms`,
       {
