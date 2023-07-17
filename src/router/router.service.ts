@@ -268,9 +268,9 @@ export class Router {
         });
 
         for (const method of methods) {
-          if (request.method === method && urlPattern.test(pathname)) {
+          if (request.method === method && urlPattern.test(request.url)) {
             const resolvedParams = Object.values(
-              urlPattern.exec(pathname)?.pathname?.groups ?? {},
+              urlPattern.exec(request.url)?.pathname?.groups ?? {},
             );
 
             return await this.parseResponse(await action(...resolvedParams));
