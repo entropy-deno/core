@@ -6,7 +6,7 @@ import { inject } from '../injector/functions/inject.function.ts';
 import { Localizator } from '../localizator/localizator.module.ts';
 import { Logger } from '../logger/logger.service.ts';
 import { Router } from '../router/router.service.ts';
-import { runCommand } from '../utils/functions/run_command.function.ts';
+import { runShellCommand } from '../utils/functions/run_shell_command.function.ts';
 import { ServerOptions } from './interfaces/server_options.interface.ts';
 import { WebClientAlias } from './enums/web_client_alias.enum.ts';
 
@@ -172,7 +172,7 @@ export class Server {
 
     if (flags.open && !localStorage.getItem(this.devServerCheckKey)) {
       try {
-        runCommand(
+        runShellCommand(
           `${
             WebClientAlias[
               Deno.build.os as 'darwin' | 'linux' | 'win32' | 'windows'

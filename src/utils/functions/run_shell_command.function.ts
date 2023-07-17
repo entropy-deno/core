@@ -1,4 +1,4 @@
-export function runCommand(name: string, args: string[] = []): void {
+export function runShellCommand(name: string, args: string[] = []): void {
   const command = new Deno.Command(
     name,
     {
