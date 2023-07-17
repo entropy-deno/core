@@ -1,4 +1,4 @@
-import { load as loadEnv } from '@std/dotenv/mod.ts';
+import { load as loadDotEnv } from '@std/dotenv/mod.ts';
 import { parse as parseFlags } from '@std/flags/mod.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
 import { ErrorHandler } from '../error_handler/error_handler.service.ts';
@@ -213,7 +213,7 @@ export class Server {
       this.checkSystemRequirements();
 
       if (this.configurator.entries.envFile) {
-        await loadEnv({
+        await loadDotEnv({
           allowEmptyValues: true,
           envPath: this.configurator.entries.envFile ?? '.env',
           export: true,
