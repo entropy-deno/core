@@ -20,7 +20,7 @@
     "singleQuote": true
   },
   "imports": {
-    "@std/": "https://deno.land/std@0.192.0/"
+    "@std/": "https://deno.land/std@0.194.0/"
   },
   "lint": {
     "rules": {
