@@ -7,6 +7,7 @@ export class Configurator {
     encryptionKey: env<string>('ENCRYPTION_KEY') ?? crypto.randomUUID(),
     envFile: '.env',
     host: env<string>('HOST') ?? 'localhost',
+    isDenoDeploy: !!env<string>('DENO_DEPLOYMENT_ID') ?? false,
     isProduction: env<boolean>('PRODUCTION') ?? false,
     port: env<number>('PORT') ?? 5050,
   };

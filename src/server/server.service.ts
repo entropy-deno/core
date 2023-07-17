@@ -1,7 +1,6 @@
 import { load as loadEnv } from '@std/dotenv/mod.ts';
 import { parse as parseFlags } from '@std/flags/mod.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
-import { env } from '../utils/functions/env.function.ts';
 import { ErrorHandler } from '../error_handler/error_handler.service.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { Localizator } from '../localizator/localizator.module.ts';
@@ -121,7 +120,9 @@ export class Server {
         const responseTime = (performance.now() - timerStart).toFixed(1);
 
         this.logger.log(
-          `%c${timestamp} %c[${status}] %c${url.substring(0, 40)} %c${
+          `%c${
+            this.configurator.entries.isDenoDeploy ? '' : `${timestamp} `
+          }%c[${status}] %c${url.substring(0, 40)} %c${
             '.'.repeat(
               columns - url.substring(0, 40).length - responseTime.length - 42,
             )
@@ -208,7 +209,7 @@ export class Server {
       },
     });
 
-    if (!env<string>('DENO_DEPLOYMENT_ID')) {
+    if (!this.configurator.entries.isDenoDeploy) {
       this.checkSystemRequirements();
 
       if (this.configurator.entries.envFile) {
@@ -226,7 +227,7 @@ export class Server {
 
     await this.localizator.setup();
 
-    if (!env<string>('DENO_DEPLOYMENT_ID')) {
+    if (!this.configurator.entries.isDenoDeploy) {
       flags.dev
         ? this.setupDevelopmentEnvironment()
         : this.setupProductionEnvironment();
@@ -240,7 +241,7 @@ export class Server {
         port: this.configurator.entries.port,
       });
 
-      if (!env<string>('DENO_DEPLOYMENT_ID')) {
+      if (!this.configurator.entries.isDenoDeploy) {
         this.logger.info(
           `HTTP server is running on %c${
             this.configurator.entries.isProduction

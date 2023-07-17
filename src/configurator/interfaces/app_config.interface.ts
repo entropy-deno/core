@@ -3,6 +3,7 @@ export interface AppConfig {
   encryptionKey: string;
   envFile: string | false;
   host: string;
+  isDenoDeploy: boolean;
   isProduction: boolean;
   port: number;
 }
