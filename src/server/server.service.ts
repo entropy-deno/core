@@ -28,7 +28,7 @@ export class Server {
   constructor(private readonly options: ServerOptions) {}
 
   private checkSystemRequirements(): void {
-    const minimumDenoVersion = '1.34.0';
+    const minimumDenoVersion = '1.35.0';
 
     const satisfiesDenoVersion = Deno.version.deno
       .localeCompare(minimumDenoVersion, undefined, {
