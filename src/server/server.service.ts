@@ -48,96 +48,86 @@ export class Server {
     }
   }
 
-  private async serveHttp(connection: Deno.Conn): Promise<void> {
-    try {
-      const httpConnection = Deno.serveHttp(connection);
+  private async handleRequest(request: Request): Promise<Response> {
+    const timerStart = performance.now();
+    const url = new URL(request.url).pathname;
 
-      for await (const { request, respondWith } of httpConnection) {
-        const timerStart = performance.now();
-        const url = new URL(request.url).pathname;
+    if (request.headers.get('upgrade')?.toLowerCase() === 'websocket') {
+      const { socket, response } = Deno.upgradeWebSocket(request);
 
-        if (request.headers.get('upgrade')?.toLowerCase() === 'websocket') {
-          const { socket, response } = Deno.upgradeWebSocket(request);
+      if (
+        !this.configurator.entries.isProduction && url === '/$entropy/hot-reload'
+      ) {
+        const watcher = Deno.watchFs('src');
 
-          if (
-            !this.configurator.entries.isProduction && url === '/$entropy/hot-reload'
-          ) {
-            const watcher = Deno.watchFs('src');
-
-            socket.onopen = async () => {
-              for await (const event of watcher) {
-                if (event.kind === 'modify') {
-                  socket.send(JSON.stringify({
-                    path: event.paths[0],
-                  }));
-                }
-              }
-            };
-
-            socket.onclose = () => {
-              watcher.close();
-            };
+        socket.onopen = async () => {
+          for await (const event of watcher) {
+            if (event.kind === 'modify') {
+              socket.send(JSON.stringify({
+                path: event.paths[0],
+              }));
+            }
           }
+        };
 
-          respondWith(response);
-
-          continue;
-        }
-
-        const response = await this.router.respond(request);
-        const { status } = response;
-
-        let statusColor: 'blue' | 'green' | 'orange' | 'red' = 'blue';
-
-        switch (true) {
-          case status >= 100 && status < 200:
-            statusColor = 'blue';
-
-            break;
-
-          case status >= 200 && status < 400:
-            statusColor = 'green';
-
-            break;
-
-          case status >= 400 && status < 500:
-            statusColor = 'orange';
-
-            break;
-
-          case status >= 500 && status < 600:
-            statusColor = 'red';
-
-            break;
-        }
-
-        const { columns } = Deno.consoleSize();
-
-        const timestamp = new Date().toLocaleString('en-us', {
-          timeZone: 'UTC',
-        });
-
-        const responseTime = (performance.now() - timerStart).toFixed(1);
-
-        this.logger.log(
-          `%c${
-            this.configurator.entries.isDenoDeploy ? '' : `${timestamp} `
-          }%c[${status}] %c${url.substring(0, 40)} %c${
-            '.'.repeat(
-              columns - url.substring(0, 40).length - responseTime.length - 42,
-            )
-          } ${responseTime}ms`,
-          {
-            badge: 'Request',
-            colors: ['lightgray', statusColor, 'white', 'gray'],
-          },
-        );
-
-        respondWith(response);
+        socket.onclose = () => {
+          watcher.close();
+        };
       }
-    } catch (error) {
-      this.errorHandler.handle(error);
+
+      return response;
     }
+
+    const response = await this.router.respond(request);
+    const { status } = response;
+
+    let statusColor: 'blue' | 'green' | 'orange' | 'red' = 'blue';
+
+    switch (true) {
+      case status >= 100 && status < 200:
+        statusColor = 'blue';
+
+        break;
+
+      case status >= 200 && status < 400:
+        statusColor = 'green';
+
+        break;
+
+      case status >= 400 && status < 500:
+        statusColor = 'orange';
+
+        break;
+
+      case status >= 500 && status < 600:
+        statusColor = 'red';
+
+        break;
+    }
+
+    const { columns } = Deno.consoleSize();
+
+    const timestamp = new Date().toLocaleString('en-us', {
+      timeZone: 'UTC',
+    });
+
+    const responseTime = (performance.now() - timerStart).toFixed(1);
+
+    this.logger.log(
+      `%c${
+        this.configurator.entries.isDenoDeploy ? '' : `${timestamp} `
+      }%c[${status}] %c${url.substring(0, 40)} %c${
+        '.'.repeat(
+          columns - url.substring(0, 40).length - responseTime.length - 42,
+        )
+      } ${responseTime}ms`,
+      {
+        badge: 'Request',
+        colors: ['lightgray', statusColor, 'white', 'gray'],
+      },
+    );
+
+    return response;
   }
 
   private setup(): void {
@@ -236,28 +226,25 @@ export class Server {
     try {
       this.setup();
 
-      const listener = Deno.listen({
+      Deno.serve({
         hostname: this.configurator.entries.host,
         port: this.configurator.entries.port,
-      });
-
-      if (!this.configurator.entries.isDenoDeploy) {
-        this.logger.info(
-          `HTTP server is running on %c${
-            this.configurator.entries.isProduction
-              ? `port ${this.configurator.entries.port}`
-              : `http://${this.configurator.entries.host}:${this.configurator.entries.port}`
-          } %c[${Deno.build.os === 'darwin' ? '⌃C' : 'Ctrl+C'} to quit]`,
-          {
-            badge: 'Server',
-            colors: ['blue', 'gray'],
-          },
-        );
-      }
-
-      for await (const connection of listener) {
-        this.serveHttp(connection);
-      }
+        onListen: () => {
+          if (!this.configurator.entries.isDenoDeploy) {
+            this.logger.info(
+              `HTTP server is running on %c${
+                this.configurator.entries.isProduction
+                  ? `port ${this.configurator.entries.port}`
+                  : `http://${this.configurator.entries.host}:${this.configurator.entries.port}`
+              } %c[${Deno.build.os === 'darwin' ? '⌃C' : 'Ctrl+C'} to quit]`,
+              {
+                badge: 'Server',
+                colors: ['blue', 'gray'],
+              },
+            );
+          }
+        },
+      }, async (request) => await this.handleRequest(request));
     } catch (error) {
       this.errorHandler.handle(error);
     }
