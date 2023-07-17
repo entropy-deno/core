@@ -13,7 +13,7 @@ import { WebClientAlias } from './enums/web_client_alias.enum.ts';
 export class Server {
   private readonly configurator = inject(Configurator);
 
-  private readonly devServerCheckKey = 'entropy:devServer';
+  private readonly devServerCheckKey = '$entropy/dev-server';
 
   private readonly errorHandler = inject(ErrorHandler);
 
