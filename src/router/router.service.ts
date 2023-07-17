@@ -39,7 +39,7 @@ export class Router {
 
   private readonly errorHandler = inject(ErrorHandler);
 
-  private readonly routes = new Map<RegExp, RouteDefinition>();
+  private readonly routes = new Map<string, RouteDefinition>();
 
   private readonly templateCompiler = inject(TemplateCompiler);
 
@@ -140,36 +140,6 @@ export class Router {
         'content-type': `${contentType}; charset=utf-8`,
       },
     });
-  }
-
-  private resolvePathRegexp(path: RoutePath): RegExp {
-    const definedParams = path.match(/\/:(\w+)/g);
-    const validatedParams: string[] = [];
-
-    for (const [, name] of definedParams ?? []) {
-      if (validatedParams.includes(name)) {
-        throw new Error(`Duplicate route parameter name '${name}'`);
-      }
-
-      validatedParams.push(name);
-    }
-
-    const replacements: Record<string, [RegExp, string]> = {
-      path: [/(.+)\/$/, '$1\\/?'],
-      optionalParam: [/\/:(\w+)\?/g, '/(?<$1>.+)\\?'],
-      requiredParam: [/\/:(\w+)/g, '/(?<$1>.+)'],
-      regexConstrainedParam: [/\/:(\w+)\((.+)\)/g, '/(?<$1>$2+)'],
-    };
-
-    let resultPattern: string = path;
-
-    for (const [, [pattern, replacement]] of Object.entries(replacements)) {
-      resultPattern = resultPattern.replace(pattern, replacement);
-    }
-
-    return new RegExp(
-      `^${resultPattern}(\\?.*)?$`,
-    );
   }
 
   public createRouteDecorator<
@@ -288,15 +258,19 @@ export class Router {
         return await this.handleStaticFileRequest(request);
       }
 
-      for (const [pathRegexp, { action, methods }] of this.routes) {
+      for (const [path, { action, methods }] of this.routes) {
         if (!methods.includes(request.method as HttpMethod)) {
           continue;
         }
 
+        const urlPattern = new URLPattern({
+          pathname: path,
+        });
+
         for (const method of methods) {
-          if (request.method === method && pathRegexp.test(pathname)) {
+          if (request.method === method && urlPattern.test(pathname)) {
             const resolvedParams = Object.values(
-              pathRegexp.exec(pathname)?.groups ?? {},
+              urlPattern.exec(pathname)?.pathname?.groups ?? {},
             );
 
             return await this.parseResponse(await action(...resolvedParams));
@@ -480,13 +454,7 @@ export class Router {
     action: (...args: unknown[]) => Promise<unknown>,
     options: RouteOptions = {},
   ): void {
-    const pathRegexp = this.resolvePathRegexp(path);
-
-    if (this.routes.has(pathRegexp)) {
-      throw new Error(`Duplicate route path: ${path}`);
-    }
-
-    this.routes.set(pathRegexp, {
+    this.routes.set(path, {
       action,
       methods,
       path,
