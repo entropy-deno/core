@@ -12,7 +12,8 @@
   },
   "fmt": {
     "include": [
-      "src/"
+      "src/",
+      "*.md"
     ],
     "indentWidth": 2,
     "lineWidth": 85,
