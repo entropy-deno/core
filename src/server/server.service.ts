@@ -5,6 +5,7 @@ import { ErrorHandler } from '../error_handler/error_handler.service.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { Localizator } from '../localizator/localizator.module.ts';
 import { Logger } from '../logger/logger.service.ts';
+import { MIN_DENO_VERSION } from '../constants.ts';
 import { Router } from '../router/router.service.ts';
 import { runShellCommand } from '../utils/functions/run_shell_command.function.ts';
 import { ServerOptions } from './interfaces/server_options.interface.ts';
@@ -28,17 +29,15 @@ export class Server {
   constructor(private readonly options: ServerOptions) {}
 
   private checkSystemRequirements(): void {
-    const minimumDenoVersion = '1.35.0';
-
     const satisfiesDenoVersion = Deno.version.deno
-      .localeCompare(minimumDenoVersion, undefined, {
+      .localeCompare(MIN_DENO_VERSION, undefined, {
         numeric: true,
         sensitivity: 'base',
       });
 
     if (satisfiesDenoVersion === -1) {
       this.logger.warn(
-        `Entropy requires Deno version ${minimumDenoVersion} or higher %c[run 'deno upgrade' to update Deno]`,
+        `Entropy requires Deno version ${MIN_DENO_VERSION} or higher %c[run 'deno upgrade' to update Deno]`,
         {
           colors: ['gray'],
         },
