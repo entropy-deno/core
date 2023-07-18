@@ -19,9 +19,6 @@
     "semiColons": true,
     "singleQuote": true
   },
-  "imports": {
-    "@std/": "https://deno.land/std@0.194.0/"
-  },
   "lint": {
     "rules": {
       "exclude": [

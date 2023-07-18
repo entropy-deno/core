@@ -4,7 +4,10 @@ interface LogOptions {
 }
 
 export class Logger {
-  public error(message: string, { badge = 'Error', colors = [] }: LogOptions = {}): void {
+  public error(
+    message: string,
+    { badge = 'Error', colors = [] }: LogOptions = {},
+  ): void {
     console.error(
       `%c${badge[0]?.toUpperCase() ?? ''}${badge.slice(1) ?? ''} %c${message}`,
       'color: red',
@@ -13,7 +16,10 @@ export class Logger {
     );
   }
 
-  public info(message: string, { badge = 'Info', colors = [] }: LogOptions = {}): void {
+  public info(
+    message: string,
+    { badge = 'Info', colors = [] }: LogOptions = {},
+  ): void {
     console.log(
       `%c${badge[0]?.toUpperCase() ?? ''}${badge.slice(1) ?? ''} %c${message}`,
       'color: blue',
@@ -22,7 +28,10 @@ export class Logger {
     );
   }
 
-  public log(message: string, { badge = 'Log', colors = [] }: LogOptions = {}): void {
+  public log(
+    message: string,
+    { badge = 'Log', colors = [] }: LogOptions = {},
+  ): void {
     const output = `%c${badge[0]?.toUpperCase() ?? ''}${
       badge.slice(1) ?? ''
     } %c${message}`;
