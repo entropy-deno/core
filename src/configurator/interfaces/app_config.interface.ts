@@ -5,6 +5,7 @@ export interface AppConfig {
   host: string;
   isDenoDeploy: boolean;
   isProduction: boolean;
+  logger: boolean;
   port: number;
   tlsCertificate: string | false;
   tlsCertificateFile: string | false;

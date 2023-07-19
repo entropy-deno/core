@@ -110,26 +110,13 @@ export class Server {
         break;
     }
 
-    const { columns } = Deno.consoleSize();
-
-    const timestamp = new Date().toLocaleString('en-us', {
-      timeZone: 'UTC',
-    });
-
     const responseTime = (performance.now() - timerStart).toFixed(1);
 
     this.logger.log(
-      `%c${
-        this.configurator.entries.isDenoDeploy ? '' : `${timestamp} `
-      }%c[${status}] %c${url.substring(0, 40)} %c${
-        '.'.repeat(
-          columns - url.substring(0, 40).length - responseTime.length -
-            (this.configurator.entries.isDenoDeploy ? 60 : 42),
-        )
-      } ${responseTime}ms`,
+      `%c[${status}] %c${url.substring(0, 40)}%c - ${responseTime}ms`,
       {
         badge: 'Request',
-        colors: ['lightgray', statusColor, 'white', 'gray'],
+        colors: [statusColor, 'lightgray', 'gray'],
       },
     );
 
@@ -211,7 +198,7 @@ export class Server {
       if (this.configurator.entries.envFile) {
         await loadDotEnv({
           allowEmptyValues: true,
-          envPath: this.configurator.entries.envFile ?? '.env',
+          envPath: (this.configurator.entries.envFile ?? '.env'),
           export: true,
         });
       }

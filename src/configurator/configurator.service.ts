@@ -9,6 +9,7 @@ export class Configurator {
     host: env<string>('HOST') ?? 'localhost',
     isDenoDeploy: !!env<string>('DENO_DEPLOYMENT_ID') ?? false,
     isProduction: env<boolean>('PRODUCTION') ?? false,
+    logger: true,
     port: env<number>('PORT') ?? 5050,
     tlsCertificate: env<string>('TLS_CERTIFICATE') ?? false,
     tlsCertificateFile: false,
