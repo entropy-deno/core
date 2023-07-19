@@ -57,7 +57,13 @@ export class Server {
       if (
         !this.configurator.entries.isProduction && url === '/$entropy/hot-reload'
       ) {
-        const watcher = Deno.watchFs('src');
+        let watcher: Deno.FsWatcher;
+
+        try {
+          watcher = Deno.watchFs(['src', 'views']);
+        } catch {
+          watcher = Deno.watchFs('src');
+        }
 
         socket.onopen = async () => {
           for await (const event of watcher) {
