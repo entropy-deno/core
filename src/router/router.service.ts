@@ -13,7 +13,7 @@ import { Reflect } from '../utils/reflect.class.ts';
 import { RouteDefinition } from './interfaces/route_definition.interface.ts';
 import { RouteOptions } from './interfaces/route_options.interface.ts';
 import { RoutePath } from './types/route_path.type.ts';
-import { StatusCode } from '../http/enums/status_code.enum.ts';
+import { HttpStatus } from '../http/enums/http_status.enum.ts';
 import { statusPage } from '../http/pages/status_page.ts';
 import { TemplateCompiler } from '../template_compiler/template_compiler.service.ts';
 import { ValuesUnion } from '../utils/types/values_union.type.ts';
@@ -33,8 +33,8 @@ export class Router {
   private readonly configurator = inject(Configurator);
 
   private readonly customHttpHandlers = new Map<
-    StatusCode | undefined,
-    (statusCode: StatusCode) => unknown
+    HttpStatus | undefined,
+    (statusCode: HttpStatus) => unknown
   >();
 
   private readonly errorHandler = inject(ErrorHandler);
@@ -45,11 +45,11 @@ export class Router {
 
   private async abortResponse(
     request: Request,
-    statusCode = StatusCode.NotFound,
+    statusCode = HttpStatus.NotFound,
   ): Promise<Response> {
     const payload = {
       statusCode,
-      message: enumKey(statusCode, StatusCode).replace(/([a-z])([A-Z])/g, '$1 $2') ??
+      message: enumKey(statusCode, HttpStatus).replace(/([a-z])([A-Z])/g, '$1 $2') ??
         'Error',
     };
 
@@ -88,13 +88,13 @@ export class Router {
         },
       });
     } catch {
-      throw new HttpError(StatusCode.NotFound);
+      throw new HttpError(HttpStatus.NotFound);
     }
   }
 
   private async parseResponse(
     body: unknown,
-    statusCode = StatusCode.Ok,
+    statusCode = HttpStatus.Ok,
   ): Promise<Response> {
     let contentType = 'text/html';
 
@@ -197,7 +197,7 @@ export class Router {
     });
 
     for (const controllerRouteMethod of controllerRouteMethods) {
-      const handler = Reflect.getMetadata<{ statusCode?: StatusCode }>(
+      const handler = Reflect.getMetadata<{ statusCode?: HttpStatus }>(
         'httpErrorHandler',
         controller.prototype[controllerRouteMethod],
       );
@@ -205,7 +205,7 @@ export class Router {
       if (handler) {
         this.customHttpHandlers.set(
           handler.statusCode,
-          async (statusCode: StatusCode) => {
+          async (statusCode: HttpStatus) => {
             const methodResult = (inject(controller) as unknown as Record<
               string,
               (...args: unknown[]) => unknown
@@ -278,7 +278,7 @@ export class Router {
         }
       }
 
-      throw new HttpError(StatusCode.NotFound);
+      throw new HttpError(HttpStatus.NotFound);
     } catch (error) {
       if (!(error instanceof HttpError)) {
         this.errorHandler.handle(error, false);
@@ -298,7 +298,7 @@ export class Router {
           return this.parseResponse(body, statusCode);
         }
 
-        return await this.abortResponse(request, StatusCode.InternalServerError);
+        return await this.abortResponse(request, HttpStatus.InternalServerError);
       }
 
       return createResponse(
@@ -306,7 +306,7 @@ export class Router {
           error,
         }),
         {
-          statusCode: StatusCode.InternalServerError,
+          statusCode: HttpStatus.InternalServerError,
         },
       );
     }

@@ -2,7 +2,7 @@ import { HttpMethod } from '../../http/enums/http_method.enum.ts';
 import { inject } from '../../injector/functions/inject.function.ts';
 import { Reflect } from '../../utils/reflect.class.ts';
 import { Router } from '../router.service.ts';
-import { StatusCode } from '../../http/enums/status_code.enum.ts';
+import { HttpStatus } from '../../http/enums/http_status.enum.ts';
 
 const router = inject(Router);
 
@@ -43,7 +43,7 @@ export const Unlock = router.createRouteDecorator([HttpMethod.Unlock]);
 export const Methods = router.createRouteDecorator();
 
 export function Error(
-  statusCode?: StatusCode,
+  statusCode?: HttpStatus,
 ): MethodDecorator {
   return (_target, _methodName, descriptor) => {
     Reflect.defineMetadata(

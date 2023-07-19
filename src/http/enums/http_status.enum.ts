@@ -1,4 +1,4 @@
-export enum StatusCode {
+export enum HttpStatus {
   Continue = 100,
   SwitchingProtocols = 101,
   Processing = 102,

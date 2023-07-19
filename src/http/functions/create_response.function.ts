@@ -1,17 +1,17 @@
 import { Configurator } from '../../configurator/configurator.service.ts';
 import { inject } from '../../injector/functions/inject.function.ts';
-import { StatusCode } from '../enums/status_code.enum.ts';
+import { HttpStatus } from '../enums/http_status.enum.ts';
 
 interface Options {
   headers?: HeadersInit;
-  statusCode?: StatusCode;
+  statusCode?: HttpStatus;
 }
 
 const configurator = inject(Configurator);
 
 export function createResponse(
   body: ReadableStream | XMLHttpRequestBodyInit | null,
-  { headers = {}, statusCode = StatusCode.Ok }: Options = {},
+  { headers = {}, statusCode = HttpStatus.Ok }: Options = {},
 ): Response {
   const cspDirectives = configurator.entries.isProduction
     ? ''
