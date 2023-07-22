@@ -21,6 +21,7 @@ export class TemplateCompiler {
 
   private readonly functions = {
     '__': translate,
+    '$': translate,
     '$env': env,
     '$escape': escape,
     '$inject': inject,
@@ -31,6 +32,8 @@ export class TemplateCompiler {
   private options: CompileOptions = {};
 
   private rawContent: string[] = [];
+
+  private request: Request | undefined = undefined;
 
   public static stacks = new Map<string, string[]>();
 
@@ -174,7 +177,12 @@ export class TemplateCompiler {
             });
 
             const fileContent = await Deno.readTextFile(file);
-            const compiledPartial = await compiler.compile(fileContent, this.data);
+            const compiledPartial = await compiler.compile(
+              fileContent,
+              this.data,
+              {},
+              this.request,
+            );
 
             return compiledPartial;
           } catch (error) {
@@ -202,7 +210,12 @@ export class TemplateCompiler {
             });
 
             const fileContent = await Deno.readTextFile(file);
-            const compiledLayout = await compiler.compile(fileContent, this.data);
+            const compiledLayout = await compiler.compile(
+              fileContent,
+              this.data,
+              {},
+              this.request,
+            );
 
             return compiledLayout;
           } catch (error) {
@@ -234,6 +247,7 @@ export class TemplateCompiler {
 
   private getRenderFunction(body: string, variables: Record<string, unknown> = {}) {
     const globalVariables = {
+      $request: this.request,
       ...Object.keys(constants).reduce((result, key) => ({
         ...result,
         [`$${key}`]: (constants as Record<string, unknown>)[key],
@@ -324,10 +338,15 @@ export class TemplateCompiler {
             fresh: true,
           });
 
-          content = await compiler.compile(content, {
-            ...this.data,
-            ...scopeVariables,
-          });
+          content = await compiler.compile(
+            content,
+            {
+              ...this.data,
+              ...scopeVariables,
+            },
+            {},
+            this.request,
+          );
 
           result += content;
         }
@@ -478,11 +497,13 @@ export class TemplateCompiler {
     html: string,
     data: Record<string, unknown> = {},
     options: CompileOptions = {},
+    request?: Request,
   ): Promise<string> {
     this.data = data;
     this.html = html;
     this.options = options;
     this.rawContent = [];
+    this.request = request;
 
     this.parseRawDirectives();
     this.removeComments();

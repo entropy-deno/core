@@ -93,6 +93,7 @@ export class Router {
   }
 
   private async parseResponse(
+    request: Request,
     body: unknown,
     statusCode = HttpStatus.Ok,
   ): Promise<Response> {
@@ -106,10 +107,24 @@ export class Router {
       case body instanceof Response:
         return body as Response;
 
-      case body instanceof ViewResponse:
-        body = (body as ViewResponse).content;
+      case body instanceof ViewResponse: {
+        const template = await (body as ViewResponse).template();
+        const compiled = await inject(TemplateCompiler).compile(
+          template,
+          (body as ViewResponse).data,
+          {
+            file: (body as ViewResponse).file,
+            ...(body as ViewResponse).options,
+          },
+          request,
+        );
+
+        TemplateCompiler.stacks.clear();
+
+        body = compiled;
 
         break;
+      }
 
       case Array.isArray(body) ||
         ((typeof body === 'object' && body !== null) &&
@@ -279,7 +294,10 @@ export class Router {
               urlPattern.exec(request.url)?.pathname?.groups ?? {},
             );
 
-            return await this.parseResponse(await action(...resolvedParams));
+            return await this.parseResponse(
+              request,
+              await action(...resolvedParams),
+            );
           }
         }
       }
@@ -301,7 +319,7 @@ export class Router {
             this.customHttpHandlers.has(statusCode) ? statusCode : undefined,
           )?.(statusCode);
 
-          return this.parseResponse(body, statusCode);
+          return this.parseResponse(request, body, statusCode);
         }
 
         return await this.abortResponse(request, HttpStatus.InternalServerError);

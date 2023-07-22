@@ -1,14 +1,12 @@
 import { callerFile } from '../../utils/functions/caller_file.function.ts';
 import { CompileOptions } from '../interfaces/compile_options.interface.ts';
-import { inject } from '../../injector/functions/inject.function.ts';
 import { resolveViewFile } from './resolve_view_file.function.ts';
-import { TemplateCompiler } from '../template_compiler.service.ts';
 import { ViewResponse } from '../../http/view_response.class.ts';
 
-export async function render(
+export function render(
   file: string,
   data: Record<string, unknown> = {},
-  options: CompileOptions = {},
+  options: Omit<CompileOptions, 'file'> = {},
 ) {
   const caller = callerFile();
 
@@ -19,20 +17,7 @@ export async function render(
   }
 
   try {
-    const fileContent = await Deno.readTextFile(file);
-
-    const html = await inject(TemplateCompiler).compile(fileContent, data, {
-      file,
-      ...options,
-    });
-
-    TemplateCompiler.stacks.clear();
-
-    const compiled = await inject(TemplateCompiler).compile(html, data, {
-      file,
-    });
-
-    return new ViewResponse(compiled);
+    return new ViewResponse(file, data, options);
   } catch (error) {
     if (!(error instanceof Deno.errors.NotFound)) {
       throw error;

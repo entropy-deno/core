@@ -88,9 +88,9 @@ export class WsServer {
       onListen: () => {
         if (!this.configurator.entries.isDenoDeploy) {
           this.logger.info(
-            `WS server is running on %cport ${this.configurator.entries.port}`,
+            `Broadcasting on port %c${this.configurator.entries.wsPort}`,
             {
-              badge: 'WS',
+              badge: 'WebSocket',
               colors: ['blue'],
             },
           );

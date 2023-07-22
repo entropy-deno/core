@@ -211,10 +211,10 @@ export class Server {
         onListen: () => {
           if (!this.configurator.entries.isDenoDeploy) {
             this.logger.info(
-              `HTTP server is running on %c${
+              `HTTP server is running on ${
                 this.configurator.entries.isProduction
-                  ? `port ${this.configurator.entries.port}`
-                  : `http://${this.configurator.entries.host}:${this.configurator.entries.port}`
+                  ? `port %c${this.configurator.entries.port}`
+                  : `%chttp://${this.configurator.entries.host}:${this.configurator.entries.port}`
               } %c[${Deno.build.os === 'darwin' ? '⌃C' : 'Ctrl+C'} to quit]`,
               {
                 badge: 'Server',
