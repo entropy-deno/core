@@ -192,7 +192,7 @@ export class Router {
       return (
         typeof controller.prototype[property] === 'function' &&
         !['constructor', 'toString', 'toLocaleString'].includes(property) &&
-        !property.startsWith('_')
+        property[0] !== '_'
       );
     });
 

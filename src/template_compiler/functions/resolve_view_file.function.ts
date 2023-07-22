@@ -7,7 +7,7 @@ export function resolveViewFile(caller: string, file: string): string {
 
       break;
 
-    case file.startsWith('/'):
+    case file[0] === '/':
       file = `views/${file.slice(1)}`;
 
       break;
