@@ -1,4 +1,4 @@
-import { fromFileUrl } from 'https://deno.land/std@0.194.0/path/mod.ts';
+import { fromFileUrl } from 'https://deno.land/std@0.195.0/path/mod.ts';
 
 export function callerFile() {
   const error = new Error();

@@ -1,5 +1,5 @@
-import { load as loadDotEnv } from 'https://deno.land/std@0.194.0/dotenv/mod.ts';
-import { parse as parseFlags } from 'https://deno.land/std@0.194.0/flags/mod.ts';
+import { load as loadDotEnv } from 'https://deno.land/std@0.195.0/dotenv/mod.ts';
+import { parse as parseFlags } from 'https://deno.land/std@0.195.0/flags/mod.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
 import { ErrorHandler } from '../error_handler/error_handler.service.ts';
 import { inject } from '../injector/functions/inject.function.ts';
