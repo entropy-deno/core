@@ -1,6 +1,6 @@
 import { HttpMethod } from '../../http/enums/http_method.enum.ts';
 import { inject } from '../../injector/functions/inject.function.ts';
-import { Reflect } from '../../utils/reflect.class.ts';
+import { Reflector } from '../../utils/reflector.class.ts';
 import { Router } from '../router.service.ts';
 import { HttpStatus } from '../../http/enums/http_status.enum.ts';
 
@@ -46,7 +46,7 @@ export function Error(
   statusCode?: HttpStatus,
 ): MethodDecorator {
   return (_target, _methodName, descriptor) => {
-    Reflect.defineMetadata(
+    Reflector.defineMetadata(
       'httpErrorHandler',
       {
         statusCode,

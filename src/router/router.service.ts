@@ -9,7 +9,7 @@ import { errorPage } from '../error_handler/pages/error_page.ts';
 import { HttpError } from '../http/http_error.class.ts';
 import { HttpMethod } from '../http/enums/http_method.enum.ts';
 import { inject } from '../injector/functions/inject.function.ts';
-import { Reflect } from '../utils/reflect.class.ts';
+import { Reflector } from '../utils/reflector.class.ts';
 import { RouteDefinition } from './interfaces/route_definition.interface.ts';
 import { RouteOptions } from './interfaces/route_options.interface.ts';
 import { RoutePath } from './types/route_path.type.ts';
@@ -151,7 +151,7 @@ export class Router {
       options: RouteOptions = {},
     ): MethodDecorator => {
       return (_target, _methodName, descriptor) => {
-        Reflect.defineMetadata<Partial<RouteDefinition>>(
+        Reflector.defineMetadata<Partial<RouteDefinition>>(
           'routeDefinition',
           {
             methods,
@@ -197,7 +197,7 @@ export class Router {
     });
 
     for (const controllerRouteMethod of controllerRouteMethods) {
-      const handler = Reflect.getMetadata<{ statusCode?: HttpStatus }>(
+      const handler = Reflector.getMetadata<{ statusCode?: HttpStatus }>(
         'httpErrorHandler',
         controller.prototype[controllerRouteMethod],
       );
@@ -221,7 +221,7 @@ export class Router {
         continue;
       }
 
-      const { methods, path } = Reflect.getMetadata<
+      const { methods, path } = Reflector.getMetadata<
         Exclude<RouteDefinition, 'action'>
       >(
         'routeDefinition',
