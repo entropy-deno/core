@@ -10,6 +10,7 @@ import { Router } from '../router/router.service.ts';
 import { runShellCommand } from '../utils/functions/run_shell_command.function.ts';
 import { ServerOptions } from './interfaces/server_options.interface.ts';
 import { WebClientAlias } from './enums/web_client_alias.enum.ts';
+import { WsServer } from '../ws/ws_server.service.ts';
 
 export class Server {
   private readonly configurator = inject(Configurator);
@@ -25,6 +26,8 @@ export class Server {
   private readonly logger = inject(Logger);
 
   private readonly router = inject(Router);
+
+  private readonly wsServer = inject(WsServer);
 
   constructor(private readonly options: ServerOptions) {}
 
@@ -50,40 +53,8 @@ export class Server {
   private async handleRequest(request: Request): Promise<Response> {
     const timerStart = performance.now();
     const url = new URL(request.url).pathname;
-
-    if (request.headers.get('upgrade')?.toLowerCase() === 'websocket') {
-      const { socket, response } = Deno.upgradeWebSocket(request);
-
-      if (
-        !this.configurator.entries.isProduction && url === '/$entropy/hot-reload'
-      ) {
-        let watcher: Deno.FsWatcher;
-
-        try {
-          watcher = Deno.watchFs(['src', 'views']);
-        } catch {
-          watcher = Deno.watchFs('src');
-        }
-
-        socket.onopen = async () => {
-          for await (const event of watcher) {
-            if (event.kind === 'modify') {
-              socket.send(JSON.stringify({
-                path: event.paths[0],
-              }));
-            }
-          }
-        };
-
-        socket.onclose = () => {
-          watcher.close();
-        };
-      }
-
-      return response;
-    }
-
     const response = await this.router.respond(request);
+
     const { status } = response;
 
     let statusColor: 'blue' | 'green' | 'orange' | 'red' = 'blue';
@@ -131,9 +102,8 @@ export class Server {
     for (const module of this.options.modules) {
       const moduleInstance = inject(module);
 
-      for (const controller of moduleInstance.controllers ?? []) {
-        this.router.registerController(controller);
-      }
+      this.router.registerControllers(moduleInstance.controllers ?? []);
+      this.wsServer.registerChannels(moduleInstance.channels ?? []);
     }
   }
 
@@ -254,6 +224,8 @@ export class Server {
           }
         },
       }, async (request) => await this.handleRequest(request));
+
+      this.wsServer.start();
     } catch (error) {
       this.errorHandler.handle(error);
     }

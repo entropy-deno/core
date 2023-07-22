@@ -11,4 +11,5 @@ export interface AppConfig {
   tlsCertificateFile: string | false;
   tlsKey: string | false;
   tlsKeyFile: string | false;
+  wsPort: number;
 }

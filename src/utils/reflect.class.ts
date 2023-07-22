@@ -1,14 +1,10 @@
-import { Constructor } from './interfaces/constructor.interface.ts';
-
-type Target = Constructor | ((...args: unknown[]) => unknown);
-
 export class Reflect {
-  private static metadata = new WeakMap<Target, Record<string, unknown>>();
+  private static metadata = new WeakMap<object, Record<string, unknown>>();
 
   public static defineMetadata<T>(
     key: string,
     value: T,
-    target: Target,
+    target: object,
   ): void {
     this.metadata.set(target, {
       [key]: value,
@@ -18,12 +14,12 @@ export class Reflect {
 
   public static getMetadata<T>(
     key: string,
-    target: Target,
+    target: object,
   ): T | undefined {
     return this.metadata.get(target)?.[key] as T | undefined;
   }
 
-  public static hasMetadata(key: string, target: Target): boolean {
+  public static hasMetadata(key: string, target: object): boolean {
     return this.metadata.has(target) && key in this.metadata.get(target)!;
   }
 }

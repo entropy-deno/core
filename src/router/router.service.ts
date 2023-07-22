@@ -250,6 +250,12 @@ export class Router {
     }
   }
 
+  public registerControllers(controllers: Constructor<Controller>[]): void {
+    for (const controller of controllers) {
+      this.registerController(controller);
+    }
+  }
+
   public async respond(request: Request): Promise<Response> {
     try {
       const { pathname } = new URL(request.url);

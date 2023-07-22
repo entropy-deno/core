@@ -104,7 +104,7 @@ export class TemplateCompiler {
         render: () => {
           return this.configurator.entries.isProduction ? '' : `
               <script>
-                const ws = new WebSocket('ws://${this.configurator.entries.host}:${this.configurator.entries.port}/$entropy/hot-reload');
+                const ws = new WebSocket('ws://${this.configurator.entries.host}:${this.configurator.entries.wsPort}/$entropy/hot-reload');
 
                 ws.onmessage = (event) => {
                   if (JSON.parse(event.data).path.endsWith('${
@@ -115,6 +115,7 @@ export class TemplateCompiler {
                     window.location.reload();
                   }
                 };
+
                 ws.onclose = () => console.log('[entropy] Hot reload disconnected');
               </script>
             `;
