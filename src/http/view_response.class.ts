@@ -5,17 +5,21 @@ import { TemplateCompiler } from '../template_compiler/template_compiler.service
 export class ViewResponse {
   constructor(
     public readonly file: string,
-    public readonly data: Record<string, unknown> = {},
+    public readonly variables: Record<string, unknown> = {},
     public readonly options: Omit<CompileOptions, 'file'> = {},
   ) {}
 
   public async template(): Promise<string> {
     const fileContent = await Deno.readTextFile(this.file);
 
-    const compiled = await inject(TemplateCompiler).compile(fileContent, this.data, {
-      file: this.file,
-      ...this.options,
-    });
+    const compiled = await inject(TemplateCompiler).compile(
+      fileContent,
+      this.variables,
+      {
+        file: this.file,
+        ...this.options,
+      },
+    );
 
     TemplateCompiler.stacks.clear();
 

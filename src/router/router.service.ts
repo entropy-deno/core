@@ -104,14 +104,15 @@ export class Router {
     }
 
     switch (true) {
-      case body instanceof Response:
+      case body instanceof Response: {
         return body as Response;
+      }
 
       case body instanceof ViewResponse: {
         const template = await (body as ViewResponse).template();
         const compiled = await inject(TemplateCompiler).compile(
           template,
-          (body as ViewResponse).data,
+          (body as ViewResponse).variables,
           {
             file: (body as ViewResponse).file,
             ...(body as ViewResponse).options,
@@ -145,8 +146,9 @@ export class Router {
         break;
       }
 
-      default:
+      default: {
         throw new Error('Invalid response type');
+      }
     }
 
     return createResponse(body as string, {

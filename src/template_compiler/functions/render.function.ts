@@ -5,7 +5,7 @@ import { ViewResponse } from '../../http/view_response.class.ts';
 
 export function render(
   file: string,
-  data: Record<string, unknown> = {},
+  variables: Record<string, unknown> = {},
   options: Omit<CompileOptions, 'file'> = {},
 ) {
   const caller = callerFile();
@@ -17,7 +17,7 @@ export function render(
   }
 
   try {
-    return new ViewResponse(file, data, options);
+    return new ViewResponse(file, variables, options);
   } catch (error) {
     if (!(error instanceof Deno.errors.NotFound)) {
       throw error;

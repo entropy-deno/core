@@ -13,8 +13,6 @@ import { translate } from '../localizator/functions/translate.function.ts';
 export class TemplateCompiler {
   private readonly configurator = inject(Configurator);
 
-  private data: Record<string, unknown> = {};
-
   private directives: TemplateDirectiveDefinition[] = [];
 
   private html = '';
@@ -34,6 +32,8 @@ export class TemplateCompiler {
   private rawContent: string[] = [];
 
   private request: Request | undefined = undefined;
+
+  private variables: Record<string, unknown> = {};
 
   public static stacks = new Map<string, string[]>();
 
@@ -179,7 +179,7 @@ export class TemplateCompiler {
             const fileContent = await Deno.readTextFile(file);
             const compiledPartial = await compiler.compile(
               fileContent,
-              this.data,
+              this.variables,
               {},
               this.request,
             );
@@ -212,7 +212,7 @@ export class TemplateCompiler {
             const fileContent = await Deno.readTextFile(file);
             const compiledLayout = await compiler.compile(
               fileContent,
-              this.data,
+              this.variables,
               {},
               this.request,
             );
@@ -252,7 +252,7 @@ export class TemplateCompiler {
         ...result,
         [`$${key}`]: (constants as Record<string, unknown>)[key],
       }), {}),
-      ...this.data,
+      ...this.variables,
       ...this.functions,
     };
 
@@ -341,7 +341,7 @@ export class TemplateCompiler {
           content = await compiler.compile(
             content,
             {
-              ...this.data,
+              ...this.variables,
               ...scopeVariables,
             },
             {},
@@ -495,15 +495,15 @@ export class TemplateCompiler {
 
   public async compile(
     html: string,
-    data: Record<string, unknown> = {},
+    variables: Record<string, unknown> = {},
     options: CompileOptions = {},
     request?: Request,
   ): Promise<string> {
-    this.data = data;
     this.html = html;
     this.options = options;
     this.rawContent = [];
     this.request = request;
+    this.variables = variables;
 
     this.parseRawDirectives();
     this.removeComments();
