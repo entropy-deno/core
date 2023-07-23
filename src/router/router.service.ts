@@ -1,7 +1,6 @@
 import { contentType } from 'https://deno.land/std@0.195.0/media_types/content_type.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
 import { Constructor } from '../utils/interfaces/constructor.interface.ts';
-import { Controller } from '../http/interfaces/controller.interface.ts';
 import { createResponse } from '../http/functions/create_response.function.ts';
 import { enumKey } from '../utils/functions/enum_key.function.ts';
 import { ErrorHandler } from '../error_handler/error_handler.service.ts';
@@ -200,9 +199,7 @@ export class Router {
     ) as RouteDecoratorFunction<T>;
   }
 
-  public registerController(controller: Constructor<Controller>): void {
-    const instance = inject(controller);
-
+  public registerController(controller: Constructor): void {
     const properties = Object.getOwnPropertyNames(controller.prototype);
 
     const controllerRouteMethods = properties.filter((property) => {
@@ -255,19 +252,9 @@ export class Router {
         return methodResult instanceof Promise ? await methodResult : methodResult;
       });
     }
-
-    for (const { action, methods, path } of instance.routes ?? []) {
-      this.registerRoute(path, methods, async (...args: unknown[]) => {
-        const methodResult =
-          (instance as unknown as Record<string, (...args: unknown[]) => unknown>)
-            [action](...args);
-
-        return methodResult instanceof Promise ? await methodResult : methodResult;
-      });
-    }
   }
 
-  public registerControllers(controllers: Constructor<Controller>[]): void {
+  public registerControllers(controllers: Constructor[]): void {
     for (const controller of controllers) {
       this.registerController(controller);
     }
@@ -292,7 +279,7 @@ export class Router {
 
             return await this.parseResponse(
               request,
-              await action(...resolvedParams),
+              await action(request, ...resolvedParams),
             );
           }
         }
