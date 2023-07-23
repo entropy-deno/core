@@ -28,33 +28,6 @@ export class WsServer {
 
     const { socket, response } = Deno.upgradeWebSocket(request);
 
-    if (
-      !this.configurator.entries.isProduction &&
-      url.pathname === '/$entropy/hot-reload'
-    ) {
-      let watcher: Deno.FsWatcher;
-
-      try {
-        watcher = Deno.watchFs(['src', 'views']);
-      } catch {
-        watcher = Deno.watchFs('src');
-      }
-
-      socket.onopen = async () => {
-        for await (const event of watcher) {
-          if (event.kind === 'modify') {
-            socket.send(JSON.stringify({
-              path: event.paths[0],
-            }));
-          }
-        }
-      };
-
-      socket.onclose = () => {
-        watcher.close();
-      };
-    }
-
     for (const channel of this.channels) {
       const channelInstance = inject(channel);
       const socketId = this.encryoter.uuid();

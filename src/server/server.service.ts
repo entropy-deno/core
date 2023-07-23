@@ -2,6 +2,7 @@ import { load as loadDotEnv } from 'https://deno.land/std@0.195.0/dotenv/mod.ts'
 import { parse as parseFlags } from 'https://deno.land/std@0.195.0/flags/mod.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
 import { ErrorHandler } from '../error_handler/error_handler.service.ts';
+import { HotReloadChannel } from './hot_reload.channel.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { Localizator } from '../localizator/localizator.module.ts';
 import { Logger } from '../logger/logger.service.ts';
@@ -107,7 +108,9 @@ export class Server {
     }
   }
 
-  private setupDevelopmentEnvironment(): void {
+  private async setupDevelopmentEnvironment(): Promise<void> {
+    this.wsServer.registerChannel(HotReloadChannel);
+
     const flags = parseFlags(Deno.args, {
       boolean: ['open'],
       default: {
@@ -115,9 +118,25 @@ export class Server {
       },
     });
 
+    let viewWatcher: Deno.FsWatcher;
+
+    try {
+      viewWatcher = Deno.watchFs(['src', 'views']);
+    } catch {
+      viewWatcher = Deno.watchFs('src');
+    }
+
+    for await (const event of viewWatcher) {
+      if (event.kind === 'modify') {
+        inject(HotReloadChannel).sendReloadRequest(event.paths[0]);
+      }
+    }
+
     for (const signal of this.listenSignals) {
       Deno.addSignalListener(signal, () => {
         localStorage.removeItem(this.devServerCheckKey);
+
+        viewWatcher.close();
 
         Deno.exit();
       });
@@ -182,7 +201,7 @@ export class Server {
 
     if (!this.configurator.entries.isDenoDeploy) {
       flags.dev
-        ? this.setupDevelopmentEnvironment()
+        ? await this.setupDevelopmentEnvironment()
         : this.setupProductionEnvironment();
     }
 

@@ -106,22 +106,16 @@ export class TemplateCompiler {
         type: 'single',
         render: () => {
           return this.configurator.entries.isProduction ? '' : `
-              <script>
-                const ws = new WebSocket('ws://${this.configurator.entries.host}:${this.configurator.entries.wsPort}/$entropy/hot-reload');
+            <script>
+              const ws = new WebSocket('ws://${this.configurator.entries.host}:${this.configurator.entries.wsPort}');
 
-                ws.onmessage = (event) => {
-                  if (JSON.parse(event.data).path.endsWith('${
-            this.options
-              .file!.split('/')
-              .pop()
-          }')) {
-                    window.location.reload();
-                  }
-                };
+              ws.onmessage = () => {
+                window.location.reload();
+              };
 
-                ws.onclose = () => console.log('[entropy] Hot reload disconnected');
-              </script>
-            `;
+              ws.onclose = () => console.log('[entropy] Hot reload disconnected');
+            </script>
+          `;
         },
       },
       {
