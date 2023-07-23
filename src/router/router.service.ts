@@ -275,12 +275,6 @@ export class Router {
 
   public async respond(request: Request): Promise<Response> {
     try {
-      const { pathname } = new URL(request.url);
-
-      if (request.method === HttpMethod.Get && pathname.includes('.')) {
-        return await this.handleStaticFileRequest(request);
-      }
-
       for (const [path, { action, methods }] of this.routes) {
         if (!methods.includes(request.method as HttpMethod)) {
           continue;
@@ -302,6 +296,13 @@ export class Router {
             );
           }
         }
+      }
+
+      if (
+        request.method === HttpMethod.Get &&
+        new URL(request.url).pathname.includes('.')
+      ) {
+        return await this.handleStaticFileRequest(request);
       }
 
       throw new HttpError(HttpStatus.NotFound);
