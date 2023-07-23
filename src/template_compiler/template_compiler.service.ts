@@ -15,8 +15,6 @@ export class TemplateCompiler {
 
   private directives: TemplateDirectiveDefinition[] = [];
 
-  private html = '';
-
   private readonly functions = {
     '__': translate,
     '$': translate,
@@ -32,6 +30,8 @@ export class TemplateCompiler {
   private rawContent: string[] = [];
 
   private request: Request | undefined = undefined;
+
+  private template = '';
 
   private variables: Record<string, unknown> = {};
 
@@ -271,7 +271,7 @@ export class TemplateCompiler {
   }
 
   private parseDataInterpolations(): void {
-    const matches = this.html.matchAll(/\{\{(#|@?)(.*?)\}\}/g) ?? [];
+    const matches = this.template.matchAll(/\{\{(#|@?)(.*?)\}\}/g) ?? [];
 
     for (const [wholeMatch, modifier, matchValue] of matches) {
       if (modifier === '@') {
@@ -294,12 +294,12 @@ export class TemplateCompiler {
 
       const renderedExpression = renderFunction();
 
-      this.html = this.html.replace(wholeMatch, String(renderedExpression));
+      this.template = this.template.replace(wholeMatch, String(renderedExpression));
     }
   }
 
   private async parseEachDirectives(): Promise<void> {
-    const matches = this.html.matchAll(
+    const matches = this.template.matchAll(
       /\[each *?\((.*?) (in|of) (.*)\)\](\n|\r\n)?((.*?|\s*?)*?)\[\/each\]/gm,
     ) ?? [];
 
@@ -352,13 +352,14 @@ export class TemplateCompiler {
         }
       }
 
-      this.html = this.html.replace(wholeMatch, result);
+      this.template = this.template.replace(wholeMatch, result);
     }
   }
 
   private parseIfDirectives(): void {
     const matches =
-      this.html.matchAll(/\[if ?(.*?)\](\n|\r\n*?)?((.|\n|\r\n)*?)\[\/if\]/gm) ?? [];
+      this.template.matchAll(/\[if ?(.*?)\](\n|\r\n*?)?((.|\n|\r\n)*?)\[\/if\]/gm) ??
+        [];
 
     for (const [wholeMatch, , , content] of matches) {
       const renderFunction = this.getRenderFunction(
@@ -368,17 +369,17 @@ export class TemplateCompiler {
       const condition = renderFunction<boolean>();
 
       if (condition) {
-        this.html = this.html.replace(wholeMatch, content);
+        this.template = this.template.replace(wholeMatch, content);
 
         continue;
       }
 
-      this.html = this.html.replace(wholeMatch, '');
+      this.template = this.template.replace(wholeMatch, '');
     }
   }
 
   private parseIfElseDirectives(): void {
-    const matches = this.html.matchAll(
+    const matches = this.template.matchAll(
       /\[if ?(.*?)\](\n|\r\n*?)?((.|\n|\r\n)*?)(\[else\])((.|\n|\r\n)*?)\[\/if\]/gm,
     ) ?? [];
 
@@ -390,23 +391,23 @@ export class TemplateCompiler {
       const condition = renderFunction<boolean>();
 
       if (condition) {
-        this.html = this.html.replace(wholeMatch, value);
+        this.template = this.template.replace(wholeMatch, value);
 
         continue;
       }
 
-      this.html = this.html.replace(wholeMatch, content);
+      this.template = this.template.replace(wholeMatch, content);
     }
   }
 
   private parseRawDirectives(): void {
     const matches =
-      this.html.matchAll(/\[raw\](\n|\r\n)?((.*?|\s*?)*?)\[\/raw\]/gm) ?? [];
+      this.template.matchAll(/\[raw\](\n|\r\n)?((.*?|\s*?)*?)\[\/raw\]/gm) ?? [];
 
     let count = 0;
 
     for (const [wholeMatch, , content] of matches) {
-      this.html = this.html.replace(wholeMatch, `$_raw${count}`);
+      this.template = this.template.replace(wholeMatch, `$_raw${count}`);
 
       this.rawContent.push(content);
 
@@ -415,7 +416,7 @@ export class TemplateCompiler {
   }
 
   private parseSwitchDirectives(): void {
-    const matches = this.html.matchAll(
+    const matches = this.template.matchAll(
       /\[switch ?(.*?)\](\n|\r\n*?)?((.|\n|\r\n)*?)\[\/switch\]/gm,
     ) ?? [];
 
@@ -457,7 +458,7 @@ export class TemplateCompiler {
 
       for (const [key, value] of cases) {
         if (key === switchCondition) {
-          this.html = this.html.replace(wholeMatch, value);
+          this.template = this.template.replace(wholeMatch, value);
 
           matchesOneCase = true;
 
@@ -466,43 +467,43 @@ export class TemplateCompiler {
       }
 
       if (!matchesOneCase && defaultCaseValue) {
-        this.html = this.html.replace(wholeMatch, defaultCaseValue);
+        this.template = this.template.replace(wholeMatch, defaultCaseValue);
 
         return;
       }
 
-      this.html = this.html.replace(wholeMatch, '');
+      this.template = this.template.replace(wholeMatch, '');
     }
   }
 
   private removeComments(): void {
-    const matches = this.html.matchAll(/\{\{(@?)--(.*?)--\}\}/g) ?? [];
+    const matches = this.template.matchAll(/\{\{(@?)--(.*?)--\}\}/g) ?? [];
 
     for (const [wholeMatch] of matches) {
-      this.html = this.html.replace(wholeMatch, '');
+      this.template = this.template.replace(wholeMatch, '');
     }
   }
 
   private restoreRawContent(): void {
-    const matches = this.html.matchAll(/\$_raw([0-9]+)/g) ?? [];
+    const matches = this.template.matchAll(/\$_raw([0-9]+)/g) ?? [];
 
     for (const [wholeMatch, segmentIndex] of matches) {
       const index = parseInt(segmentIndex);
 
-      this.html = this.html.replace(wholeMatch, this.rawContent[index]);
+      this.template = this.template.replace(wholeMatch, this.rawContent[index]);
     }
   }
 
   public async compile(
-    html: string,
+    template: string,
     variables: Record<string, unknown> = {},
     options: CompileOptions = {},
     request?: Request,
   ): Promise<string> {
-    this.html = html;
     this.options = options;
     this.rawContent = [];
     this.request = request;
+    this.template = template;
     this.variables = variables;
 
     this.parseRawDirectives();
@@ -523,7 +524,7 @@ export class TemplateCompiler {
           'gm',
         );
 
-      const matches = this.html.matchAll(directive.pattern ?? pattern) ?? [];
+      const matches = this.template.matchAll(directive.pattern ?? pattern) ?? [];
 
       for (const [expression, hasArguments, args, , blockContent] of matches) {
         const argumentsRenderFunction = hasArguments
@@ -543,7 +544,7 @@ export class TemplateCompiler {
             ...resolvedArguments,
           );
 
-        this.html = this.html.replace(
+        this.template = this.template.replace(
           expression,
           result instanceof Promise ? await result : result,
         );
@@ -552,7 +553,7 @@ export class TemplateCompiler {
 
     this.restoreRawContent();
 
-    return this.html;
+    return this.template;
   }
 
   public registerDirective(directive: TemplateDirectiveDefinition): void {
