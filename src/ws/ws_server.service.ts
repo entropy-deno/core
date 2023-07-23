@@ -82,6 +82,12 @@ export class WsServer {
   }
 
   public start(): void {
+    if (this.configurator.entries.wsPort === this.configurator.entries.port) {
+      throw new Error(
+        `WebSocket port ${this.configurator.entries.wsPort} is already in use`,
+      );
+    }
+
     Deno.serve({
       hostname: this.configurator.entries.host,
       port: this.configurator.entries.wsPort,

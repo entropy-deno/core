@@ -110,7 +110,7 @@ export class Router {
 
       case body instanceof ViewResponse: {
         const template = await (body as ViewResponse).template();
-        const compiled = await inject(TemplateCompiler).compile(
+        const compiledTemplate = await inject(TemplateCompiler).compile(
           template,
           (body as ViewResponse).variables,
           {
@@ -122,7 +122,7 @@ export class Router {
 
         TemplateCompiler.stacks.clear();
 
-        body = compiled;
+        body = compiledTemplate;
 
         break;
       }
@@ -321,7 +321,7 @@ export class Router {
             this.customHttpHandlers.has(statusCode) ? statusCode : undefined,
           )?.(statusCode);
 
-          return this.parseResponse(request, body, statusCode);
+          return await this.parseResponse(request, body, statusCode);
         }
 
         return await this.abortResponse(request, HttpStatus.InternalServerError);
