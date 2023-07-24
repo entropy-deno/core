@@ -3,22 +3,28 @@ import { Reflector } from '../utils/reflector.class.ts';
 export abstract class Broadcaster {
   public readonly activeSockets = new Map<string, WebSocket>();
 
-  protected broadcast(payload: unknown = {}, channel?: string): void {
+  protected broadcast(
+    payload: Record<string, unknown> = {},
+    channel?: string,
+  ): void {
     for (const socket of this.activeSockets.values()) {
-      const channelName = Reflector.getMetadata<string>('name', this);
-
-      const pattern = new URLPattern({
-        pathname: `${channelName?.[0] === '/' ? '' : '/'}${channelName}`,
-      });
+      const channelName = Reflector.getMetadata<string>('name', this.constructor);
 
       if (!channel) {
         channel = channelName;
       }
 
+      const pattern = new URLPattern({
+        pathname: `${channel?.[0] === '/' ? '' : '/'}${channel}`,
+      });
+
       if (
         pattern?.test({ pathname: `${channel?.[0] === '/' ? '' : '/'}${channel}` })
       ) {
-        socket?.send(JSON.stringify(payload));
+        socket?.send(JSON.stringify({
+          channel,
+          payload,
+        }));
       }
     }
   }

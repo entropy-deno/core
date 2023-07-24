@@ -17,12 +17,7 @@ export class WsServer {
   private readonly logger = inject(Logger);
 
   private handleConnection(request: Request): Response {
-    const url = new URL(request.url);
-
-    if (
-      url.protocol === 'ws' &&
-      request.headers.get('upgrade')?.toLowerCase() !== 'websocket'
-    ) {
+    if (request.headers.get('upgrade')?.toLowerCase() !== 'websocket') {
       throw new HttpError(HttpStatus.UpgradeRequired);
     }
 

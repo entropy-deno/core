@@ -108,7 +108,7 @@ export class Server {
     }
   }
 
-  private async setupDevelopmentEnvironment(): Promise<void> {
+  private setupDevelopmentEnvironment(): void {
     this.wsServer.registerChannel(HotReloadChannel);
 
     const flags = parseFlags(Deno.args, {
@@ -118,25 +118,9 @@ export class Server {
       },
     });
 
-    let viewWatcher: Deno.FsWatcher;
-
-    try {
-      viewWatcher = Deno.watchFs(['src', 'views']);
-    } catch {
-      viewWatcher = Deno.watchFs('src');
-    }
-
-    for await (const event of viewWatcher) {
-      if (event.kind === 'modify') {
-        inject(HotReloadChannel).sendReloadRequest(event.paths[0]);
-      }
-    }
-
     for (const signal of this.listenSignals) {
       Deno.addSignalListener(signal, () => {
         localStorage.removeItem(this.devServerCheckKey);
-
-        viewWatcher.close();
 
         Deno.exit();
       });
@@ -201,7 +185,7 @@ export class Server {
 
     if (!this.configurator.entries.isDenoDeploy) {
       flags.dev
-        ? await this.setupDevelopmentEnvironment()
+        ? this.setupDevelopmentEnvironment()
         : this.setupProductionEnvironment();
     }
 
@@ -245,6 +229,30 @@ export class Server {
       }, async (request) => await this.handleRequest(request));
 
       this.wsServer.start();
+
+      if (flags.dev) {
+        let viewWatcher: Deno.FsWatcher;
+
+        try {
+          viewWatcher = Deno.watchFs(['src', 'views']);
+        } catch {
+          viewWatcher = Deno.watchFs('src');
+        }
+
+        for await (const event of viewWatcher) {
+          if (event.kind === 'modify') {
+            inject(HotReloadChannel).sendReloadRequest();
+          }
+        }
+
+        for (const signal of this.listenSignals) {
+          Deno.addSignalListener(signal, () => {
+            viewWatcher.close();
+
+            Deno.exit();
+          });
+        }
+      }
     } catch (error) {
       this.errorHandler.handle(error);
     }

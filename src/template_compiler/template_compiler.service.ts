@@ -109,8 +109,10 @@ export class TemplateCompiler {
             <script>
               const ws = new WebSocket('ws://${this.configurator.entries.host}:${this.configurator.entries.wsPort}');
 
-              ws.onmessage = () => {
-                window.location.reload();
+              ws.onmessage = (event) => {
+                if (JSON.parse(event.data).channel === '$hot-reload') {
+                  window.location.reload();
+                }
               };
 
               ws.onclose = () => console.log('[entropy] Hot reload disconnected');

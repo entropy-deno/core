@@ -3,9 +3,9 @@ import { WsChannel } from '../ws/decorators/ws_channel.decorator.ts';
 
 @WsChannel('$hot-reload')
 export class HotReloadChannel extends Broadcaster {
-  public sendReloadRequest(path: string) {
+  public sendReloadRequest() {
     this.broadcast({
-      path,
-    }, '$hot-reload');
+      reload: true,
+    });
   }
 }
