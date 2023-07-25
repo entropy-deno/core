@@ -211,9 +211,11 @@ export class Router {
     });
 
     for (const controllerRouteMethod of controllerRouteMethods) {
+      const controllerMethod = controller.prototype[controllerRouteMethod];
+
       const handler = Reflector.getMetadata<{ statusCode?: HttpStatus }>(
         'httpErrorHandler',
-        controller.prototype[controllerRouteMethod],
+        controllerMethod,
       );
 
       if (handler) {
@@ -239,10 +241,23 @@ export class Router {
         Exclude<RouteDefinition, 'action'>
       >(
         'routeDefinition',
-        controller.prototype[controllerRouteMethod],
+        controllerMethod,
       )!;
 
       this.registerRoute(path, methods, async (...args: unknown[]) => {
+        const redirectUrl = Reflector.getMetadata<string>(
+          'redirectUrl',
+          controllerMethod,
+        );
+
+        if (redirectUrl) {
+          return Response.redirect(
+            redirectUrl[0] === '/'
+              ? `${new URL((args[0] as Request).url).origin}${redirectUrl}`
+              : redirectUrl,
+          );
+        }
+
         const methodResult = (inject(controller) as unknown as Record<
           string,
           (...args: unknown[]) => unknown

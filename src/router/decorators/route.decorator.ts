@@ -46,7 +46,7 @@ export function Error(
   statusCode?: HttpStatus,
 ): MethodDecorator {
   return (_target, _methodName, descriptor) => {
-    Reflector.defineMetadata(
+    Reflector.defineMetadata<{ statusCode?: HttpStatus }>(
       'httpErrorHandler',
       {
         statusCode,
