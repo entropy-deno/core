@@ -8,6 +8,7 @@ import { errorPage } from '../error_handler/pages/error_page.ts';
 import { HttpError } from '../http/http_error.class.ts';
 import { HttpMethod } from '../http/enums/http_method.enum.ts';
 import { inject } from '../injector/functions/inject.function.ts';
+import { Middleware } from '../http/interfaces/middleware.interface.ts';
 import { Reflector } from '../utils/reflector.class.ts';
 import { RouteDefinition } from './interfaces/route_definition.interface.ts';
 import { RouteOptions } from './interfaces/route_options.interface.ts';
@@ -245,6 +246,23 @@ export class Router {
       )!;
 
       this.registerRoute(path, methods, async (...args: unknown[]) => {
+        const middleware = Reflector.getMetadata<Constructor<Middleware>[]>(
+          'middleware',
+          controllerMethod,
+        ) ?? [];
+
+        for (const middlewareHandler of middleware) {
+          const result = inject(middlewareHandler).handle();
+
+          if (result instanceof Promise) {
+            await result;
+          }
+
+          if (result) {
+            return result;
+          }
+        }
+
         const redirectUrl = Reflector.getMetadata<string>(
           'redirectUrl',
           controllerMethod,
