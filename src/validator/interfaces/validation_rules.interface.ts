@@ -28,7 +28,6 @@ export interface ValidationRules {
   phoneNumber?: boolean;
   regexp?: RegExp;
   required?: boolean;
-  sameAs?: string;
   startsWith?: string;
   uppercase?: boolean;
   username?: boolean;

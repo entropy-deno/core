@@ -1,5 +1,4 @@
 import { Configurator } from '../configurator/configurator.service.ts';
-import { HttpStatus } from '../http/enums/http_status.enum.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { Localizator } from '../localizator/localizator.service.ts';
 import { ValidationRuleDefinition } from './interfaces/validation_rule_definition.interface.ts';
@@ -18,8 +17,8 @@ export class Validator {
         name: 'accepted',
         errorMessage: 'Field :field must be accepted',
         validate: ([value]) => {
-          return ([true, 'true', 'on', 'yes', '1', 1] as const).includes(
-            value as any,
+          return ([true, 'true', 'on', 'yes', '1', 1]).includes(
+            value as boolean | number | string,
           );
         },
       },
@@ -27,8 +26,8 @@ export class Validator {
         name: 'boolean',
         errorMessage: 'Field :field must be a boolean value',
         validate: ([value]) => {
-          return ([true, false, 'true', 'false', '1', '0', 1, 0] as const).includes(
-            value as any,
+          return ([true, false, 'true', 'false', '1', '0', 1, 0]).includes(
+            value as boolean | number | string,
           );
         },
       },
@@ -46,8 +45,8 @@ export class Validator {
         name: 'declined',
         errorMessage: 'Field :field must be declined',
         validate: ([value]) => {
-          return ([false, 'false', 'ooo', 'no', '0', 0] as const).includes(
-            value as any,
+          return ([false, 'false', 'ooo', 'no', '0', 0]).includes(
+            value as boolean | number | string,
           );
         },
       },
@@ -137,7 +136,7 @@ export class Validator {
         name: 'length',
         errorMessage: `Field :field must be a :value characters long`,
         validate: ([value, length]) => {
-          return value?.length === (length as Integer);
+          return value?.length === (length as number);
         },
       },
       {
@@ -158,7 +157,7 @@ export class Validator {
         name: 'maxLength',
         errorMessage: `Field :field must be shorter than :value characters`,
         validate: ([value, length]) => {
-          return value && value.length < (length as Integer);
+          return value && value.length < (length as number);
         },
       },
       {
@@ -173,7 +172,7 @@ export class Validator {
         errorMessage:
           `Field :field must be shorter than :value characters or equal length`,
         validate: ([value, length]) => {
-          return value && value.length <= (length as Integer);
+          return value && value.length <= (length as number);
         },
       },
       {
@@ -187,7 +186,7 @@ export class Validator {
         name: 'minLength',
         errorMessage: `Field :field must be longer than :value characters`,
         validate: ([value, length]) => {
-          return value && value.length > (length as Integer);
+          return value && value.length > (length as number);
         },
       },
       {
@@ -202,7 +201,7 @@ export class Validator {
         errorMessage:
           `Field :field must be longer than :value characters or equal length`,
         validate: ([value, length]) => {
-          return value && value.length >= (length as Integer);
+          return value && value.length >= (length as number);
         },
       },
       {
@@ -251,13 +250,6 @@ export class Validator {
         },
       },
       {
-        name: 'sameAs',
-        errorMessage: `Field :field must be same as :value`,
-        validate: ([value, secondField]) => {
-          return value === this.request.input(secondField as string);
-        },
-      },
-      {
         name: 'startsWith',
         errorMessage: `Field :field must start with ':value'`,
         validate: ([value, search]) => {
@@ -292,10 +284,15 @@ export class Validator {
     rules: Record<string, ValidationRules | Record<string, unknown>>,
     request: Request,
   ): Promise<Record<string, string[]>> {
+    const formData = await request.formData();
     const errors: Record<string, string[]> = {};
 
     for (const [fieldName, ruleSet] of Object.entries(rules)) {
-      const fieldValue = request.input(fieldName);
+      const fieldValue = formData.get(fieldName);
+
+      if (typeof fieldValue !== 'string') {
+        continue;
+      }
 
       for (const [rule, ruleValue] of Object.entries(ruleSet)) {
         const ruleObject = this.rules.find((ruleData) => ruleData.name === rule);
