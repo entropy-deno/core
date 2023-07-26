@@ -16,6 +16,8 @@ import { RoutePath } from './types/route_path.type.ts';
 import { HttpStatus } from '../http/enums/http_status.enum.ts';
 import { statusPage } from '../http/pages/status_page.ts';
 import { TemplateCompiler } from '../template_compiler/template_compiler.service.ts';
+import { ValidationRules } from '../validator/interfaces/validation_rules.interface.ts';
+import { Validator } from '../validator/validator.service.ts';
 import { ValuesUnion } from '../utils/types/values_union.type.ts';
 import { ViewResponse } from '../http/view_response.class.ts';
 
@@ -43,7 +45,9 @@ export class Router {
 
   private readonly templateCompiler = inject(TemplateCompiler);
 
-  private async abortResponse(
+  private readonly validator = inject(Validator);
+
+  private async createAbortResponse(
     request: Request,
     statusCode = HttpStatus.NotFound,
   ): Promise<Response> {
@@ -53,10 +57,7 @@ export class Router {
         'Error',
     };
 
-    if (
-      request.headers.get('x-requested-with')?.toLowerCase() === 'xmlhttprequest' ||
-      request.headers.get('accept')?.includes('application/json')
-    ) {
+    if (this.isAjaxRequest(request)) {
       return createResponse(JSON.stringify(payload), {
         statusCode,
         headers: {
@@ -90,6 +91,12 @@ export class Router {
     } catch {
       throw new HttpError(HttpStatus.NotFound);
     }
+  }
+
+  private isAjaxRequest(request: Request): boolean {
+    return !!(request.headers.get('x-requested-with')?.toLowerCase() ===
+        'xmlhttprequest' ||
+      request.headers.get('accept')?.includes('application/json'));
   }
 
   private async parseResponse(
@@ -246,6 +253,7 @@ export class Router {
       )!;
 
       this.registerRoute(path, methods, async (...args: unknown[]) => {
+        const request = args[0] as Request;
         const middleware = Reflector.getMetadata<Constructor<Middleware>[]>(
           'middleware',
           controllerMethod,
@@ -271,9 +279,41 @@ export class Router {
         if (redirectUrl) {
           return Response.redirect(
             redirectUrl[0] === '/'
-              ? `${new URL((args[0] as Request).url).origin}${redirectUrl}`
+              ? `${new URL(request.url).origin}${redirectUrl}`
               : redirectUrl,
           );
+        }
+
+        const validationRules = Reflector.getMetadata<
+          Record<string, ValidationRules | Record<string, unknown>>
+        >(
+          'validationRules',
+          controllerMethod,
+        );
+
+        if (validationRules) {
+          const errors = await this.validator.validate(
+            validationRules,
+            request,
+          );
+
+          if (Object.keys(errors).length > 0) {
+            if (this.isAjaxRequest(request)) {
+              return createResponse(
+                JSON.stringify({
+                  errors,
+                }),
+                {
+                  statusCode: HttpStatus.BadRequest,
+                  headers: {
+                    'content-type': 'application/json; charset=utf-8',
+                  },
+                },
+              );
+            }
+
+            return Response.redirect(request.url); // TODO: redirect back
+          }
         }
 
         const methodResult = (inject(controller) as unknown as Record<
@@ -345,7 +385,10 @@ export class Router {
           return await this.parseResponse(request, body, statusCode);
         }
 
-        return await this.abortResponse(request, HttpStatus.InternalServerError);
+        return await this.createAbortResponse(
+          request,
+          HttpStatus.InternalServerError,
+        );
       }
 
       return createResponse(

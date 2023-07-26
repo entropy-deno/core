@@ -1,3 +1,5 @@
+import { ValidationRuleDefinition } from '../../validator/interfaces/validation_rule_definition.interface.ts';
+
 export interface AppConfig {
   defaultLocale: string;
   encryptionKey: string;
@@ -11,5 +13,6 @@ export interface AppConfig {
   tlsCertificateFile: string | false;
   tlsKey: string | false;
   tlsKeyFile: string | false;
+  validationRules: ValidationRuleDefinition[];
   wsPort: number;
 }

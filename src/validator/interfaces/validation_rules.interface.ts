@@ -1,0 +1,35 @@
+export interface ValidationRules {
+  accepted?: boolean;
+  boolean?: boolean;
+  date?: string | Date;
+  declined?: boolean;
+  doesntEndWith?: string;
+  doesntStartWith?: string;
+  endsWith?: string;
+  email?: boolean;
+  float?: boolean;
+  in?: string[];
+  number?: boolean;
+  ip?: boolean;
+  json?: boolean;
+  length?: number;
+  lowercase?: boolean;
+  max?: number;
+  maxLength?: number;
+  maxOrEqual?: number;
+  maxOrEqualLength?: number;
+  min?: number;
+  minLength?: number;
+  minOrEqual?: number;
+  minOrEqualLength?: number;
+  notIn?: string[];
+  numeric?: boolean;
+  otherThan?: string;
+  phoneNumber?: boolean;
+  regexp?: RegExp;
+  required?: boolean;
+  sameAs?: string;
+  startsWith?: string;
+  uppercase?: boolean;
+  username?: boolean;
+}

@@ -15,6 +15,7 @@ export class Configurator {
     tlsCertificateFile: false,
     tlsKey: env<string>('TLS_KEY') ?? false,
     tlsKeyFile: false,
+    validationRules: [],
     wsPort: env<number>('WS_PORT') ?? (env<number>('PORT') ?? 5050) + 1,
   };
 

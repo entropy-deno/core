@@ -10,4 +10,5 @@ export * from './router/router.module.ts';
 export * from './server/server.module.ts';
 export * from './template_compiler/template_compiler.module.ts';
 export * from './utils/utils.module.ts';
+export * from './validator/validator.module.ts';
 export * from './ws/ws.module.ts';
