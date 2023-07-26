@@ -1,7 +1,7 @@
 import { Broadcaster } from '../../ws/broadcaster.class.ts';
-import { WsChannel } from '../../ws/decorators/ws_channel.decorator.ts';
+import { Channel } from '../../ws/decorators/channel.decorator.ts';
 
-@WsChannel('$hot-reload')
+@Channel('$hot-reload')
 export class HotReloadChannel extends Broadcaster {
   public sendReloadRequest() {
     this.broadcast({
