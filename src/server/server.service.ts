@@ -2,7 +2,7 @@ import { load as loadDotEnv } from 'https://deno.land/std@0.195.0/dotenv/mod.ts'
 import { parse as parseFlags } from 'https://deno.land/std@0.195.0/flags/mod.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
 import { ErrorHandler } from '../error_handler/error_handler.service.ts';
-import { HotReloadChannel } from './hot_reload.channel.ts';
+import { HotReloadChannel } from './channels/hot_reload.channel.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { Localizator } from '../localizator/localizator.module.ts';
 import { Logger } from '../logger/logger.service.ts';
