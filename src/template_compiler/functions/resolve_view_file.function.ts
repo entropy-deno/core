@@ -1,4 +1,4 @@
-import { resolve } from 'https://deno.land/std@0.195.0/path/mod.ts';
+import { resolve } from 'https://deno.land/std@0.196.0/path/mod.ts';
 
 export function resolveViewFile(caller: string, file: string): string {
   switch (true) {
