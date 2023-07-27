@@ -17,7 +17,7 @@ export class Validator {
         name: 'accepted',
         errorMessage: 'Field :field must be accepted',
         validate: ([value]) => {
-          return ([true, 'true', 'on', 'yes', '1', 1]).includes(
+          return [true, 'true', 'on', 'yes', '1', 1].includes(
             value as boolean | number | string,
           );
         },
@@ -26,7 +26,7 @@ export class Validator {
         name: 'boolean',
         errorMessage: 'Field :field must be a boolean value',
         validate: ([value]) => {
-          return ([true, false, 'true', 'false', '1', '0', 1, 0]).includes(
+          return [true, false, 'true', 'false', '1', '0', 1, 0].includes(
             value as boolean | number | string,
           );
         },
@@ -45,7 +45,7 @@ export class Validator {
         name: 'declined',
         errorMessage: 'Field :field must be declined',
         validate: ([value]) => {
-          return ([false, 'false', 'ooo', 'no', '0', 0]).includes(
+          return [false, 'false', 'ooo', 'no', '0', 0].includes(
             value as boolean | number | string,
           );
         },

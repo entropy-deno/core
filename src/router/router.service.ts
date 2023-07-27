@@ -14,6 +14,7 @@ import { RouteDefinition } from './interfaces/route_definition.interface.ts';
 import { RouteOptions } from './interfaces/route_options.interface.ts';
 import { RoutePath } from './types/route_path.type.ts';
 import { HttpStatus } from '../http/enums/http_status.enum.ts';
+import { Pipe } from '../http/interfaces/pipe.interface.ts';
 import { statusPage } from '../http/pages/status_page.ts';
 import { TemplateCompiler } from '../template_compiler/template_compiler.service.ts';
 import { ValidationRules } from '../validator/interfaces/validation_rules.interface.ts';
@@ -316,11 +317,34 @@ export class Router {
           }
         }
 
+        const transformParams = Reflector.getMetadata<
+          Record<string, Constructor<Pipe>>
+        >(
+          'transformParams',
+          controllerMethod,
+        );
+
+        const urlPattern = new URLPattern({
+          pathname: path,
+        });
+
+        const groups = urlPattern.exec(request.url)?.pathname?.groups ?? {};
+
+        if (transformParams) {
+          for (const [paramName, pipe] of Object.entries(transformParams)) {
+            const transformed = inject(pipe).transform(groups[paramName] ?? '');
+
+            groups[paramName] = transformed instanceof Promise
+              ? await transformed
+              : transformed;
+          }
+        }
+
         const methodResult = (inject(controller) as unknown as Record<
           string,
           (...args: unknown[]) => unknown
         >)
-          [controllerRouteMethod](...args);
+          [controllerRouteMethod](args[0], ...Object.values(groups));
 
         return methodResult instanceof Promise ? await methodResult : methodResult;
       });
