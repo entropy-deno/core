@@ -165,6 +165,8 @@ export class Server {
       },
     });
 
+    Deno.env.set('PRODUCTION', flags.dev ? 'false' : 'true');
+
     if (!this.configurator.entries.isDenoDeploy) {
       this.checkSystemRequirements();
 
@@ -176,8 +178,6 @@ export class Server {
         });
       }
     }
-
-    Deno.env.set('PRODUCTION', flags.dev ? 'false' : 'true');
 
     this.configurator.setup(this.options.config);
 
@@ -192,9 +192,9 @@ export class Server {
     try {
       this.setup();
 
-      const tlsCertificate = this.configurator.entries.tlsCertificate ??
-        (this.configurator.entries.tlsCertificateFile
-          ? await Deno.readTextFile(this.configurator.entries.tlsCertificateFile)
+      const tlsCert = this.configurator.entries.tlsCert ??
+        (this.configurator.entries.tlsCertFile
+          ? await Deno.readTextFile(this.configurator.entries.tlsCertFile)
           : false);
 
       const tlsKey = this.configurator.entries.tlsKey ??
@@ -203,9 +203,9 @@ export class Server {
           : false);
 
       Deno.serve({
-        ...(tlsCertificate && tlsKey
+        ...(tlsCert && tlsKey
           ? {
-            cert: tlsCertificate,
+            cert: tlsCert,
             key: tlsKey,
           }
           : {}),

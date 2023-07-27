@@ -9,8 +9,8 @@ export interface AppConfig {
   isProduction: boolean;
   logger: boolean;
   port: number;
-  tlsCertificate: string | false;
-  tlsCertificateFile: string | false;
+  tlsCert: string | false;
+  tlsCertFile: string | false;
   tlsKey: string | false;
   tlsKeyFile: string | false;
   validationRules: ValidationRuleDefinition[];

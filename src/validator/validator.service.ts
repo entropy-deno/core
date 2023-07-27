@@ -17,8 +17,8 @@ export class Validator {
         name: 'accepted',
         errorMessage: 'Field :field must be accepted',
         validate: ([value]) => {
-          return [true, 'true', 'on', 'yes', '1', 1].includes(
-            value as boolean | number | string,
+          return ['1', 'true', 'on', 'yes'].includes(
+            value as string,
           );
         },
       },
@@ -26,8 +26,8 @@ export class Validator {
         name: 'boolean',
         errorMessage: 'Field :field must be a boolean value',
         validate: ([value]) => {
-          return [true, false, 'true', 'false', '1', '0', 1, 0].includes(
-            value as boolean | number | string,
+          return ['0', '1', 'true', 'false'].includes(
+            value as string,
           );
         },
       },
@@ -35,18 +35,17 @@ export class Validator {
         name: 'date',
         errorMessage: 'Field :field must be a valid date format',
         validate: ([value]) => {
-          return (
-            (new Date(value ?? '') as unknown) !== 'Invalid Date' &&
-            !isNaN(new Date(value ?? '') as unknown as number)
-          );
+          const date = new Date(value ?? '') as string | Date;
+
+          return date !== 'Invalid Date' && !isNaN(date as unknown as number);
         },
       },
       {
         name: 'declined',
         errorMessage: 'Field :field must be declined',
         validate: ([value]) => {
-          return [false, 'false', 'ooo', 'no', '0', 0].includes(
-            value as boolean | number | string,
+          return [null, '0', 'false', 'off', 'no'].includes(
+            value,
           );
         },
       },

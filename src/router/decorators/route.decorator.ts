@@ -1,8 +1,8 @@
 import { HttpMethod } from '../../http/enums/http_method.enum.ts';
+import { HttpStatus } from '../../http/enums/http_status.enum.ts';
 import { inject } from '../../injector/functions/inject.function.ts';
 import { Reflector } from '../../utils/reflector.class.ts';
 import { Router } from '../router.service.ts';
-import { HttpStatus } from '../../http/enums/http_status.enum.ts';
 
 const router = inject(Router);
 

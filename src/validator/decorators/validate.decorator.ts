@@ -2,7 +2,7 @@ import { Reflector } from '../../utils/reflector.class.ts';
 import { ValidationRules } from '../interfaces/validation_rules.interface.ts';
 
 export function Validate(
-  rules: Record<string, ValidationRules | Record<string, any>>,
+  rules: Record<string, ValidationRules | Record<string, unknown>>,
 ): MethodDecorator {
   return (_target, _methodName, descriptor) => {
     Reflector.defineMetadata<typeof rules>(
