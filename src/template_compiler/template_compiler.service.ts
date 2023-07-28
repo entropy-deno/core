@@ -567,7 +567,7 @@ export class TemplateCompiler {
     options: TemplateCompilerOptions = {},
     request?: Request,
   ): Promise<string> {
-    const renderedTemplate = await this.compile(
+    const compiledTemplate = await this.compile(
       template,
       variables,
       options,
@@ -576,7 +576,7 @@ export class TemplateCompiler {
 
     this.currentStacks.clear();
 
-    return renderedTemplate;
+    return compiledTemplate;
   }
 
   public registerDirective(directive: TemplateDirectiveDefinition): void {

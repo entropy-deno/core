@@ -1,23 +1,23 @@
 import { AppConfig } from './interfaces/app_config.interface.ts';
-import { env } from './functions/env.function.ts';
 import { EnvVariable } from './types/env_variable.type.ts';
 
 export class Configurator {
   private options: Readonly<AppConfig> = {
     defaultLocale: 'en',
-    encryptionKey: env<string>('ENCRYPTION_KEY') ?? crypto.randomUUID(),
+    encryptionKey: this.getEnv<string>('ENCRYPTION_KEY') ?? crypto.randomUUID(),
     envFile: '.env',
-    host: env<string>('HOST') ?? 'localhost',
-    isDenoDeploy: !!env<string>('DENO_DEPLOYMENT_ID') ?? false,
-    isProduction: env<boolean>('PRODUCTION') ?? false,
+    host: this.getEnv<string>('HOST') ?? 'localhost',
+    isDenoDeploy: !!this.getEnv<string>('DENO_DEPLOYMENT_ID') ?? false,
+    isProduction: this.getEnv<boolean>('PRODUCTION') ?? false,
     logger: true,
-    port: env<number>('PORT') ?? 5050,
-    tlsCert: env<string>('TLS_CERT') ?? false,
+    port: this.getEnv<number>('PORT') ?? 5050,
+    tlsCert: this.getEnv<string>('TLS_CERT') ?? false,
     tlsCertFile: false,
-    tlsKey: env<string>('TLS_KEY') ?? false,
+    tlsKey: this.getEnv<string>('TLS_KEY') ?? false,
     tlsKeyFile: false,
     validationRules: [],
-    wsPort: env<number>('WS_PORT') ?? (env<number>('PORT') ?? 5050) + 1,
+    wsPort: this.getEnv<number>('WS_PORT') ??
+      (this.getEnv<number>('PORT') ?? 5050) + 1,
   };
 
   public all(): AppConfig {

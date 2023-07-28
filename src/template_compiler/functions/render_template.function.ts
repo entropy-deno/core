@@ -7,5 +7,5 @@ export function renderTemplate(
   variables: Record<string, unknown> = {},
   options: TemplateCompilerOptions = {},
 ) {
-  return inject(TemplateCompiler).compile(template, variables, options);
+  return inject(TemplateCompiler).render(template, variables, options);
 }

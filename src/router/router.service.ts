@@ -72,7 +72,7 @@ export class Router {
     }
 
     return this.createResponse(
-      await this.templateCompiler.compile(statusPage, payload),
+      await this.templateCompiler.render(statusPage, payload),
       {
         statusCode,
       },
@@ -122,7 +122,7 @@ export class Router {
 
       case body instanceof ViewResponse: {
         const template = await (body as ViewResponse).template();
-        const compiledTemplate = await inject(TemplateCompiler).compile(
+        const compiledTemplate = await inject(TemplateCompiler).render(
           template,
           (body as ViewResponse).variables,
           {
@@ -451,7 +451,7 @@ export class Router {
       }
 
       return this.createResponse(
-        await this.templateCompiler.compile(errorPage, {
+        await this.templateCompiler.render(errorPage, {
           error,
         }),
         {
