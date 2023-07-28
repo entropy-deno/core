@@ -53,7 +53,7 @@ export class Validator {
         name: 'doesntEndWith',
         errorMessage: `Field :field must not end with ':value'`,
         validate: ([value, search]) => {
-          return !value?.endsWith(search);
+          return !value?.endsWith(search as string);
         },
       },
       {
@@ -238,7 +238,7 @@ export class Validator {
         name: 'regexp',
         errorMessage: `Field :field must follow the :value pattern`,
         validate: ([value, pattern]) => {
-          return pattern.test(value);
+          return (pattern as RegExp).test(value ?? '');
         },
       },
       {
@@ -280,7 +280,7 @@ export class Validator {
   }
 
   public async validate(
-    rules: Record<string, ValidationRules | Record<string, unknown>>,
+    rules: Record<string, Partial<ValidationRules> | Record<string, unknown>>,
     request: Request,
   ): Promise<Record<string, string[]>> {
     const formData = await request.formData();

@@ -6,6 +6,6 @@ import { Module } from '../interfaces/module.interface.ts';
 export interface ServerOptions {
   channels?: Constructor<Broadcaster>[];
   config?: Partial<AppConfig>;
-  controllers?: Constructor<any>[];
+  controllers?: Constructor[];
   modules: Constructor<Module>[];
 }

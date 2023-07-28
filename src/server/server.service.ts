@@ -20,7 +20,7 @@ export class Server {
 
   private readonly errorHandler = inject(ErrorHandler);
 
-  private readonly listenSignals: Deno.Signal[] = ['SIGINT', 'SIGTERM', 'SIGQUIT'];
+  private readonly exitSignals: Deno.Signal[] = ['SIGINT', 'SIGTERM', 'SIGQUIT'];
 
   private readonly localizator = inject(Localizator);
 
@@ -31,6 +31,14 @@ export class Server {
   private readonly wsServer = inject(WsServer);
 
   constructor(private readonly options: ServerOptions) {}
+
+  private addExitSignalListener(callback: () => void): void {
+    for (const signal of this.exitSignals) {
+      Deno.addSignalListener(signal, () => {
+        callback();
+      });
+    }
+  }
 
   private checkSystemRequirements(): void {
     const satisfiesDenoVersion = Deno.version.deno
@@ -52,7 +60,7 @@ export class Server {
   }
 
   private async handleRequest(request: Request): Promise<Response> {
-    const timerStart = performance.now();
+    const performanceTimerStart = performance.now();
     const url = new URL(request.url).pathname;
     const response = await this.router.respond(request);
 
@@ -82,7 +90,7 @@ export class Server {
         break;
     }
 
-    const responseTime = (performance.now() - timerStart).toFixed(1);
+    const responseTime = (performance.now() - performanceTimerStart).toFixed(1);
 
     this.logger.log(
       `%c[${status}] %c${url.substring(0, 40)}%c - ${responseTime}ms`,
@@ -96,9 +104,8 @@ export class Server {
   }
 
   private setup(): void {
-    for (const controller of this.options.controllers ?? []) {
-      this.router.registerController(controller);
-    }
+    this.router.registerControllers(this.options.controllers ?? []);
+    this.wsServer.registerChannels(this.options.channels ?? []);
 
     for (const module of this.options.modules) {
       const moduleInstance = inject(module);
@@ -118,13 +125,11 @@ export class Server {
       },
     });
 
-    for (const signal of this.listenSignals) {
-      Deno.addSignalListener(signal, () => {
-        localStorage.removeItem(this.devServerCheckKey);
+    this.addExitSignalListener(() => {
+      localStorage.removeItem(this.devServerCheckKey);
 
-        Deno.exit();
-      });
-    }
+      Deno.exit();
+    });
 
     if (flags.open && !localStorage.getItem(this.devServerCheckKey)) {
       try {
@@ -144,17 +149,15 @@ export class Server {
   }
 
   private setupProductionEnvironment(): void {
-    for (const signal of this.listenSignals) {
-      Deno.addSignalListener(signal, () => {
-        const shouldQuit = confirm(
-          'Are you sure you want to quit production server?',
-        );
+    this.addExitSignalListener(() => {
+      const shouldQuit = confirm(
+        'Are you sure you want to quit production server?',
+      );
 
-        if (shouldQuit) {
-          Deno.exit();
-        }
-      });
-    }
+      if (shouldQuit) {
+        Deno.exit();
+      }
+    });
   }
 
   public async start(): Promise<void> {
@@ -245,13 +248,11 @@ export class Server {
           }
         }
 
-        for (const signal of this.listenSignals) {
-          Deno.addSignalListener(signal, () => {
-            viewWatcher.close();
+        this.addExitSignalListener(() => {
+          viewWatcher.close();
 
-            Deno.exit();
-          });
-        }
+          Deno.exit();
+        });
       }
     } catch (error) {
       this.errorHandler.handle(error);

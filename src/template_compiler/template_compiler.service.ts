@@ -1,7 +1,7 @@
 import * as constants from '../constants.ts';
-import { CompileOptions } from './interfaces/compile_options.interface.ts';
+import { TemplateCompilerOptions } from './interfaces/template_compiler_options.interface.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
-import { env } from '../utils/functions/env.function.ts';
+import { env } from '../configurator/functions/env.function.ts';
 import { escape } from '../utils/functions/escape.function.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { range } from '../utils/functions/range.function.ts';
@@ -25,17 +25,17 @@ export class TemplateCompiler {
     '$translate': translate,
   };
 
-  private options: CompileOptions = {};
+  private currentOptions: TemplateCompilerOptions = {};
 
-  private rawContent: string[] = [];
+  private currentRawContent: string[] = [];
 
-  private request: Request | undefined = undefined;
+  private currentRequest: Request | undefined = undefined;
 
-  private template = '';
+  private currentTemplate = '';
 
-  private variables: Record<string, unknown> = {};
+  private currentVariables: Record<string, unknown> = {};
 
-  public static stacks = new Map<string, string[]>();
+  private currentStacks = new Map<string, string[]>();
 
   constructor() {
     this.directives = [
@@ -147,13 +147,11 @@ export class TemplateCompiler {
         name: 'push',
         type: 'block',
         render: (content: string, stack: string) => {
-          const { stacks } = this.constructor as unknown as {
-            stacks: Map<string, string[]>;
-          };
-
-          stacks.set(
+          this.currentStacks.set(
             stack,
-            stacks.has(stack) ? [...stacks.get(stack)!, content] : [content],
+            this.currentStacks.has(stack)
+              ? [...this.currentStacks.get(stack)!, content]
+              : [content],
           );
 
           return '';
@@ -164,20 +162,20 @@ export class TemplateCompiler {
         type: 'single',
         render: async (partial: string) => {
           const file = `${
-            this.options.file ? `${this.options.file}/..` : 'app/views'
+            this.currentOptions.file ? `${this.currentOptions.file}/..` : 'app/views'
           }/${partial}.html`;
 
           try {
             const compiler = inject(TemplateCompiler, {
-              fresh: true,
+              singleton: false,
             });
 
             const fileContent = await Deno.readTextFile(file);
             const compiledPartial = await compiler.compile(
               fileContent,
-              this.variables,
+              this.currentVariables,
               {},
-              this.request,
+              this.currentRequest,
             );
 
             return compiledPartial;
@@ -197,20 +195,20 @@ export class TemplateCompiler {
         type: 'block',
         render: async (layout: string) => {
           const file = `${
-            this.options.file ? `${this.options.file}/..` : 'app/views'
+            this.currentOptions.file ? `${this.currentOptions.file}/..` : 'app/views'
           }/${layout}.html`;
 
           try {
             const compiler = inject(TemplateCompiler, {
-              fresh: true,
+              singleton: false,
             });
 
             const fileContent = await Deno.readTextFile(file);
             const compiledLayout = await compiler.compile(
               fileContent,
-              this.variables,
+              this.currentVariables,
               {},
-              this.request,
+              this.currentRequest,
             );
 
             return compiledLayout;
@@ -229,11 +227,7 @@ export class TemplateCompiler {
         name: 'stack',
         type: 'single',
         render: (stackName: string) => {
-          const { stacks } = this.constructor as unknown as {
-            stacks: Map<string, string[]>;
-          };
-
-          const stackedContent = stacks.get(stackName) ?? [];
+          const stackedContent = this.currentStacks.get(stackName) ?? [];
 
           return stackedContent.join('');
         },
@@ -243,12 +237,12 @@ export class TemplateCompiler {
 
   private getRenderFunction(body: string, variables: Record<string, unknown> = {}) {
     const globalVariables = {
-      $request: this.request,
+      $request: this.currentRequest,
       ...Object.keys(constants).reduce((result, key) => ({
         ...result,
         [`$${key}`]: (constants as Record<string, unknown>)[key],
       }), {}),
-      ...this.variables,
+      ...this.currentVariables,
       ...this.functions,
     };
 
@@ -267,7 +261,7 @@ export class TemplateCompiler {
   }
 
   private parseDataInterpolations(): void {
-    const matches = this.template.matchAll(/\{\{(#|@?)(.*?)\}\}/g) ?? [];
+    const matches = this.currentTemplate.matchAll(/\{\{(#|@?)(.*?)\}\}/g) ?? [];
 
     for (const [wholeMatch, modifier, matchValue] of matches) {
       if (modifier === '@') {
@@ -290,12 +284,15 @@ export class TemplateCompiler {
 
       const renderedExpression = renderFunction();
 
-      this.template = this.template.replace(wholeMatch, String(renderedExpression));
+      this.currentTemplate = this.currentTemplate.replace(
+        wholeMatch,
+        String(renderedExpression),
+      );
     }
   }
 
   private async parseEachDirectives(): Promise<void> {
-    const matches = this.template.matchAll(
+    const matches = this.currentTemplate.matchAll(
       /\[each *?\((.*?) (in|of) (.*)\)\](\n|\r\n)?((.*?|\s*?)*?)\[\/each\]/gm,
     ) ?? [];
 
@@ -331,31 +328,32 @@ export class TemplateCompiler {
           iterator += 1;
 
           const compiler = inject(TemplateCompiler, {
-            fresh: true,
+            singleton: false,
           });
 
           content = await compiler.compile(
             content,
             {
-              ...this.variables,
+              ...this.currentVariables,
               ...scopeVariables,
             },
             {},
-            this.request,
+            this.currentRequest,
           );
 
           result += content;
         }
       }
 
-      this.template = this.template.replace(wholeMatch, result);
+      this.currentTemplate = this.currentTemplate.replace(wholeMatch, result);
     }
   }
 
   private parseIfDirectives(): void {
-    const matches =
-      this.template.matchAll(/\[if ?(.*?)\](\n|\r\n*?)?((.|\n|\r\n)*?)\[\/if\]/gm) ??
-        [];
+    const matches = this.currentTemplate.matchAll(
+      /\[if ?(.*?)\](\n|\r\n*?)?((.|\n|\r\n)*?)\[\/if\]/gm,
+    ) ??
+      [];
 
     for (const [wholeMatch, , , content] of matches) {
       const renderFunction = this.getRenderFunction(
@@ -365,17 +363,17 @@ export class TemplateCompiler {
       const condition = renderFunction<boolean>();
 
       if (condition) {
-        this.template = this.template.replace(wholeMatch, content);
+        this.currentTemplate = this.currentTemplate.replace(wholeMatch, content);
 
         continue;
       }
 
-      this.template = this.template.replace(wholeMatch, '');
+      this.currentTemplate = this.currentTemplate.replace(wholeMatch, '');
     }
   }
 
   private parseIfElseDirectives(): void {
-    const matches = this.template.matchAll(
+    const matches = this.currentTemplate.matchAll(
       /\[if ?(.*?)\](\n|\r\n*?)?((.|\n|\r\n)*?)(\[else\])((.|\n|\r\n)*?)\[\/if\]/gm,
     ) ?? [];
 
@@ -387,32 +385,36 @@ export class TemplateCompiler {
       const condition = renderFunction<boolean>();
 
       if (condition) {
-        this.template = this.template.replace(wholeMatch, value);
+        this.currentTemplate = this.currentTemplate.replace(wholeMatch, value);
 
         continue;
       }
 
-      this.template = this.template.replace(wholeMatch, content);
+      this.currentTemplate = this.currentTemplate.replace(wholeMatch, content);
     }
   }
 
   private parseRawDirectives(): void {
     const matches =
-      this.template.matchAll(/\[raw\](\n|\r\n)?((.*?|\s*?)*?)\[\/raw\]/gm) ?? [];
+      this.currentTemplate.matchAll(/\[raw\](\n|\r\n)?((.*?|\s*?)*?)\[\/raw\]/gm) ??
+        [];
 
     let count = 0;
 
     for (const [wholeMatch, , content] of matches) {
-      this.template = this.template.replace(wholeMatch, `$_raw${count}`);
+      this.currentTemplate = this.currentTemplate.replace(
+        wholeMatch,
+        `$_raw${count}`,
+      );
 
-      this.rawContent.push(content);
+      this.currentRawContent.push(content);
 
       count += 1;
     }
   }
 
   private parseSwitchDirectives(): void {
-    const matches = this.template.matchAll(
+    const matches = this.currentTemplate.matchAll(
       /\[switch ?(.*?)\](\n|\r\n*?)?((.|\n|\r\n)*?)\[\/switch\]/gm,
     ) ?? [];
 
@@ -454,7 +456,7 @@ export class TemplateCompiler {
 
       for (const [key, value] of cases) {
         if (key === switchCondition) {
-          this.template = this.template.replace(wholeMatch, value);
+          this.currentTemplate = this.currentTemplate.replace(wholeMatch, value);
 
           matchesOneCase = true;
 
@@ -463,44 +465,50 @@ export class TemplateCompiler {
       }
 
       if (!matchesOneCase && defaultCaseValue) {
-        this.template = this.template.replace(wholeMatch, defaultCaseValue);
+        this.currentTemplate = this.currentTemplate.replace(
+          wholeMatch,
+          defaultCaseValue,
+        );
 
         return;
       }
 
-      this.template = this.template.replace(wholeMatch, '');
+      this.currentTemplate = this.currentTemplate.replace(wholeMatch, '');
     }
   }
 
   private removeComments(): void {
-    const matches = this.template.matchAll(/\{\{(@?)--(.*?)--\}\}/g) ?? [];
+    const matches = this.currentTemplate.matchAll(/\{\{(@?)--(.*?)--\}\}/g) ?? [];
 
     for (const [wholeMatch] of matches) {
-      this.template = this.template.replace(wholeMatch, '');
+      this.currentTemplate = this.currentTemplate.replace(wholeMatch, '');
     }
   }
 
   private restoreRawContent(): void {
-    const matches = this.template.matchAll(/\$_raw([0-9]+)/g) ?? [];
+    const matches = this.currentTemplate.matchAll(/\$_raw([0-9]+)/g) ?? [];
 
     for (const [wholeMatch, segmentIndex] of matches) {
       const index = parseInt(segmentIndex);
 
-      this.template = this.template.replace(wholeMatch, this.rawContent[index]);
+      this.currentTemplate = this.currentTemplate.replace(
+        wholeMatch,
+        this.currentRawContent[index],
+      );
     }
   }
 
   public async compile(
     template: string,
     variables: Record<string, unknown> = {},
-    options: CompileOptions = {},
+    options: TemplateCompilerOptions = {},
     request?: Request,
   ): Promise<string> {
-    this.options = options;
-    this.rawContent = [];
-    this.request = request;
-    this.template = template;
-    this.variables = variables;
+    this.currentOptions = options;
+    this.currentRawContent = [];
+    this.currentRequest = request;
+    this.currentTemplate = template;
+    this.currentVariables = variables;
 
     this.parseRawDirectives();
     this.removeComments();
@@ -520,7 +528,8 @@ export class TemplateCompiler {
           'gm',
         );
 
-      const matches = this.template.matchAll(directive.pattern ?? pattern) ?? [];
+      const matches = this.currentTemplate.matchAll(directive.pattern ?? pattern) ??
+        [];
 
       for (const [expression, hasArguments, args, , blockContent] of matches) {
         const argumentsRenderFunction = hasArguments
@@ -540,7 +549,7 @@ export class TemplateCompiler {
             ...resolvedArguments,
           );
 
-        this.template = this.template.replace(
+        this.currentTemplate = this.currentTemplate.replace(
           expression,
           result instanceof Promise ? await result : result,
         );
@@ -549,7 +558,25 @@ export class TemplateCompiler {
 
     this.restoreRawContent();
 
-    return this.template;
+    return this.currentTemplate;
+  }
+
+  public async render(
+    template: string,
+    variables: Record<string, unknown> = {},
+    options: TemplateCompilerOptions = {},
+    request?: Request,
+  ): Promise<string> {
+    const renderedTemplate = await this.compile(
+      template,
+      variables,
+      options,
+      request,
+    );
+
+    this.currentStacks.clear();
+
+    return renderedTemplate;
   }
 
   public registerDirective(directive: TemplateDirectiveDefinition): void {

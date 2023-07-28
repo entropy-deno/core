@@ -28,15 +28,15 @@ export class Injector {
 
   public static resolve<T>(
     target: Constructor<T>,
-    options?: ServiceResolveOptions,
+    options: ServiceResolveOptions = {},
   ): T | never {
-    if (!options?.fresh && this.has(target)) {
+    if ((options.singleton ?? true) && this.has(target)) {
       return this.cachedInstances.get(target) as T;
     }
 
     const instance = new target();
 
-    if ((options?.initialCache ?? true)) {
+    if (options.singleton ?? true) {
       this.cachedInstances.set(target, instance);
     }
 

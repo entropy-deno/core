@@ -3,7 +3,6 @@ export * from './decorators/transform.decorator.ts';
 export * from './decorators/use.decorator.ts';
 export * from './enums/http_method.enum.ts';
 export * from './enums/http_status.enum.ts';
-export * from './functions/create_response.function.ts';
 export * from './interfaces/middleware.interface.ts';
 export * from './interfaces/pipe.interface.ts';
 export * from './http_client.service.ts';

@@ -1,12 +1,12 @@
 import { callerFile } from '../../utils/functions/caller_file.function.ts';
-import { CompileOptions } from '../interfaces/compile_options.interface.ts';
+import { TemplateCompilerOptions } from '../interfaces/template_compiler_options.interface.ts';
 import { resolveViewFile } from './resolve_view_file.function.ts';
 import { ViewResponse } from '../../http/view_response.class.ts';
 
-export function render(
+export function renderView(
   file: string,
   variables: Record<string, unknown> = {},
-  options: Omit<CompileOptions, 'file'> = {},
+  options: Omit<TemplateCompilerOptions, 'file'> = {},
 ) {
   const caller = callerFile();
 

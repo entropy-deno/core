@@ -2,7 +2,12 @@ export interface ValidationRuleDefinition {
   name: string;
   errorMessage: string;
   validate: (
-    input: [string | null, ...any[]],
+    input: [string | null, ...unknown[]],
     fieldName: string,
-  ) => boolean | Promise<boolean>;
+  ) =>
+    | boolean
+    | null
+    | string
+    | undefined
+    | Promise<boolean | null | string | undefined>;
 }

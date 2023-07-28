@@ -1,7 +1,6 @@
 import { contentType } from 'https://deno.land/std@0.196.0/media_types/content_type.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
 import { Constructor } from '../utils/interfaces/constructor.interface.ts';
-import { createResponse } from '../http/functions/create_response.function.ts';
 import { enumKey } from '../utils/functions/enum_key.function.ts';
 import { ErrorHandler } from '../error_handler/error_handler.service.ts';
 import { errorPage } from '../error_handler/pages/error_page.ts';
@@ -21,6 +20,11 @@ import { ValidationRules } from '../validator/interfaces/validation_rules.interf
 import { Validator } from '../validator/validator.service.ts';
 import { ValuesUnion } from '../utils/types/values_union.type.ts';
 import { ViewResponse } from '../http/view_response.class.ts';
+
+interface ResponseOptions {
+  headers?: HeadersInit;
+  statusCode?: HttpStatus;
+}
 
 type RouteDecoratorFunction<T> = T extends ValuesUnion<HttpMethod>[] ? (
     path: RoutePath,
@@ -59,7 +63,7 @@ export class Router {
     };
 
     if (this.isAjaxRequest(request)) {
-      return createResponse(JSON.stringify(payload), {
+      return this.createResponse(JSON.stringify(payload), {
         statusCode,
         headers: {
           'content-type': 'application/json; charset=utf-8',
@@ -67,7 +71,7 @@ export class Router {
       });
     }
 
-    return createResponse(
+    return this.createResponse(
       await this.templateCompiler.compile(statusPage, payload),
       {
         statusCode,
@@ -82,7 +86,7 @@ export class Router {
       const fileSize = (await Deno.stat(filePath)).size;
       const body = (await Deno.open(filePath)).readable;
 
-      return createResponse(body, {
+      return this.createResponse(body, {
         headers: {
           'content-length': fileSize.toString(),
           'content-type': contentType(filePath.split('.')?.pop() ?? '') ??
@@ -128,8 +132,6 @@ export class Router {
           request,
         );
 
-        TemplateCompiler.stacks.clear();
-
         body = compiledTemplate;
 
         break;
@@ -159,10 +161,43 @@ export class Router {
       }
     }
 
-    return createResponse(body as string, {
+    return this.createResponse(body as string, {
       statusCode,
       headers: {
         'content-type': `${contentType}; charset=utf-8`,
+      },
+    });
+  }
+
+  public createResponse(
+    body: ReadableStream | XMLHttpRequestBodyInit | null,
+    { headers = {}, statusCode = HttpStatus.Ok }: ResponseOptions = {},
+  ): Response {
+    const cspDirectives = this.configurator.entries.isProduction
+      ? ''
+      : ` http://${this.configurator.entries.host}:* ws://${this.configurator.entries.host}:*`;
+
+    const securityHeaders = {
+      'content-security-policy':
+        `default-src 'self' 'unsafe-inline'${cspDirectives};base-uri 'self';connect-src 'self'${cspDirectives};font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src *;object-src 'none';script-src 'self' 'unsafe-inline'${cspDirectives};script-src-attr 'unsafe-inline';style-src 'self' 'unsafe-inline' https://fonts.googleapis.com${cspDirectives};upgrade-insecure-requests`,
+      'cross-origin-opener-policy': 'same-origin',
+      'cross-origin-resource-policy': 'same-origin',
+      'origin-agent-cluster': '?1',
+      'permissions-policy':
+        'autoplay=(self), camera=(), encrypted-media=(self), geolocation=(self), microphone=(), payment=(), sync-xhr=(self)',
+      'referrer-policy': 'no-referrer',
+      'strict-transport-security': 'max-age=31536000; includeSubDomains',
+      'x-content-type-options': 'nosniff',
+      'x-dns-prefetch-control': 'off',
+      'x-xss-protection': '0',
+    };
+
+    return new Response(body, {
+      status: statusCode,
+      headers: {
+        'content-type': 'text/html; charset=utf-8',
+        ...securityHeaders,
+        ...headers,
       },
     });
   }
@@ -286,7 +321,7 @@ export class Router {
         }
 
         const validationRules = Reflector.getMetadata<
-          Record<string, ValidationRules | Record<string, unknown>>
+          Record<string, Partial<ValidationRules> | Record<string, unknown>>
         >(
           'validationRules',
           controllerMethod,
@@ -300,7 +335,7 @@ export class Router {
 
           if (Object.keys(errors).length > 0) {
             if (this.isAjaxRequest(request)) {
-              return createResponse(
+              return this.createResponse(
                 JSON.stringify({
                   errors,
                 }),
@@ -415,7 +450,7 @@ export class Router {
         );
       }
 
-      return createResponse(
+      return this.createResponse(
         await this.templateCompiler.compile(errorPage, {
           error,
         }),
