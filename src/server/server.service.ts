@@ -248,8 +248,17 @@ export class Server {
           }
         }
 
+        const translationWatcher = Deno.watchFs('locales');
+
+        for await (const event of viewWatcher) {
+          if (event.kind === 'modify') {
+            await this.localizator.setup();
+          }
+        }
+
         this.addExitSignalListener(() => {
           viewWatcher.close();
+          translationWatcher.close();
 
           Deno.exit();
         });
