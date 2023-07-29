@@ -4,7 +4,7 @@ import { ServiceResolveOptions } from '../interfaces/service_resolve_options.int
 
 export function inject<T>(
   service: Constructor<T>,
-  options: ServiceResolveOptions = {},
+  options: Partial<ServiceResolveOptions> = {},
 ): T {
   return Injector.resolve<T>(service, options);
 }

@@ -26,11 +26,11 @@ export class Server {
 
   private readonly logger = inject(Logger);
 
+  private options: Partial<ServerOptions> = {};
+
   private readonly router = inject(Router);
 
   private readonly wsServer = inject(WsServer);
-
-  constructor(private readonly options: ServerOptions) {}
 
   private addExitSignalListener(callback: () => void): void {
     for (const signal of this.exitSignals) {
@@ -107,7 +107,7 @@ export class Server {
     this.router.registerControllers(this.options.controllers ?? []);
     this.wsServer.registerChannels(this.options.channels ?? []);
 
-    for (const module of this.options.modules) {
+    for (const module of this.options.modules ?? []) {
       const moduleInstance = inject(module);
 
       this.router.registerControllers(moduleInstance.controllers ?? []);
@@ -158,6 +158,10 @@ export class Server {
         Deno.exit();
       }
     });
+  }
+
+  public configure(options: Partial<ServerOptions>): void {
+    this.options = options;
   }
 
   public async start(): Promise<void> {

@@ -22,8 +22,8 @@ import { ValuesUnion } from '../utils/types/values_union.type.ts';
 import { ViewResponse } from '../http/view_response.class.ts';
 
 interface ResponseOptions {
-  headers?: HeadersInit;
-  statusCode?: HttpStatus;
+  headers: HeadersInit;
+  statusCode: HttpStatus;
 }
 
 type RouteDecoratorFunction<T> = T extends ValuesUnion<HttpMethod>[] ? (
@@ -171,7 +171,7 @@ export class Router {
 
   public createResponse(
     body: ReadableStream | XMLHttpRequestBodyInit | null,
-    { headers = {}, statusCode = HttpStatus.Ok }: ResponseOptions = {},
+    { headers = {}, statusCode = HttpStatus.Ok }: Partial<ResponseOptions> = {},
   ): Response {
     const cspDirectives = this.configurator.entries.isProduction
       ? ''

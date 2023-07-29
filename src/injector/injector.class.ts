@@ -28,7 +28,7 @@ export class Injector {
 
   public static resolve<T>(
     target: Constructor<T>,
-    options: ServiceResolveOptions = {},
+    options: Partial<ServiceResolveOptions> = {},
   ): T | never {
     if ((options.singleton ?? true) && this.has(target)) {
       return this.cachedInstances.get(target) as T;
