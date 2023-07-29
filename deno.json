@@ -22,7 +22,9 @@
   },
   "lock": false,
   "tasks": {
-    "test": "deno test -A --no-check --parallel --watch",
-    "test:cov": "deno test -A --coverage=coverage"
+    "bench": "deno bench -A",
+    "test": "deno test -A --no-check --parallel",
+    "test:cov": "deno test -A --coverage=coverage",
+    "test:watch": "deno test -A --no-check --parallel --watch"
   }
 }
