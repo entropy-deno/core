@@ -1,6 +1,7 @@
 import { contentType } from 'https://deno.land/std@0.196.0/media_types/content_type.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
 import { Constructor } from '../utils/interfaces/constructor.interface.ts';
+import { Controller } from '../http/controller.class.ts';
 import { enumKey } from '../utils/functions/enum_key.function.ts';
 import { ErrorHandler } from '../error_handler/error_handler.service.ts';
 import { errorPage } from '../error_handler/pages/error_page.ts';
@@ -386,7 +387,7 @@ export class Router {
     }
   }
 
-  public registerControllers(controllers: Constructor[]): void {
+  public registerControllers(controllers: Constructor<Controller>[]): void {
     for (const controller of controllers) {
       this.registerController(controller);
     }
