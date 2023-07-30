@@ -29,7 +29,7 @@ export class Injector {
   public static resolve<T>(
     target: Constructor<T>,
     options: Partial<ServiceResolveOptions> = {},
-  ): T | never {
+  ): T {
     if ((options.singleton ?? true) && this.has(target)) {
       return this.cachedInstances.get(target) as T;
     }
@@ -45,5 +45,13 @@ export class Injector {
     }
 
     return instance;
+  }
+
+  public static use<T>(target: Constructor<T>): T {
+    if (!this.has(target)) {
+      throw new Error(`Cannot use ${target.name} before binding it`);
+    }
+
+    return this.cachedInstances.get(target) as T;
   }
 }
