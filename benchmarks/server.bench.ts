@@ -1,7 +1,8 @@
 import { Route } from '../src/router/router.module.ts';
+import { Controller } from '../src/http/controller.class.ts';
 import { createServer } from '../src/server/functions/create_server.function.ts';
 
-class RootController {
+class RootController extends Controller {
   @Route.Get('/')
   public index() {
     return 'Hello, world!';
