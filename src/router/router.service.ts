@@ -181,8 +181,23 @@ export class Router {
     } ${
       this.configurator.entries.isProduction
         ? ''
-        : ` http://${this.configurator.entries.host}:* ws://${this.configurator.entries.host}:*`
+        : `http://${this.configurator.entries.host}:* ws://${this.configurator.entries.host}:*`
     }`;
+
+    const csp = {
+      'default-src': `'self' 'unsafe-inline' ${cspDirectives}`,
+      'base-uri': `'self'`,
+      'connect-src': `'self' ${cspDirectives}`,
+      'font-src': `'self' ${cspDirectives} https: data:`,
+      'frame-ancestors': `'self'`,
+      'form-action': `'self'`,
+      'img-src': '*',
+      'object-src': `'none'`,
+      'script-src': `'self' 'unsafe-inline' ${cspDirectives}`,
+      'script-src-attr': `'unsafe-inline'`,
+      'style-src': `'self' 'unsafe-inline' ${cspDirectives}`,
+      'upgrade-insecure-requests': '',
+    };
 
     const { corsAllowedHeaders, corsAllowedMethods, corsAllowedOrigins } =
       this.configurator.entries;
@@ -201,8 +216,9 @@ export class Router {
         'access-control-allow-origin': corsAllowedOrigins.join(','),
       }),
       'access-control-max-age': String(this.configurator.entries.corsMaxAge),
-      'content-security-policy':
-        `default-src 'self' 'unsafe-inline'${cspDirectives};base-uri 'self';connect-src 'self'${cspDirectives};font-src 'self' https: data:;frame-ancestors 'self';form-action 'self';img-src *;object-src 'none';script-src 'self' 'unsafe-inline'${cspDirectives};script-src-attr 'unsafe-inline';style-src 'self' 'unsafe-inline'${cspDirectives};upgrade-insecure-requests`,
+      'content-security-policy': Object.entries(csp).map(([key, value]) =>
+        `${key} ${value}`
+      ).join(';'),
       'cross-origin-opener-policy': 'same-origin',
       'cross-origin-resource-policy': 'same-origin',
       'origin-agent-cluster': '?1',
