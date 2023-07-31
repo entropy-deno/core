@@ -5,7 +5,7 @@ import { resolveViewFile } from '../template_compiler/functions/resolve_view_fil
 import { RoutePath } from '../router/types/route_path.type.ts';
 import { ViewResponse } from './view_response.class.ts';
 
-export class Controller {
+export abstract class Controller {
   protected redirectResponse(
     url: string | RoutePath,
     statusCode: HttpStatus,
