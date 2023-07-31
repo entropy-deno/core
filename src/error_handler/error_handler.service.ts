@@ -1,6 +1,5 @@
 import { fromFileUrl } from 'https://deno.land/std@0.196.0/path/mod.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
-import { env } from '../configurator/functions/env.function.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { Logger } from '../logger/logger.service.ts';
 
@@ -25,6 +24,7 @@ export class ErrorHandler {
     if (!stack) {
       this.currentFile = this.defaultFile;
       this.currentLine = null;
+      this.currentStack = null;
 
       return;
     }
@@ -71,7 +71,7 @@ export class ErrorHandler {
 
     console.log(`\n%c${this.currentStack}\n`, 'color: gray');
 
-    if (die && !env<string>('DENO_DEPLOYMENT_ID')) {
+    if (die && !this.configurator.entries.isDenoDeploy) {
       Deno.exit(1);
     }
   }
