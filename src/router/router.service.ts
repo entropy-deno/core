@@ -174,7 +174,7 @@ export class Router {
     body: ReadableStream | XMLHttpRequestBodyInit | null,
     { headers = {}, statusCode = HttpStatus.Ok }: Partial<ResponseOptions> = {},
   ): Response {
-    const cspDirectives = ` https://fonts.googleapis.com ${
+    const cspDirectives = ` ${
       this.configurator.entries.cspAllowedOrigins.join(' ')
     } ${
       this.configurator.entries.isProduction
