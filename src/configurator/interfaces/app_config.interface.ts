@@ -2,6 +2,11 @@ import { ValidationRuleDefinition } from '../../validator/interfaces/validation_
 
 export interface AppConfig {
   cspAllowedOrigins: string[];
+  corsAllowCredentials: boolean;
+  corsAllowedHeaders: string[];
+  corsAllowedMethods: string[];
+  corsAllowedOrigins: string[];
+  corsMaxAge: number;
   defaultLocale: string;
   encryptionKey: string;
   envFile: string | false;

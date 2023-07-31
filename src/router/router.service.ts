@@ -69,7 +69,7 @@ export class Router {
         headers: {
           'content-type': 'application/json; charset=utf-8',
         },
-      });
+      }, request);
     }
 
     return this.createResponse(
@@ -77,6 +77,7 @@ export class Router {
       {
         statusCode,
       },
+      request,
     );
   }
 
@@ -167,12 +168,13 @@ export class Router {
       headers: {
         'content-type': `${contentType}; charset=utf-8`,
       },
-    });
+    }, request);
   }
 
   public createResponse(
     body: ReadableStream | XMLHttpRequestBodyInit | null,
     { headers = {}, statusCode = HttpStatus.Ok }: Partial<ResponseOptions> = {},
+    request?: Request,
   ): Response {
     const cspDirectives = ` ${
       this.configurator.entries.cspAllowedOrigins.join(' ')
@@ -182,7 +184,23 @@ export class Router {
         : ` http://${this.configurator.entries.host}:* ws://${this.configurator.entries.host}:*`
     }`;
 
+    const { corsAllowedHeaders, corsAllowedMethods, corsAllowedOrigins } =
+      this.configurator.entries;
+
     const securityHeaders = {
+      'access-control-allow-credentials': String(
+        this.configurator.entries.corsAllowCredentials,
+      ),
+      'access-control-allow-headers': corsAllowedHeaders.length
+        ? corsAllowedHeaders.join(',')
+        : (request?.headers.get('access-control-request-headers') ?? ''),
+      ...(corsAllowedMethods.length && {
+        'access-control-allow-methods': corsAllowedMethods.join(','),
+      }),
+      ...(corsAllowedOrigins.length && {
+        'access-control-allow-origin': corsAllowedOrigins.join(','),
+      }),
+      'access-control-max-age': String(this.configurator.entries.corsMaxAge),
       'content-security-policy':
         `default-src 'self' 'unsafe-inline'${cspDirectives};base-uri 'self';connect-src 'self'${cspDirectives};font-src 'self' https: data:;frame-ancestors 'self';form-action 'self';img-src *;object-src 'none';script-src 'self' 'unsafe-inline'${cspDirectives};script-src-attr 'unsafe-inline';style-src 'self' 'unsafe-inline'${cspDirectives};upgrade-insecure-requests`,
       'cross-origin-opener-policy': 'same-origin',
@@ -195,6 +213,9 @@ export class Router {
       'x-content-type-options': 'nosniff',
       'x-dns-prefetch-control': 'off',
       'x-xss-protection': '0',
+      ...(!corsAllowedMethods.includes('*') && {
+        'vary': 'origin',
+      }),
     };
 
     return new Response(body, {
@@ -350,6 +371,7 @@ export class Router {
                     'content-type': 'application/json; charset=utf-8',
                   },
                 },
+                request,
               );
             }
 
@@ -462,6 +484,7 @@ export class Router {
         {
           statusCode: HttpStatus.InternalServerError,
         },
+        request,
       );
     }
   }
