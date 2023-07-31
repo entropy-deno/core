@@ -184,7 +184,7 @@ export class Router {
 
     const securityHeaders = {
       'content-security-policy':
-        `default-src 'self' 'unsafe-inline'${cspDirectives};base-uri 'self';connect-src 'self'${cspDirectives};font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';form-action 'self';img-src *;object-src 'none';script-src 'self' 'unsafe-inline'${cspDirectives};script-src-attr 'unsafe-inline';style-src 'self' 'unsafe-inline'${cspDirectives};upgrade-insecure-requests`,
+        `default-src 'self' 'unsafe-inline'${cspDirectives};base-uri 'self';connect-src 'self'${cspDirectives};font-src 'self' https: data:;frame-ancestors 'self';form-action 'self';img-src *;object-src 'none';script-src 'self' 'unsafe-inline'${cspDirectives};script-src-attr 'unsafe-inline';style-src 'self' 'unsafe-inline'${cspDirectives};upgrade-insecure-requests`,
       'cross-origin-opener-policy': 'same-origin',
       'cross-origin-resource-policy': 'same-origin',
       'origin-agent-cluster': '?1',
