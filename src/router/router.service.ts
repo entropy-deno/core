@@ -174,13 +174,17 @@ export class Router {
     body: ReadableStream | XMLHttpRequestBodyInit | null,
     { headers = {}, statusCode = HttpStatus.Ok }: Partial<ResponseOptions> = {},
   ): Response {
-    const cspDirectives = this.configurator.entries.isProduction
-      ? ''
-      : ` http://${this.configurator.entries.host}:* ws://${this.configurator.entries.host}:*`;
+    const cspDirectives = ` https://fonts.googleapis.com ${
+      this.configurator.entries.cspAllowedOrigins.join(' ')
+    } ${
+      this.configurator.entries.isProduction
+        ? ''
+        : ` http://${this.configurator.entries.host}:* ws://${this.configurator.entries.host}:*`
+    }`;
 
     const securityHeaders = {
       'content-security-policy':
-        `default-src 'self' 'unsafe-inline'${cspDirectives};base-uri 'self';connect-src 'self'${cspDirectives};font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src *;object-src 'none';script-src 'self' 'unsafe-inline'${cspDirectives};script-src-attr 'unsafe-inline';style-src 'self' 'unsafe-inline' https://fonts.googleapis.com${cspDirectives};upgrade-insecure-requests`,
+        `default-src 'self' 'unsafe-inline'${cspDirectives};base-uri 'self';connect-src 'self'${cspDirectives};font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';form-action 'self';img-src *;object-src 'none';script-src 'self' 'unsafe-inline'${cspDirectives};script-src-attr 'unsafe-inline';style-src 'self' 'unsafe-inline'${cspDirectives};upgrade-insecure-requests`,
       'cross-origin-opener-policy': 'same-origin',
       'cross-origin-resource-policy': 'same-origin',
       'origin-agent-cluster': '?1',

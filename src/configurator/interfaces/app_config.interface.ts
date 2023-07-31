@@ -1,6 +1,7 @@
 import { ValidationRuleDefinition } from '../../validator/interfaces/validation_rule_definition.interface.ts';
 
 export interface AppConfig {
+  cspAllowedOrigins: string[];
   defaultLocale: string;
   encryptionKey: string;
   envFile: string | false;

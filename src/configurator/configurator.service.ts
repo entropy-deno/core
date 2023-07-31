@@ -3,6 +3,7 @@ import { EnvVariable } from './types/env_variable.type.ts';
 
 export class Configurator {
   private options: Readonly<AppConfig> = {
+    cspAllowedOrigins: [],
     defaultLocale: 'en',
     encryptionKey: this.getEnv<string>('ENCRYPTION_KEY') ?? crypto.randomUUID(),
     envFile: '.env',
