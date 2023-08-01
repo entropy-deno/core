@@ -14,7 +14,8 @@ export class Configurator {
     envFile: '.env',
     host: this.getEnv<string>('HOST') ?? 'localhost',
     isDenoDeploy: !!this.getEnv<string>('DENO_DEPLOYMENT_ID') ?? false,
-    isProduction: this.getEnv<boolean>('PRODUCTION') ?? false,
+    isProduction: (this.getEnv<boolean>('PRODUCTION') ?? false) ||
+      (!!this.getEnv<string>('DENO_DEPLOYMENT_ID') ?? false),
     logger: true,
     port: this.getEnv<number>('PORT') ?? 5050,
     tlsCert: this.getEnv<string>('TLS_CERT') ?? false,
