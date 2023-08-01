@@ -2,7 +2,6 @@ import { contentType } from 'https://deno.land/std@0.196.0/media_types/content_t
 import { Configurator } from '../configurator/configurator.service.ts';
 import { Constructor } from '../utils/interfaces/constructor.interface.ts';
 import { Controller } from '../http/controller.class.ts';
-import { enumKey } from '../utils/functions/enum_key.function.ts';
 import { ErrorHandler } from '../error_handler/error_handler.service.ts';
 import { errorPage } from '../error_handler/pages/error_page.ts';
 import { HttpError } from '../http/http_error.class.ts';
@@ -17,6 +16,7 @@ import { RoutePath } from './types/route_path.type.ts';
 import { Pipe } from '../http/interfaces/pipe.interface.ts';
 import { statusPage } from '../http/pages/status_page.ts';
 import { TemplateCompiler } from '../template_compiler/template_compiler.service.ts';
+import { Utils } from '../utils/utils.class.ts';
 import { ValidationRules } from '../validator/interfaces/validation_rules.interface.ts';
 import { Validator } from '../validator/validator.service.ts';
 import { ValuesUnion } from '../utils/types/values_union.type.ts';
@@ -59,8 +59,9 @@ export class Router {
   ): Promise<Response> {
     const payload = {
       statusCode,
-      message: enumKey(statusCode, HttpStatus).replace(/([a-z])([A-Z])/g, '$1 $2') ??
-        'Error',
+      message:
+        Utils.enumKey(statusCode, HttpStatus).replace(/([a-z])([A-Z])/g, '$1 $2') ??
+          'Error',
     };
 
     if (this.isAjaxRequest(request)) {

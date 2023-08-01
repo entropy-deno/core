@@ -2,13 +2,12 @@ import * as constants from '../constants.ts';
 import { TemplateCompilerOptions } from './interfaces/template_compiler_options.interface.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
 import { env } from '../configurator/functions/env.function.ts';
-import { escape } from '../utils/functions/escape.function.ts';
 import { inject } from '../injector/functions/inject.function.ts';
-import { range } from '../utils/functions/range.function.ts';
 import {
   TemplateDirectiveDefinition,
 } from './interfaces/template_directive_definition.interface.ts';
 import { translate } from '../localizator/functions/translate.function.ts';
+import { Utils } from '../utils/utils.class.ts';
 
 export class TemplateCompiler {
   private readonly configurator = inject(Configurator);
@@ -19,9 +18,9 @@ export class TemplateCompiler {
     '__': translate,
     '$': translate,
     '$env': env,
-    '$escape': escape,
+    '$escape': Utils.escape,
     '$inject': inject,
-    '$range': range,
+    '$range': Utils.range,
     '$translate': translate,
   };
 

@@ -8,8 +8,8 @@ import { Localizator } from '../localizator/localizator.module.ts';
 import { Logger } from '../logger/logger.service.ts';
 import { MIN_DENO_VERSION } from '../constants.ts';
 import { Router } from '../router/router.service.ts';
-import { runShellCommand } from '../utils/functions/run_shell_command.function.ts';
 import { ServerOptions } from './interfaces/server_options.interface.ts';
+import { Utils } from '../utils/utils.class.ts';
 import { WebClientAlias } from './enums/web_client_alias.enum.ts';
 import { WsServer } from '../ws/ws_server.service.ts';
 
@@ -133,7 +133,7 @@ export class Server {
 
     if (flags.open && !localStorage.getItem(this.devServerCheckKey)) {
       try {
-        runShellCommand(
+        Utils.runShellCommand(
           `${
             WebClientAlias[
               Deno.build.os as 'darwin' | 'linux' | 'win32' | 'windows'
