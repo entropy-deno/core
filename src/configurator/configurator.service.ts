@@ -35,30 +35,19 @@ export class Configurator {
   }
 
   public get<T = string>(option: string, defaultValue: T): T {
-    return this.options[option as keyof Readonly<AppConfig>] as unknown as T ??
+    return this.options[option as keyof Readonly<AppConfig>] as T ??
       defaultValue;
   }
 
-  public getEnv<T = EnvVariable>(
-    key: string,
-    defaultValue?: T,
-  ): typeof defaultValue extends EnvVariable ? T : T | undefined {
+  public getEnv<T extends EnvVariable>(key: string): T | undefined {
     if (!(key in Deno.env.toObject())) {
-      return defaultValue as (typeof defaultValue extends EnvVariable
-        ? typeof defaultValue
-        : T | undefined);
+      return undefined;
     }
 
     try {
-      return JSON.parse(
-        Deno.env.get(key)?.toString() ?? 'null',
-      ) as (typeof defaultValue extends EnvVariable ? typeof defaultValue
-        : T | undefined);
+      return JSON.parse(Deno.env.get(key)?.toString() ?? 'null') as T | undefined;
     } catch {
-      return (Deno.env.get(key) as T) ??
-        defaultValue as (typeof defaultValue extends EnvVariable
-          ? typeof defaultValue
-          : T | undefined);
+      return Deno.env.get(key) as T;
     }
   }
 

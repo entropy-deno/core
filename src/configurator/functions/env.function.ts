@@ -4,9 +4,6 @@ import { inject } from '../../injector/functions/inject.function.ts';
 
 const configurator = inject(Configurator);
 
-export function env<T = EnvVariable>(
-  key: string,
-  defaultValue?: T,
-): typeof defaultValue extends EnvVariable ? T : T | undefined {
-  return configurator.getEnv(key, defaultValue);
+export function env<T extends EnvVariable>(key: string): T | undefined {
+  return configurator.getEnv(key);
 }
