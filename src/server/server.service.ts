@@ -9,7 +9,9 @@ import { Logger } from '../logger/logger.service.ts';
 import { MIN_DENO_VERSION } from '../constants.ts';
 import { Router } from '../router/router.service.ts';
 import { ServerOptions } from './interfaces/server_options.interface.ts';
+import { TemplateCompiler } from '../template_compiler/template_compiler.service.ts';
 import { Utils } from '../utils/utils.class.ts';
+import { Validator } from '../validator/validator.service.ts';
 import { WebClientAlias } from './enums/web_client_alias.enum.ts';
 import { WsServer } from '../ws/ws_server.service.ts';
 
@@ -29,6 +31,10 @@ export class Server {
   private options: Partial<ServerOptions> = {};
 
   private readonly router = inject(Router);
+
+  private readonly templateCompiler = inject(TemplateCompiler);
+
+  private readonly validator = inject(Validator);
 
   private readonly wsServer = inject(WsServer);
 
@@ -105,6 +111,10 @@ export class Server {
 
   private setup(): void {
     this.router.registerControllers(this.options.controllers ?? []);
+    this.validator.registerRules(this.configurator.entries.validatorRules);
+    this.templateCompiler.registerDirectives(
+      this.configurator.entries.templateDirectives,
+    );
     this.wsServer.registerChannels(this.options.channels ?? []);
 
     for (const module of this.options.modules ?? []) {

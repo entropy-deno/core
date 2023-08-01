@@ -18,11 +18,12 @@ export class Configurator {
       (!!this.getEnv<string>('DENO_DEPLOYMENT_ID') ?? false),
     logger: true,
     port: this.getEnv<number>('PORT') ?? 5050,
+    templateDirectives: [],
     tlsCert: this.getEnv<string>('TLS_CERT') ?? false,
     tlsCertFile: false,
     tlsKey: this.getEnv<string>('TLS_KEY') ?? false,
     tlsKeyFile: false,
-    validationRules: [],
+    validatorRules: [],
     wsPort: this.getEnv<number>('WS_PORT') ??
       (this.getEnv<number>('PORT') ?? 5050) + 1,
   };

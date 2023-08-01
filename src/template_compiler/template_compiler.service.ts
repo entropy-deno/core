@@ -581,4 +581,10 @@ export class TemplateCompiler {
   public registerDirective(directive: TemplateDirectiveDefinition): void {
     this.directives.push(directive);
   }
+
+  public registerDirectives(directives: TemplateDirectiveDefinition[]): void {
+    for (const directive of directives) {
+      this.registerDirective(directive);
+    }
+  }
 }

@@ -271,12 +271,18 @@ export class Validator {
           return usernameRegexp.test(value ?? '');
         },
       },
-      ...(this.configurator.entries.validationRules ?? []),
+      ...(this.configurator.entries.validatorRules ?? []),
     ];
   }
 
   public registerRule(rule: ValidationRuleDefinition): void {
     this.rules.push(rule);
+  }
+
+  public registerRules(rules: ValidationRuleDefinition[]): void {
+    for (const rule of rules) {
+      this.registerRule(rule);
+    }
   }
 
   public async validate(
