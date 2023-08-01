@@ -1,6 +1,6 @@
 import { fromFileUrl } from 'https://deno.land/std@0.196.0/path/mod.ts';
 
-export class Utils {
+export abstract class Utils {
   public static callerFile() {
     const error = new Error();
     const [, , , data] = error.stack?.split('\n') ?? [];
@@ -39,6 +39,15 @@ export class Utils {
     );
   }
 
+  public static range(start: number, end?: number) {
+    if (end === undefined) {
+      end = start;
+      start = 0;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => i + start);
+  }
+
   public static runShellCommand(name: string, args: string[] = []): void {
     const command = new Deno.Command(
       name,
@@ -51,14 +60,5 @@ export class Utils {
     );
 
     command.spawn();
-  }
-
-  public static range(start: number, end?: number) {
-    if (end === undefined) {
-      end = start;
-      start = 0;
-    }
-
-    return Array.from({ length: end - start + 1 }, (_, i) => i + start);
   }
 }
