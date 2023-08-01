@@ -1,4 +1,4 @@
-export class Reflector {
+export abstract class Reflector {
   private static metadata = new WeakMap<object, Record<string, unknown>>();
 
   public static defineMetadata<T>(
