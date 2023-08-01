@@ -69,7 +69,9 @@ export class ErrorHandler {
       },
     );
 
-    console.log(`\n%c${this.currentStack}\n`, 'color: gray');
+    if (this.currentStack) {
+      this.logger.raw(`\n%c${this.currentStack}\n`, 'color: gray');
+    }
 
     if (die && !this.configurator.entries.isDenoDeploy) {
       Deno.exit(1);

@@ -61,6 +61,10 @@ export class Logger {
     );
   }
 
+  public raw(...messages: string[]): void {
+    console.log(...messages);
+  }
+
   public warn(
     message: string,
     { badge = 'Warning', colors = [] }: LogOptions = {},

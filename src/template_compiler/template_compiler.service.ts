@@ -114,7 +114,7 @@ export class TemplateCompiler {
                 }
               };
 
-              ws.onclose = () => console.log('[entropy] Hot reload disconnected');
+              ws.onclose = () => console.error('[entropy] Hot reload disconnected');
             </script>
           `;
         },
