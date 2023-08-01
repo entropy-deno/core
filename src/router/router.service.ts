@@ -186,13 +186,14 @@ export class Router {
     }`;
 
     const csp = {
-      'default-src': `'self' 'unsafe-inline' ${cspDirectives}`,
       'base-uri': `'self'`,
       'connect-src': `'self' ${cspDirectives}`,
+      'default-src': `'self' 'unsafe-inline' ${cspDirectives}`,
       'font-src': `'self' ${cspDirectives} https: data:`,
-      'frame-ancestors': `'self'`,
       'form-action': `'self'`,
+      'frame-ancestors': `'self'`,
       'img-src': '*',
+      'media-src': `'self'`,
       'object-src': `'none'`,
       'script-src': `'self' 'unsafe-inline' ${cspDirectives}`,
       'script-src-attr': `'unsafe-inline'`,
