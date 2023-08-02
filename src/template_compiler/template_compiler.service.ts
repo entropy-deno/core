@@ -106,7 +106,9 @@ export class TemplateCompiler {
         render: () => {
           return this.configurator.entries.isProduction ? '' : `
             <script>
-              const ws = new WebSocket('ws://${this.configurator.entries.host}:${this.configurator.entries.webSocket.port}');
+              const ws = new WebSocket('${
+            this.configurator.entries.tls.enabled ? 'wss' : 'ws'
+          }://${this.configurator.entries.host}:${this.configurator.entries.webSocket.port}');
 
               ws.onmessage = (event) => {
                 if (JSON.parse(event.data).channel === '$hot-reload') {

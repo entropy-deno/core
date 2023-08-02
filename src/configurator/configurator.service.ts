@@ -30,6 +30,7 @@ export class Configurator {
     tls: {
       cert: this.getEnv<string>('TLS_CERT') ?? false,
       certFile: false,
+      enabled: false,
       key: this.getEnv<string>('TLS_KEY') ?? false,
       keyFile: false,
     },

@@ -49,7 +49,7 @@ export class WebSocketServer {
     }
   }
 
-  public start(): void {
+  public async start(): Promise<void> {
     if (
       this.configurator.entries.webSocket.port === this.configurator.entries.port
     ) {
@@ -58,7 +58,23 @@ export class WebSocketServer {
       );
     }
 
+    const tlsCert = this.configurator.entries.tls.cert ??
+      (this.configurator.entries.tls.certFile
+        ? await Deno.readTextFile(this.configurator.entries.tls.certFile)
+        : false);
+
+    const tlsKey = this.configurator.entries.tls.key ??
+      (this.configurator.entries.tls.keyFile
+        ? await Deno.readTextFile(this.configurator.entries.tls.keyFile)
+        : false);
+
     Deno.serve({
+      ...(this.configurator.entries.tls.enabled
+        ? {
+          cert: tlsCert,
+          key: tlsKey,
+        }
+        : {}),
       hostname: this.configurator.entries.host,
       port: this.configurator.entries.webSocket.port,
       onListen: () => {

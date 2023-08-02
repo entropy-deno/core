@@ -27,6 +27,7 @@ export interface AppConfig {
   tls: {
     cert: string | false;
     certFile: string | false;
+    enabled: boolean;
     key: string | false;
     keyFile: string | false;
   };

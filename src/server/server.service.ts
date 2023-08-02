@@ -150,7 +150,9 @@ export class Server {
             ] ??
               'open'
           }`,
-          [`http://${this.configurator.entries.host}:${this.configurator.entries.port}`],
+          [`${
+            this.configurator.entries.tls.enabled ? 'https' : 'http'
+          }://${this.configurator.entries.host}:${this.configurator.entries.port}`],
         );
       } finally {
         localStorage.setItem(this.devServerCheckKey, 'on');
@@ -219,8 +221,12 @@ export class Server {
           ? await Deno.readTextFile(this.configurator.entries.tls.keyFile)
           : false);
 
+      if (tlsCert && tlsKey) {
+        this.configurator.entries.tls.enabled = true;
+      }
+
       Deno.serve({
-        ...(tlsCert && tlsKey
+        ...(this.configurator.entries.tls.enabled
           ? {
             cert: tlsCert,
             key: tlsKey,
@@ -234,7 +240,9 @@ export class Server {
               `HTTP server is running on ${
                 this.configurator.entries.isProduction
                   ? `port %c${this.configurator.entries.port}`
-                  : `%chttp://${this.configurator.entries.host}:${this.configurator.entries.port}`
+                  : `%c${
+                    this.configurator.entries.tls.enabled ? 'https' : 'http'
+                  }://${this.configurator.entries.host}:${this.configurator.entries.port}`
               } %c[${Deno.build.os === 'darwin' ? '⌃C' : 'Ctrl+C'} to quit]`,
               {
                 badge: 'Server',
