@@ -1,14 +1,19 @@
 import { AppConfig } from './interfaces/app_config.interface.ts';
 import { EnvVariable } from './types/env_variable.type.ts';
+import { Utils } from '../utils/utils.class.ts';
 
 export class Configurator {
   private options: Readonly<AppConfig> = {
-    cspAllowedOrigins: [],
-    corsAllowCredentials: false,
-    corsAllowedHeaders: [],
-    corsAllowedMethods: ['*'],
-    corsAllowedOrigins: ['*'],
-    corsMaxAge: 0,
+    contentSecurityPolicy: {
+      allowedOrigins: [],
+    },
+    cors: {
+      allowCredentials: false,
+      allowedHeaders: [],
+      allowedMethods: ['*'],
+      allowedOrigins: ['*'],
+      maxAge: 0,
+    },
     defaultLocale: 'en',
     encryptionKey: this.getEnv<string>('ENCRYPTION_KEY') ?? crypto.randomUUID(),
     envFile: '.env',
@@ -19,10 +24,12 @@ export class Configurator {
     logger: true,
     port: this.getEnv<number>('PORT') ?? 5050,
     templateDirectives: [],
-    tlsCert: this.getEnv<string>('TLS_CERT') ?? false,
-    tlsCertFile: false,
-    tlsKey: this.getEnv<string>('TLS_KEY') ?? false,
-    tlsKeyFile: false,
+    tls: {
+      cert: this.getEnv<string>('TLS_CERT') ?? false,
+      certFile: false,
+      key: this.getEnv<string>('TLS_KEY') ?? false,
+      keyFile: false,
+    },
     validatorRules: [],
     wsPort: this.getEnv<number>('WS_PORT') ??
       (this.getEnv<number>('PORT') ?? 5050) + 1,
@@ -54,9 +61,6 @@ export class Configurator {
   }
 
   public setup(options: Partial<AppConfig> = {}): void {
-    this.options = {
-      ...this.options,
-      ...options,
-    };
+    this.options = Utils.deepMerge(this.options, options);
   }
 }

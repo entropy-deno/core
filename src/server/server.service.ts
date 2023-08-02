@@ -209,14 +209,14 @@ export class Server {
     try {
       this.setup();
 
-      const tlsCert = this.configurator.entries.tlsCert ??
-        (this.configurator.entries.tlsCertFile
-          ? await Deno.readTextFile(this.configurator.entries.tlsCertFile)
+      const tlsCert = this.configurator.entries.tls.cert ??
+        (this.configurator.entries.tls.certFile
+          ? await Deno.readTextFile(this.configurator.entries.tls.certFile)
           : false);
 
-      const tlsKey = this.configurator.entries.tlsKey ??
-        (this.configurator.entries.tlsKeyFile
-          ? await Deno.readTextFile(this.configurator.entries.tlsKeyFile)
+      const tlsKey = this.configurator.entries.tls.key ??
+        (this.configurator.entries.tls.keyFile
+          ? await Deno.readTextFile(this.configurator.entries.tls.keyFile)
           : false);
 
       Deno.serve({

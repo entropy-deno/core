@@ -178,7 +178,7 @@ export class Router {
     request?: Request,
   ): Response {
     const cspDirectives = ` ${
-      this.configurator.entries.cspAllowedOrigins.join(' ')
+      this.configurator.entries.contentSecurityPolicy.allowedOrigins.join(' ')
     } ${
       this.configurator.entries.isProduction
         ? ''
@@ -201,23 +201,20 @@ export class Router {
       'upgrade-insecure-requests': '',
     };
 
-    const { corsAllowedHeaders, corsAllowedMethods, corsAllowedOrigins } =
-      this.configurator.entries;
+    const { cors } = this.configurator.entries;
 
     const securityHeaders = {
-      'access-control-allow-credentials': String(
-        this.configurator.entries.corsAllowCredentials,
-      ),
-      'access-control-allow-headers': corsAllowedHeaders.length
-        ? corsAllowedHeaders.join(',')
+      'access-control-allow-credentials': String(cors.allowCredentials),
+      'access-control-allow-headers': cors.allowedHeaders.length
+        ? cors.allowedHeaders.join(',')
         : (request?.headers.get('access-control-request-headers') ?? ''),
-      ...(corsAllowedMethods.length && {
-        'access-control-allow-methods': corsAllowedMethods.join(','),
+      ...(cors.allowedMethods.length && {
+        'access-control-allow-methods': cors.allowedMethods.join(','),
       }),
-      ...(corsAllowedOrigins.length && {
-        'access-control-allow-origin': corsAllowedOrigins.join(','),
+      ...(cors.allowedOrigins.length && {
+        'access-control-allow-origin': cors.allowedOrigins.join(','),
       }),
-      'access-control-max-age': String(this.configurator.entries.corsMaxAge),
+      'access-control-max-age': String(cors.maxAge),
       'content-security-policy': Object.entries(csp).map(([key, value]) =>
         `${key} ${value}`
       ).join(';'),
@@ -231,7 +228,7 @@ export class Router {
       'x-content-type-options': 'nosniff',
       'x-dns-prefetch-control': 'off',
       'x-xss-protection': '0',
-      ...(!corsAllowedMethods.includes('*') && {
+      ...(!cors.allowedMethods.includes('*') && {
         'vary': 'origin',
       }),
     };

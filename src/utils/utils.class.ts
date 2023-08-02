@@ -15,6 +15,41 @@ export abstract class Utils {
     return fromFileUrl(import.meta.url);
   }
 
+  public static deepMerge<T = Record<string, unknown>, U = Record<string, unknown>>(
+    target: T,
+    ...elements: U[]
+  ): T {
+    if (!elements.length) {
+      return target;
+    }
+
+    const source = elements.shift();
+
+    for (const key in source) {
+      if (
+        (source[key] && typeof source[key] === 'object' &&
+          !Array.isArray(source[key]))
+      ) {
+        if (!target[key as keyof T]) {
+          Object.assign(target as object, {
+            [key]: {},
+          });
+        }
+
+        this.deepMerge(
+          target[key as keyof T] as T,
+          source[key] as U,
+        );
+      } else {
+        Object.assign(target as object, {
+          [key]: source[key],
+        });
+      }
+    }
+
+    return this.deepMerge(target, ...elements);
+  }
+
   public static enumKey<T = string | number>(
     value: T,
     enumObject: Record<string, unknown>,
