@@ -1,4 +1,4 @@
-import { TemplateDirectiveDefinition } from '../../template_compiler/interfaces/template_directive_definition.interface.ts';
+import { TemplateDirectiveDefinition } from '../../templates/interfaces/template_directive_definition.interface.ts';
 import { ValidationRuleDefinition } from '../../validator/interfaces/validation_rule_definition.interface.ts';
 
 export interface AppConfig {

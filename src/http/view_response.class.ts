@@ -1,4 +1,4 @@
-import { TemplateCompilerOptions } from '../template_compiler/interfaces/template_compiler_options.interface.ts';
+import { TemplateCompilerOptions } from '../templates/interfaces/template_compiler_options.interface.ts';
 
 export class ViewResponse {
   constructor(

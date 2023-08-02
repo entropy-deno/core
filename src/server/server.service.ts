@@ -9,7 +9,7 @@ import { Logger } from '../logger/logger.service.ts';
 import { MIN_DENO_VERSION } from '../constants.ts';
 import { Router } from '../router/router.service.ts';
 import { ServerOptions } from './interfaces/server_options.interface.ts';
-import { TemplateCompiler } from '../template_compiler/template_compiler.service.ts';
+import { TemplateCompiler } from '../templates/template_compiler.service.ts';
 import { Utils } from '../utils/utils.class.ts';
 import { Validator } from '../validator/validator.service.ts';
 import { WebClientAlias } from './enums/web_client_alias.enum.ts';

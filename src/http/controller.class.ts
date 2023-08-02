@@ -1,6 +1,6 @@
 import { HttpStatus } from './enums/http_status.enum.ts';
-import { TemplateCompilerOptions } from '../template_compiler/interfaces/template_compiler_options.interface.ts';
-import { resolveViewFile } from '../template_compiler/functions/resolve_view_file.function.ts';
+import { TemplateCompilerOptions } from '../templates/interfaces/template_compiler_options.interface.ts';
+import { resolveViewFile } from '../templates/functions/resolve_view_file.function.ts';
 import { RoutePath } from '../router/types/route_path.type.ts';
 import { Utils } from '../utils/utils.class.ts';
 import { ViewResponse } from './view_response.class.ts';

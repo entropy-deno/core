@@ -15,7 +15,7 @@ import { RouteOptions } from './interfaces/route_options.interface.ts';
 import { RoutePath } from './types/route_path.type.ts';
 import { Pipe } from '../http/interfaces/pipe.interface.ts';
 import { statusPage } from '../http/pages/status_page.ts';
-import { TemplateCompiler } from '../template_compiler/template_compiler.service.ts';
+import { TemplateCompiler } from '../templates/template_compiler.service.ts';
 import { Utils } from '../utils/utils.class.ts';
 import { ValidationRules } from '../validator/interfaces/validation_rules.interface.ts';
 import { Validator } from '../validator/validator.service.ts';
