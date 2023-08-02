@@ -305,7 +305,7 @@ export class TemplateCompiler {
       let iterator = 0;
 
       if (typeof iterable === 'number') {
-        iterable = range(iterable);
+        iterable = Utils.range(iterable);
       }
 
       for (const [key, item] of Object.entries(iterable)) {
