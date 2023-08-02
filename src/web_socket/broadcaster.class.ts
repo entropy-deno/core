@@ -3,7 +3,7 @@ import { Reflector } from '../utils/reflector.class.ts';
 export abstract class Broadcaster {
   public readonly activeSockets = new Map<string, WebSocket>();
 
-  protected broadcast(
+  public broadcast(
     payload: Record<string, unknown> = {},
     channel?: string,
   ): void {
