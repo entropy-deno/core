@@ -211,8 +211,14 @@ export class Router {
       ...(cors.allowedMethods.length && {
         'access-control-allow-methods': cors.allowedMethods.join(','),
       }),
-      ...(cors.allowedOrigins.length && {
-        'access-control-allow-origin': cors.allowedOrigins.join(','),
+      ...((cors.allowedOrigins.length &&
+        cors.allowedOrigins.includes(request?.headers.get('origin') as string)) && {
+        'access-control-allow-origin': cors.allowedOrigins[0] === '*'
+          ? '*'
+          : request?.headers.get('origin') ?? 'false',
+      }),
+      ...(cors.exposedHeaders.length && {
+        'access-control-expose-headers': cors.exposedHeaders.join(','),
       }),
       'access-control-max-age': String(cors.maxAge),
       'content-security-policy': Object.entries(csp).map(([key, value]) =>

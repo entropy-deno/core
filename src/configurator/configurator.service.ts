@@ -12,6 +12,7 @@ export class Configurator {
       allowedHeaders: [],
       allowedMethods: ['*'],
       allowedOrigins: ['*'],
+      exposedHeaders: [],
       maxAge: 0,
     },
     defaultLocale: 'en',

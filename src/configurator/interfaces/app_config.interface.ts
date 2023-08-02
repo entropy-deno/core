@@ -10,6 +10,7 @@ export interface AppConfig {
     allowedHeaders: string[];
     allowedMethods: string[];
     allowedOrigins: string[];
+    exposedHeaders: string[];
     maxAge: number;
   };
   defaultLocale: string;
