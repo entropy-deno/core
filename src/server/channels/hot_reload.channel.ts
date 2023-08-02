@@ -1,5 +1,5 @@
-import { Broadcaster } from '../../ws/broadcaster.class.ts';
-import { Channel } from '../../ws/decorators/channel.decorator.ts';
+import { Broadcaster } from '../../web_socket/broadcaster.class.ts';
+import { Channel } from '../../web_socket/decorators/channel.decorator.ts';
 
 @Channel('$hot-reload')
 export class HotReloadChannel extends Broadcaster {

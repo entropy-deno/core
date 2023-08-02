@@ -34,7 +34,7 @@ export class Configurator {
     },
     validatorRules: [],
     webSocket: {
-      port: this.getEnv<number>('WS_PORT') ??
+      port: this.getEnv<number>('WEB_SOCKET_PORT') ??
         (this.getEnv<number>('PORT') ?? 5050) + 1,
     },
   };

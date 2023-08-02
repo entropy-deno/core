@@ -1,4 +1,4 @@
-import { Broadcaster } from '../../ws/broadcaster.class.ts';
+import { Broadcaster } from '../../web_socket/broadcaster.class.ts';
 import { Constructor } from '../../utils/interfaces/constructor.interface.ts';
 import { Controller } from '../../http/controller.class.ts';
 

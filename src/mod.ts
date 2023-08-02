@@ -11,4 +11,4 @@ export * from './server/server.module.ts';
 export * from './template_compiler/template_compiler.module.ts';
 export * from './utils/utils.module.ts';
 export * from './validator/validator.module.ts';
-export * from './ws/ws.module.ts';
+export * from './web_socket/web_socket.module.ts';

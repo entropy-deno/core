@@ -1,4 +1,4 @@
-import { Broadcaster } from '../ws/broadcaster.class.ts';
+import { Broadcaster } from '../web_socket/broadcaster.class.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
 import { Constructor } from '../utils/interfaces/constructor.interface.ts';
 import { Encrypter } from '../encrypter/encrypter.service.ts';
@@ -7,7 +7,7 @@ import { HttpError } from '../http/http_error.class.ts';
 import { HttpStatus } from '../http/enums/http_status.enum.ts';
 import { Logger } from '../logger/logger.service.ts';
 
-export class WsServer {
+export class WebSocketServer {
   private readonly channels: Constructor<Broadcaster>[] = [];
 
   private readonly configurator = inject(Configurator);

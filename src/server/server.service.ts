@@ -13,7 +13,7 @@ import { TemplateCompiler } from '../template_compiler/template_compiler.service
 import { Utils } from '../utils/utils.class.ts';
 import { Validator } from '../validator/validator.service.ts';
 import { WebClientAlias } from './enums/web_client_alias.enum.ts';
-import { WsServer } from '../ws/ws_server.service.ts';
+import { WebSocketServer } from '../web_socket/web_socket_server.service.ts';
 
 export class Server {
   private readonly configurator = inject(Configurator);
@@ -36,7 +36,7 @@ export class Server {
 
   private readonly validator = inject(Validator);
 
-  private readonly wsServer = inject(WsServer);
+  private readonly webSocketServer = inject(WebSocketServer);
 
   private addExitSignalListener(callback: () => void): void {
     for (const signal of this.exitSignals) {
@@ -115,18 +115,18 @@ export class Server {
     this.templateCompiler.registerDirectives(
       this.configurator.entries.templateDirectives,
     );
-    this.wsServer.registerChannels(this.options.channels ?? []);
+    this.webSocketServer.registerChannels(this.options.channels ?? []);
 
     for (const module of this.options.modules ?? []) {
       const moduleInstance = inject(module);
 
       this.router.registerControllers(moduleInstance.controllers ?? []);
-      this.wsServer.registerChannels(moduleInstance.channels ?? []);
+      this.webSocketServer.registerChannels(moduleInstance.channels ?? []);
     }
   }
 
   private setupDevelopmentEnvironment(): void {
-    this.wsServer.registerChannel(HotReloadChannel);
+    this.webSocketServer.registerChannel(HotReloadChannel);
 
     const flags = parseFlags(Deno.args, {
       boolean: ['open'],
@@ -245,7 +245,7 @@ export class Server {
         },
       }, async (request) => await this.handleRequest(request));
 
-      this.wsServer.start();
+      this.webSocketServer.start();
 
       if (flags.dev) {
         let viewWatcher: Deno.FsWatcher;
