@@ -253,7 +253,9 @@ export class Server {
         },
       }, async (request) => await this.handleRequest(request));
 
-      this.webSocketServer.start();
+      if (this.configurator.entries.webSocket.enabled) {
+        await this.webSocketServer.start();
+      }
 
       if (flags.dev) {
         let viewWatcher: Deno.FsWatcher;
