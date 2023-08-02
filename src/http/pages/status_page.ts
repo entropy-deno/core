@@ -46,19 +46,26 @@ export const statusPage = `<!doctype html>
         }
 
         .header {
-          font-size: 48px;
+          font-size: 38px;
           line-height: 54px;
           font-weight: 600;
           letter-spacing: -1.2px;
+          text-align: center;
         }
 
         .header--small {
-          font-size: 38px;
+          font-size: 32px;
           letter-spacing: -1px;
         }
 
         .text-theme {
           color: var(--theme);
+        }
+
+        @media (min-width: 800px) {
+          .header--small {
+            font-size: 36px;
+          }
         }
       </style>
     [/raw]
