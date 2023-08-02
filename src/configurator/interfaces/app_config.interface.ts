@@ -13,7 +13,9 @@ export interface AppConfig {
     maxAge: number;
   };
   defaultLocale: string;
-  encryptionKey: string;
+  encryption: {
+    key: string;
+  };
   envFile: string | false;
   host: string;
   isDenoDeploy: boolean;
@@ -28,5 +30,7 @@ export interface AppConfig {
     keyFile: string | false;
   };
   validatorRules: ValidationRuleDefinition[];
-  wsPort: number;
+  webSocket: {
+    port: number;
+  };
 }

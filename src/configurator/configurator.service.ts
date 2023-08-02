@@ -15,7 +15,9 @@ export class Configurator {
       maxAge: 0,
     },
     defaultLocale: 'en',
-    encryptionKey: this.getEnv<string>('ENCRYPTION_KEY') ?? crypto.randomUUID(),
+    encryption: {
+      key: this.getEnv<string>('ENCRYPTION_KEY') ?? crypto.randomUUID(),
+    },
     envFile: '.env',
     host: this.getEnv<string>('HOST') ?? 'localhost',
     isDenoDeploy: !!this.getEnv<string>('DENO_DEPLOYMENT_ID') ?? false,
@@ -31,8 +33,10 @@ export class Configurator {
       keyFile: false,
     },
     validatorRules: [],
-    wsPort: this.getEnv<number>('WS_PORT') ??
-      (this.getEnv<number>('PORT') ?? 5050) + 1,
+    webSocket: {
+      port: this.getEnv<number>('WS_PORT') ??
+        (this.getEnv<number>('PORT') ?? 5050) + 1,
+    },
   };
 
   public all(): AppConfig {

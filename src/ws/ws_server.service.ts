@@ -50,19 +50,21 @@ export class WsServer {
   }
 
   public start(): void {
-    if (this.configurator.entries.wsPort === this.configurator.entries.port) {
+    if (
+      this.configurator.entries.webSocket.port === this.configurator.entries.port
+    ) {
       throw new Error(
-        `WebSocket port ${this.configurator.entries.wsPort} is already in use`,
+        `WebSocket port ${this.configurator.entries.webSocket.port} is already in use`,
       );
     }
 
     Deno.serve({
       hostname: this.configurator.entries.host,
-      port: this.configurator.entries.wsPort,
+      port: this.configurator.entries.webSocket.port,
       onListen: () => {
         if (!this.configurator.entries.isDenoDeploy) {
           this.logger.info(
-            `Broadcasting on port %c${this.configurator.entries.wsPort}`,
+            `Broadcasting on port %c${this.configurator.entries.webSocket.port}`,
             {
               badge: 'WebSocket',
               colors: ['blue'],

@@ -4,14 +4,15 @@ import { inject } from '../injector/functions/inject.function.ts';
 export class Encrypter {
   private readonly configurator = inject(Configurator);
 
+  private readonly encoder = new TextEncoder();
+
   public async compareHash(plainText: string, hash: string): Promise<boolean> {
     return await this.hash(plainText) === hash;
   }
 
   public async hash(plainText: string): Promise<string> {
-    const encoder = new TextEncoder();
-    const keyBuffer = encoder.encode(this.configurator.entries.encryptionKey);
-    const dataBuffer = encoder.encode(plainText);
+    const keyBuffer = this.encoder.encode(this.configurator.entries.encryption.key);
+    const dataBuffer = this.encoder.encode(plainText);
 
     const hmacKey = await crypto.subtle.importKey(
       'raw',
