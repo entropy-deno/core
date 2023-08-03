@@ -10,7 +10,9 @@
   <h4>
     <a href="https://entropy.deno.dev" target="_blank">Website</a>
     <span> · </span>
-    <a href="https://entropy.deno.dev/docs/introducing-entropy" target="_blank">Documentation</a>
+    <a href="https://entropy.deno.dev/docs/introducing-entropy" target="_blank">Docs</a>
+    <span> · </span>
+    <a href="https://github.com/entropy-deno/core" target="_blank">Repository</a>
     <span> · </span>
     <a href="https://entropy.deno.dev/docs/more/contributing" target="_blank">Contributing</a>
   </h4>
@@ -46,8 +48,8 @@ To run Entropy, your environment has to meet following requirements:
 
 - Deno 1.36.0+
 
-We recommend to always have the latest version of Deno installed. To update Deno, run the following
-command:
+We recommend to always have the latest version of Deno installed. To update Deno, run
+the following command:
 
 ```shell
 deno upgrade
