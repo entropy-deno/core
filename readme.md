@@ -1,30 +1,26 @@
 <div align="center">
-  <img src="./.github/assets/logo-full.png" height="76" alt="Logo">
-
-<br>
   <br>
-
-<p align="center">
+  <img src="./.github/assets/logo-full.png" height="76" alt="Logo">
+  <br>
+  <br>
+  <br>
+  <p align="center">
     Modern and declarative backend development framework for Deno.
   </p>
-
-<h4>
+  <h4>
     <a href="https://entropy.deno.dev" target="_blank">Website</a>
     <span> · </span>
     <a href="https://entropy.deno.dev/docs/introducing-entropy" target="_blank">Documentation</a>
     <span> · </span>
     <a href="https://entropy.deno.dev/docs/more/contributing" target="_blank">Contributing</a>
   </h4>
-
-<br>
-
-<a href="https://deno.land/x/entropy" target="_blank">
-    <img src="https://shield.deno.dev/deno/%5E1.36.0" alt="Required minimal Deno version">
+  <br>
+  <a href="https://deno.land/x/entropy" target="_blank">
+    <img src="https://shield.deno.dev/deno/%5E1.36.0" alt="Required lowest Deno version">
     &nbsp;
     <img src="https://shield.deno.dev/x/entropy" alt="Latest Entropy version">
   </a>
-
-<br>
+  <br>
 </div>
 
 ## Table of contents
@@ -48,17 +44,15 @@ it easy to create fast and secure web applications with awesome developer experi
 
 To run Entropy, your environment has to meet following requirements:
 
-| Deno    | Operating System        |
-| ------- | ----------------------- |
-| 1.36.0+ | MacOS • Windows • Linux |
+- Deno 1.36.0+
 
-We recommend to have the latest version of Deno. To update Deno, run the following
+We recommend to always have the latest version of Deno installed. To update Deno, run the following
 command:
 
 ```shell
 deno upgrade
 
-# on macOS and Linux you may have to run:
+# on Linux and macOS you may have to run:
 sudo deno upgrade
 ```
 
