@@ -14,4 +14,5 @@ export * from './pipes/float.pipe.ts';
 export * from './pipes/int.pipe.ts';
 export * from './pipes/json.pipe.ts';
 export * from './pipes/number.pipe.ts';
+export * from './rich_request.class.ts';
 export * from './view_response.class.ts';

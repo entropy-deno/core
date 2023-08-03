@@ -1,4 +1,4 @@
-import { contentType } from 'https://deno.land/std@0.196.0/media_types/content_type.ts';
+import { contentType } from 'https://deno.land/std@0.197.0/media_types/content_type.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
 import { Constructor } from '../utils/interfaces/constructor.interface.ts';
 import { Controller } from '../http/controller.class.ts';
@@ -14,6 +14,7 @@ import { RouteDefinition } from './interfaces/route_definition.interface.ts';
 import { RouteOptions } from './interfaces/route_options.interface.ts';
 import { RoutePath } from './types/route_path.type.ts';
 import { Pipe } from '../http/interfaces/pipe.interface.ts';
+import { RichRequest } from '../http/rich_request.class.ts';
 import { statusPage } from '../http/pages/status_page.ts';
 import { TemplateCompiler } from '../templates/template_compiler.service.ts';
 import { Utils } from '../utils/utils.class.ts';

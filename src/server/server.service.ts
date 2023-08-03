@@ -1,5 +1,5 @@
-import { load as loadDotEnv } from 'https://deno.land/std@0.196.0/dotenv/mod.ts';
-import { parse as parseFlags } from 'https://deno.land/std@0.196.0/flags/mod.ts';
+import { load as loadDotEnv } from 'https://deno.land/std@0.197.0/dotenv/mod.ts';
+import { parse as parseFlags } from 'https://deno.land/std@0.197.0/flags/mod.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
 import { ErrorHandler } from '../error_handler/error_handler.service.ts';
 import { HotReloadChannel } from './channels/hot_reload.channel.ts';
