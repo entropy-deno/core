@@ -19,7 +19,7 @@
 <br>
 
 <a href="https://deno.land/x/entropy" target="_blank">
-    <img src="https://shield.deno.dev/deno/%5E1.35.0" alt="Required minimal Deno version">
+    <img src="https://shield.deno.dev/deno/%5E1.36.0" alt="Required minimal Deno version">
     &nbsp;
     <img src="https://shield.deno.dev/x/entropy" alt="Latest Entropy version">
   </a>
@@ -50,7 +50,7 @@ To run Entropy, your environment has to meet following requirements:
 
 | Deno    | Operating System        |
 | ------- | ----------------------- |
-| 1.35.0+ | MacOS • Windows • Linux |
+| 1.36.0+ | MacOS • Windows • Linux |
 
 We recommend to have the latest version of Deno. To update Deno, run the following
 command:
