@@ -177,7 +177,11 @@ export class Router {
     } ${
       this.configurator.entries.isProduction
         ? ''
-        : `http://${this.configurator.entries.host}:* ws://${this.configurator.entries.host}:*`
+        : `${
+          this.configurator.entries.tls.enabled ? 'https' : 'http'
+        }://${this.configurator.entries.host}:* ${
+          this.configurator.entries.tls.enabled ? 'wss' : 'ws'
+        }://${this.configurator.entries.host}:*`
     }`;
 
     const csp = {
