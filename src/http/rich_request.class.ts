@@ -1,7 +1,16 @@
+import { Encrypter } from '../encrypter/encrypter.service.ts';
 import { HttpMethod } from './enums/http_method.enum.ts';
+import { inject } from '../injector/functions/inject.function.ts';
 
 export class RichRequest {
-  constructor(private readonly request: Request, public readonly nonce: string) {
+  private readonly encrypter = inject(Encrypter);
+
+  private readonly cspNonce = this.encrypter.generateRandomString(16);
+
+  constructor(
+    private readonly request: Request,
+    private readonly info: Deno.ServeHandlerInfo,
+  ) {
     this.request = request;
   }
 
@@ -43,12 +52,20 @@ export class RichRequest {
       this.header('accept')?.includes('application/json'));
   }
 
+  public get ip(): string {
+    return this.info.remoteAddr.hostname;
+  }
+
   public get method(): HttpMethod {
     return this.request.method as HttpMethod;
   }
 
   public get mode(): RequestMode {
     return this.request.mode;
+  }
+
+  public get nonce(): string {
+    return this.cspNonce;
   }
 
   public get origin(): string {

@@ -1,7 +1,6 @@
 import { load as loadDotEnv } from 'https://deno.land/std@0.197.0/dotenv/mod.ts';
 import { parse as parseFlags } from 'https://deno.land/std@0.197.0/flags/mod.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
-import { Encrypter } from '../encrypter/encrypter.service.ts';
 import { ErrorHandler } from '../error_handler/error_handler.service.ts';
 import { HotReloadChannel } from './channels/hot_reload.channel.ts';
 import { inject } from '../injector/functions/inject.function.ts';
@@ -21,8 +20,6 @@ export class Server {
   private readonly configurator = inject(Configurator);
 
   private readonly devServerCheckKey = '$entropy/dev-server';
-
-  private readonly encrypter = inject(Encrypter);
 
   private readonly errorHandler = inject(ErrorHandler);
 
@@ -69,11 +66,14 @@ export class Server {
     }
   }
 
-  private async handleRequest(request: Request): Promise<Response> {
+  private async handleRequest(
+    request: Request,
+    info: Deno.ServeHandlerInfo,
+  ): Promise<Response> {
     const performanceTimerStart = performance.now();
     const richRequest = new RichRequest(
       request,
-      this.encrypter.generateRandomString(16),
+      info,
     );
     const response = await this.router.respond(richRequest);
 
@@ -258,7 +258,7 @@ export class Server {
             );
           }
         },
-      }, async (request) => await this.handleRequest(request));
+      }, async (request, info) => await this.handleRequest(request, info));
 
       if (this.configurator.entries.webSocket.enabled) {
         await this.webSocketServer.start();
