@@ -1,5 +1,5 @@
 import { AppConfig } from './interfaces/app_config.interface.ts';
-import { DeepPartial } from '../utils/types/depp_partial.type.ts';
+import { DeepPartial } from '../utils/types/deep_partial.type.ts';
 import { EnvVariable } from './types/env_variable.type.ts';
 import { Utils } from '../utils/utils.class.ts';
 
