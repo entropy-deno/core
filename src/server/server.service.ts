@@ -106,10 +106,10 @@ export class Server {
     const responseTime = (performance.now() - performanceTimerStart).toFixed(1);
 
     this.logger.log(
-      `%c[${status}] %c${richRequest.path.substring(0, 40)}%c - ${responseTime}ms`,
+      `%c[${status}] %c${richRequest.path.substring(0, 40)}%c • ${responseTime}ms`,
       {
         badge: 'Request',
-        colors: [statusColor, 'lightgray', 'gray'],
+        colors: [statusColor, 'white', 'gray'],
       },
     );
 
