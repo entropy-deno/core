@@ -5,6 +5,18 @@ export class RichRequest {
     this.request = request;
   }
 
+  public get cache(): RequestCache {
+    return this.request.cache;
+  }
+
+  public get credentials(): RequestCredentials {
+    return this.request.credentials;
+  }
+
+  public get destination(): RequestDestination {
+    return this.request.destination;
+  }
+
   public header(name: string): string | null {
     return this.request.headers.get(name);
   }
@@ -35,6 +47,10 @@ export class RichRequest {
     return this.request.method as HttpMethod;
   }
 
+  public get mode(): RequestMode {
+    return this.request.mode;
+  }
+
   public get origin(): string {
     return new URL(this.request.url).origin;
   }
@@ -63,6 +79,14 @@ export class RichRequest {
     }
 
     return params;
+  }
+
+  public get referrer(): string {
+    return this.request.referrer;
+  }
+
+  public get referrerPolicy(): ReferrerPolicy {
+    return this.request.referrerPolicy;
   }
 
   public get url(): string {
