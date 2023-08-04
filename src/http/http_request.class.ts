@@ -1,3 +1,4 @@
+import { getCookies } from 'https://deno.land/std@0.197.0/http/cookie.ts';
 import { Encrypter } from '../encrypter/encrypter.service.ts';
 import { HttpMethod } from './enums/http_method.enum.ts';
 import { inject } from '../injector/functions/inject.function.ts';
@@ -18,6 +19,14 @@ export class HttpRequest {
     return this.request.cache;
   }
 
+  public cookie(name: string): string | null {
+    return this.cookies[name] ?? null;
+  }
+
+  public get cookies(): Record<string, string> {
+    return getCookies(this.headers);
+  }
+
   public get credentials(): RequestCredentials {
     return this.request.credentials;
   }
@@ -27,7 +36,7 @@ export class HttpRequest {
   }
 
   public header(name: string): string | null {
-    return this.request.headers.get(name);
+    return this.headers.get(name);
   }
 
   public get headers(): Headers {
