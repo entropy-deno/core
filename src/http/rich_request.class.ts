@@ -13,12 +13,12 @@ export class RichRequest {
     return this.request.headers;
   }
 
-  public async formData(): Promise<FormData> {
+  public async form(): Promise<FormData> {
     return await this.request.formData();
   }
 
   public async input(name: string): Promise<FormDataEntryValue | null> {
-    return (await this.formData()).get(name);
+    return (await this.form()).get(name);
   }
 
   public get integrity(): string {
