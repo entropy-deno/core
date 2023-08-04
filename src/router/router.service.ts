@@ -197,15 +197,18 @@ export class Router {
       'script-src': `'self' ${
         this.configurator.entries.contentSecurityPolicy.allowInlineScripts
           ? `'unsafe-inline'`
-          : ''
-      } 'nonce-${request.nonce}' ${cspDirectives}`,
+          : `'nonce-${request.nonce}'`
+      } ${cspDirectives}`,
       'script-src-attr': `'${
         this.configurator.entries.contentSecurityPolicy.allowInlineScripts
           ? 'unsafe-inline'
           : 'none'
       }'`,
-      'style-src':
-        `'self' 'unsafe-inline' 'nonce-${request.nonce}' ${cspDirectives}`,
+      'style-src': `'self' ${
+        this.configurator.entries.contentSecurityPolicy.allowInlineStyles
+          ? `'unsafe-inline'`
+          : `'nonce-${request.nonce}'`
+      } ${cspDirectives}`,
       'upgrade-insecure-requests': '',
     };
 

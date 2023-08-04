@@ -7,6 +7,7 @@ export class Configurator {
   private options: Readonly<AppConfig> = {
     contentSecurityPolicy: {
       allowInlineScripts: false,
+      allowInlineStyles: true,
       allowedOrigins: [],
     },
     cors: {
