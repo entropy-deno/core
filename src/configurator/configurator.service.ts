@@ -1,10 +1,12 @@
 import { AppConfig } from './interfaces/app_config.interface.ts';
+import { DeepPartial } from '../utils/types/depp_partial.type.ts';
 import { EnvVariable } from './types/env_variable.type.ts';
 import { Utils } from '../utils/utils.class.ts';
 
 export class Configurator {
   private options: Readonly<AppConfig> = {
     contentSecurityPolicy: {
+      allowInlineScripts: false,
       allowedOrigins: [],
     },
     cors: {
@@ -67,7 +69,7 @@ export class Configurator {
     }
   }
 
-  public setup(options: Partial<AppConfig> = {}): void {
+  public setup(options: DeepPartial<AppConfig> = {}): void {
     this.options = Utils.deepMerge(this.options, options);
   }
 }

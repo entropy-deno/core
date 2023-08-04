@@ -55,7 +55,7 @@ export class Router {
   private readonly validator = inject(Validator);
 
   private async createAbortResponse(
-    request: Request,
+    request: RichRequest,
     statusCode = HttpStatus.NotFound,
   ): Promise<Response> {
     const payload = {
@@ -65,7 +65,7 @@ export class Router {
           'Error',
     };
 
-    if (this.isAjaxRequest(request)) {
+    if (request.isAjax) {
       return this.createResponse(JSON.stringify(payload), {
         statusCode,
         headers: {
@@ -83,8 +83,8 @@ export class Router {
     );
   }
 
-  private async handleStaticFileRequest(request: Request): Promise<Response> {
-    const filePath = `public${new URL(request.url).pathname}`;
+  private async handleStaticFileRequest(request: RichRequest): Promise<Response> {
+    const filePath = `public${request.path}`;
 
     try {
       const fileSize = (await Deno.stat(filePath)).size;
@@ -96,20 +96,14 @@ export class Router {
           'content-type': contentType(filePath.split('.')?.pop() ?? '') ??
             'application/octet-stream',
         },
-      });
+      }, request);
     } catch {
       throw new HttpError(HttpStatus.NotFound);
     }
   }
 
-  private isAjaxRequest(request: Request): boolean {
-    return !!(request.headers.get('x-requested-with')?.toLowerCase() ===
-        'xmlhttprequest' ||
-      request.headers.get('accept')?.includes('application/json'));
-  }
-
   private async parseResponse(
-    request: Request,
+    request: RichRequest,
     body: unknown,
     statusCode = HttpStatus.Ok,
   ): Promise<Response> {
@@ -176,7 +170,7 @@ export class Router {
   public createResponse(
     body: ReadableStream | XMLHttpRequestBodyInit | null,
     { headers = {}, statusCode = HttpStatus.Ok }: Partial<ResponseOptions> = {},
-    request?: Request,
+    request: RichRequest,
   ): Response {
     const cspDirectives = ` ${
       this.configurator.entries.contentSecurityPolicy.allowedOrigins.join(' ')
@@ -188,17 +182,26 @@ export class Router {
 
     const csp = {
       'base-uri': `'self'`,
-      'connect-src': `'self' ${cspDirectives}`,
-      'default-src': `'self' 'unsafe-inline' ${cspDirectives}`,
-      'font-src': `'self' ${cspDirectives} https: data:`,
+      'connect-src': `'self' 'nonce-${request.nonce}' ${cspDirectives}`,
+      'default-src': `'self' 'nonce-${request.nonce}' ${cspDirectives}`,
+      'font-src': `'self' 'nonce-${request.nonce}' ${cspDirectives} https: data:`,
       'form-action': `'self'`,
       'frame-ancestors': `'self'`,
       'img-src': '*',
       'media-src': `'self'`,
       'object-src': `'none'`,
-      'script-src': `'self' 'unsafe-inline' ${cspDirectives}`,
-      'script-src-attr': `'unsafe-inline'`,
-      'style-src': `'self' 'unsafe-inline' ${cspDirectives}`,
+      'script-src': `'self' ${
+        this.configurator.entries.contentSecurityPolicy.allowInlineScripts
+          ? `'unsafe-inline'`
+          : ''
+      } 'nonce-${request.nonce}' ${cspDirectives}`,
+      'script-src-attr': `'${
+        this.configurator.entries.contentSecurityPolicy.allowInlineScripts
+          ? 'unsafe-inline'
+          : 'none'
+      }'`,
+      'style-src':
+        `'self' 'unsafe-inline' 'nonce-${request.nonce}' ${cspDirectives}`,
       'upgrade-insecure-requests': '',
     };
 
@@ -208,15 +211,15 @@ export class Router {
       'access-control-allow-credentials': String(cors.allowCredentials),
       'access-control-allow-headers': cors.allowedHeaders.length
         ? cors.allowedHeaders.join(',')
-        : (request?.headers.get('access-control-request-headers') ?? ''),
+        : (request.header('access-control-request-headers') ?? ''),
       ...(cors.allowedMethods.length && {
         'access-control-allow-methods': cors.allowedMethods.join(','),
       }),
       ...((cors.allowedOrigins.length &&
-        cors.allowedOrigins.includes(request?.headers.get('origin') as string)) && {
+        cors.allowedOrigins.includes(request.header('origin') as string)) && {
         'access-control-allow-origin': cors.allowedOrigins[0] === '*'
           ? '*'
-          : request?.headers.get('origin') ?? 'false',
+          : request.header('origin') ?? 'false',
       }),
       ...(cors.exposedHeaders.length && {
         'access-control-expose-headers': cors.exposedHeaders.join(','),
@@ -337,7 +340,7 @@ export class Router {
       )!;
 
       this.registerRoute(path, methods, async (...args: unknown[]) => {
-        const request = args[0] as Request;
+        const request = args[0] as RichRequest;
         const middleware = Reflector.getMetadata<Constructor<Middleware>[]>(
           'middleware',
           controllerMethod,
@@ -362,9 +365,7 @@ export class Router {
 
         if (redirectUrl) {
           return Response.redirect(
-            redirectUrl[0] === '/'
-              ? `${new URL(request.url).origin}${redirectUrl}`
-              : redirectUrl,
+            redirectUrl[0] === '/' ? `${request.origin}${redirectUrl}` : redirectUrl,
           );
         }
 
@@ -382,7 +383,7 @@ export class Router {
           );
 
           if (Object.keys(errors).length > 0) {
-            if (this.isAjaxRequest(request)) {
+            if (request.isAjax) {
               return this.createResponse(
                 JSON.stringify({
                   errors,
@@ -441,7 +442,7 @@ export class Router {
     }
   }
 
-  public async respond(request: Request): Promise<Response> {
+  public async respond(request: RichRequest): Promise<Response> {
     try {
       for (const [path, { action, methods }] of this.routes) {
         if (!methods.includes(request.method as HttpMethod)) {
@@ -468,7 +469,7 @@ export class Router {
 
       if (
         request.method === HttpMethod.Get &&
-        new URL(request.url).pathname.includes('.')
+        request.path.includes('.')
       ) {
         return await this.handleStaticFileRequest(request);
       }

@@ -3,6 +3,7 @@ import { TemplateCompilerOptions } from './interfaces/template_compiler_options.
 import { Configurator } from '../configurator/configurator.service.ts';
 import { env } from '../configurator/functions/env.function.ts';
 import { inject } from '../injector/functions/inject.function.ts';
+import { RichRequest } from '../http/rich_request.class.ts';
 import {
   TemplateDirectiveDefinition,
 } from './interfaces/template_directive_definition.interface.ts';
@@ -28,7 +29,7 @@ export class TemplateCompiler {
 
   private currentRawContent: string[] = [];
 
-  private currentRequest: Request | undefined = undefined;
+  private currentRequest: RichRequest | undefined = undefined;
 
   private currentTemplate = '';
 
@@ -503,7 +504,7 @@ export class TemplateCompiler {
     template: string,
     variables: Record<string, unknown> = {},
     options: TemplateCompilerOptions = {},
-    request?: Request,
+    request?: RichRequest,
   ): Promise<string> {
     this.currentOptions = options;
     this.currentRawContent = [];
@@ -566,7 +567,7 @@ export class TemplateCompiler {
     template: string,
     variables: Record<string, unknown> = {},
     options: TemplateCompilerOptions = {},
-    request?: Request,
+    request?: RichRequest,
   ): Promise<string> {
     const compiledTemplate = await this.compile(
       template,

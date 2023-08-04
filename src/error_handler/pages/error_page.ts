@@ -109,10 +109,18 @@ export const errorPage = `<!doctype html>
         {{ error.message }}
       </h1>
 
-      <button class="button" onclick="window.location.reload()">
+      <button class="button" id="reload">
         Reload Page
       </button>
     </main>
+
+    <script>
+      const reloadButton = document.getElementById('reload');
+
+      reloadButton.addEventListener('click', () => {
+        window.location.reload();
+      });
+    </script>
   </body>
 </html>
 `;

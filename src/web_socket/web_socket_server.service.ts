@@ -25,7 +25,7 @@ export class WebSocketServer {
 
     for (const channel of this.channels) {
       const channelInstance = inject(channel);
-      const socketId = this.encryoter.uuid();
+      const socketId = this.encryoter.generateUuid();
 
       socket.onopen = () => {
         channelInstance.activeSockets.set(socketId, socket);

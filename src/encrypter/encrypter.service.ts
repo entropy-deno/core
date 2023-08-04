@@ -10,6 +10,28 @@ export class Encrypter {
     return await this.hash(plainText) === hash;
   }
 
+  public generateRandomString(length = 32): string {
+    if (length % 2 !== 0) {
+      throw new Error('Random string length must be even');
+    }
+
+    const buffer = new Uint8Array(length / 2);
+
+    crypto.getRandomValues(buffer);
+
+    let result = '';
+
+    for (let i = 0; i < buffer.length; ++i) {
+      result += (`0${buffer[i].toString(16)}`).slice(-2);
+    }
+
+    return result;
+  }
+
+  public generateUuid(): string {
+    return crypto.randomUUID();
+  }
+
   public async hash(plainText: string): Promise<string> {
     const keyBuffer = this.encoder.encode(this.configurator.entries.encryption.key);
     const dataBuffer = this.encoder.encode(plainText);
@@ -27,9 +49,5 @@ export class Encrypter {
     return [...new Uint8Array(signature)].map((byte) =>
       byte.toString(16).padStart(2, '0')
     ).join('');
-  }
-
-  public uuid(): string {
-    return crypto.randomUUID();
   }
 }

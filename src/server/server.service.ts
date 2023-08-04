@@ -1,12 +1,14 @@
 import { load as loadDotEnv } from 'https://deno.land/std@0.197.0/dotenv/mod.ts';
 import { parse as parseFlags } from 'https://deno.land/std@0.197.0/flags/mod.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
+import { Encrypter } from '../encrypter/encrypter.service.ts';
 import { ErrorHandler } from '../error_handler/error_handler.service.ts';
 import { HotReloadChannel } from './channels/hot_reload.channel.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { Localizator } from '../localizator/localizator.module.ts';
 import { Logger } from '../logger/logger.service.ts';
 import { MIN_DENO_VERSION } from '../constants.ts';
+import { RichRequest } from '../http/rich_request.class.ts';
 import { Router } from '../router/router.service.ts';
 import { ServerOptions } from './interfaces/server_options.interface.ts';
 import { TemplateCompiler } from '../templates/template_compiler.service.ts';
@@ -19,6 +21,8 @@ export class Server {
   private readonly configurator = inject(Configurator);
 
   private readonly devServerCheckKey = '$entropy/dev-server';
+
+  private readonly encrypter = inject(Encrypter);
 
   private readonly errorHandler = inject(ErrorHandler);
 
@@ -67,8 +71,11 @@ export class Server {
 
   private async handleRequest(request: Request): Promise<Response> {
     const performanceTimerStart = performance.now();
-    const url = new URL(request.url).pathname;
-    const response = await this.router.respond(request);
+    const richRequest = new RichRequest(
+      request,
+      this.encrypter.generateRandomString(16),
+    );
+    const response = await this.router.respond(richRequest);
 
     const { status } = response;
 
@@ -99,7 +106,7 @@ export class Server {
     const responseTime = (performance.now() - performanceTimerStart).toFixed(1);
 
     this.logger.log(
-      `%c[${status}] %c${url.substring(0, 40)}%c - ${responseTime}ms`,
+      `%c[${status}] %c${richRequest.path.substring(0, 40)}%c - ${responseTime}ms`,
       {
         badge: 'Request',
         colors: [statusColor, 'lightgray', 'gray'],

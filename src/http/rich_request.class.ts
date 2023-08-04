@@ -1,10 +1,8 @@
-export class RichRequest {
-  constructor(private readonly request: Request) {
-    this.request = request;
-  }
+import { HttpMethod } from './enums/http_method.enum.ts';
 
-  public get fullUrl(): string {
-    return this.request.url;
+export class RichRequest {
+  constructor(private readonly request: Request, public readonly nonce: string) {
+    this.request = request;
   }
 
   public header(name: string): string | null {
@@ -15,8 +13,26 @@ export class RichRequest {
     return this.request.headers;
   }
 
-  public get method(): string {
-    return this.request.method;
+  public async formData(): Promise<FormData> {
+    return await this.request.formData();
+  }
+
+  public async input(name: string): Promise<FormDataEntryValue | null> {
+    return (await this.formData()).get(name);
+  }
+
+  public get integrity(): string {
+    return this.request.integrity;
+  }
+
+  public get isAjax(): boolean {
+    return !!(this.header('x-requested-with')?.toLowerCase() ===
+        'xmlhttprequest' ||
+      this.header('accept')?.includes('application/json'));
+  }
+
+  public get method(): HttpMethod {
+    return this.request.method as HttpMethod;
   }
 
   public get origin(): string {
@@ -35,7 +51,11 @@ export class RichRequest {
     return new URL(this.request.url).protocol;
   }
 
-  public get query(): Record<string, string> {
+  public queryParam(name: string): string | null {
+    return new URL(this.request.url).searchParams.get(name);
+  }
+
+  public get queryParams(): Record<string, string> {
     const params: Record<string, string> = {};
 
     for (const [key, value] of new URL(this.request.url).searchParams.entries()) {
@@ -45,7 +65,7 @@ export class RichRequest {
     return params;
   }
 
-  public get url(): URL {
-    return new URL(this.request.url);
+  public get url(): string {
+    return this.request.url;
   }
 }

@@ -3,6 +3,7 @@ import { ValidationRuleDefinition } from '../../validator/interfaces/validation_
 
 export interface AppConfig {
   contentSecurityPolicy: {
+    allowInlineScripts: boolean;
     allowedOrigins: string[];
   };
   cors: {
