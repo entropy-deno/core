@@ -7,7 +7,7 @@ import { inject } from '../injector/functions/inject.function.ts';
 import { Localizator } from '../localizator/localizator.module.ts';
 import { Logger } from '../logger/logger.service.ts';
 import { MIN_DENO_VERSION } from '../constants.ts';
-import { RichRequest } from '../http/rich_request.class.ts';
+import { HttpRequest } from '../http/http_request.class.ts';
 import { Router } from '../router/router.service.ts';
 import { ServerOptions } from './interfaces/server_options.interface.ts';
 import { TemplateCompiler } from '../templates/template_compiler.service.ts';
@@ -71,7 +71,7 @@ export class Server {
     info: Deno.ServeHandlerInfo,
   ): Promise<Response> {
     const performanceTimerStart = performance.now();
-    const richRequest = new RichRequest(
+    const richRequest = new HttpRequest(
       request,
       info,
     );

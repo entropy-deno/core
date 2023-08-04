@@ -14,7 +14,7 @@ import { RouteDefinition } from './interfaces/route_definition.interface.ts';
 import { RouteOptions } from './interfaces/route_options.interface.ts';
 import { RoutePath } from './types/route_path.type.ts';
 import { Pipe } from '../http/interfaces/pipe.interface.ts';
-import { RichRequest } from '../http/rich_request.class.ts';
+import { HttpRequest } from '../http/http_request.class.ts';
 import { statusPage } from '../http/pages/status_page.ts';
 import { TemplateCompiler } from '../templates/template_compiler.service.ts';
 import { Utils } from '../utils/utils.class.ts';
@@ -55,7 +55,7 @@ export class Router {
   private readonly validator = inject(Validator);
 
   private async createAbortResponse(
-    request: RichRequest,
+    request: HttpRequest,
     statusCode = HttpStatus.NotFound,
   ): Promise<Response> {
     const payload = {
@@ -83,7 +83,7 @@ export class Router {
     );
   }
 
-  private async handleStaticFileRequest(request: RichRequest): Promise<Response> {
+  private async handleStaticFileRequest(request: HttpRequest): Promise<Response> {
     const filePath = `public${request.path}`;
 
     try {
@@ -103,7 +103,7 @@ export class Router {
   }
 
   private async parseResponse(
-    request: RichRequest,
+    request: HttpRequest,
     body: unknown,
     statusCode = HttpStatus.Ok,
   ): Promise<Response> {
@@ -170,7 +170,7 @@ export class Router {
   public createResponse(
     body: ReadableStream | XMLHttpRequestBodyInit | null,
     { headers = {}, statusCode = HttpStatus.Ok }: Partial<ResponseOptions> = {},
-    request: RichRequest,
+    request: HttpRequest,
   ): Response {
     const cspDirectives = ` ${
       this.configurator.entries.contentSecurityPolicy.allowedOrigins.join(' ')
@@ -347,7 +347,7 @@ export class Router {
       )!;
 
       this.registerRoute(path, methods, async (...args: unknown[]) => {
-        const request = args[0] as RichRequest;
+        const request = args[0] as HttpRequest;
         const middleware = Reflector.getMetadata<Constructor<Middleware>[]>(
           'middleware',
           controllerMethod,
@@ -449,7 +449,7 @@ export class Router {
     }
   }
 
-  public async respond(request: RichRequest): Promise<Response> {
+  public async respond(request: HttpRequest): Promise<Response> {
     try {
       for (const [path, { action, methods }] of this.routes) {
         if (!methods.includes(request.method as HttpMethod)) {

@@ -2,7 +2,7 @@ import { Encrypter } from '../encrypter/encrypter.service.ts';
 import { HttpMethod } from './enums/http_method.enum.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 
-export class RichRequest {
+export class HttpRequest {
   private readonly encrypter = inject(Encrypter);
 
   private readonly cspNonce = this.encrypter.generateRandomString(16);

@@ -1,7 +1,7 @@
 import { Configurator } from '../configurator/configurator.service.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { Localizator } from '../localizator/localizator.service.ts';
-import { RichRequest } from '../http/rich_request.class.ts';
+import { HttpRequest } from '../http/http_request.class.ts';
 import { ValidationRuleDefinition } from './interfaces/validation_rule_definition.interface.ts';
 import { ValidationRules } from './interfaces/validation_rules.interface.ts';
 
@@ -288,7 +288,7 @@ export class Validator {
 
   public async validate(
     rules: Record<string, Partial<ValidationRules> | Record<string, unknown>>,
-    request: RichRequest,
+    request: HttpRequest,
   ): Promise<Record<string, string[]>> {
     const errors: Record<string, string[]> = {};
 
