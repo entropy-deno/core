@@ -267,6 +267,12 @@ export class Server {
       if (flags.dev) {
         let watcher: Deno.FsWatcher;
 
+        this.addExitSignalListener(() => {
+          watcher.close();
+
+          Deno.exit();
+        });
+
         try {
           try {
             watcher = Deno.watchFs(['src', 'views', 'locales']);
@@ -295,12 +301,6 @@ export class Server {
             }
           }
         }
-
-        this.addExitSignalListener(() => {
-          watcher.close();
-
-          Deno.exit();
-        });
       }
     } catch (error) {
       this.errorHandler.handle(error);
