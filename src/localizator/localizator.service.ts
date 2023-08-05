@@ -10,11 +10,11 @@ export class Localizator {
 
   private async loadTranslations(): Promise<void> {
     try {
-      const data = JSON.parse(
+      const locales = JSON.parse(
         await Deno.readTextFile(`locales/${this.currentLocale}.json`),
       );
 
-      for (const [key, value] of Object.entries<string | string[]>(data)) {
+      for (const [key, value] of Object.entries<string | string[]>(locales)) {
         this.translations.set(key, value);
       }
     } catch (error) {

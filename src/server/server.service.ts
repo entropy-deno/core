@@ -125,10 +125,10 @@ export class Server {
     this.webSocketServer.registerChannels(this.options.channels ?? []);
 
     for (const module of this.options.modules ?? []) {
-      const moduleInstance = inject(module);
+      const instance = inject(module);
 
-      this.router.registerControllers(moduleInstance.controllers ?? []);
-      this.webSocketServer.registerChannels(moduleInstance.channels ?? []);
+      this.router.registerControllers(instance.controllers ?? []);
+      this.webSocketServer.registerChannels(instance.channels ?? []);
     }
   }
 
@@ -265,31 +265,39 @@ export class Server {
       }
 
       if (flags.dev) {
-        let viewWatcher: Deno.FsWatcher;
+        let watcher: Deno.FsWatcher;
 
         try {
-          viewWatcher = Deno.watchFs(['src', 'views']);
-        } catch {
-          viewWatcher = Deno.watchFs('src');
-        }
-
-        for await (const event of viewWatcher) {
-          if (event.kind === 'modify') {
-            inject(HotReloadChannel).sendReloadRequest();
+          try {
+            watcher = Deno.watchFs(['src', 'views', 'locales']);
+          } catch {
+            watcher = Deno.watchFs(['src', 'views']);
           }
+        } catch {
+          watcher = Deno.watchFs('src');
         }
 
-        const translationWatcher = Deno.watchFs('locales');
+        const hotReloadChannel = inject(HotReloadChannel);
 
-        for await (const event of viewWatcher) {
+        for await (const event of watcher) {
           if (event.kind === 'modify') {
-            await this.localizator.setup();
+            switch (true) {
+              case event.paths[0]?.includes('src') ||
+                event.paths[0]?.includes('views'):
+                hotReloadChannel.sendReloadRequest();
+
+                break;
+
+              case event.paths[0]?.includes('locales'):
+                await this.localizator.setup();
+
+                break;
+            }
           }
         }
 
         this.addExitSignalListener(() => {
-          viewWatcher.close();
-          translationWatcher.close();
+          watcher.close();
 
           Deno.exit();
         });
