@@ -55,14 +55,26 @@ export class HttpRequest {
     return this.request.integrity;
   }
 
+  public get ip(): string {
+    return this.info.remoteAddr.hostname;
+  }
+
   public get isAjax(): boolean {
     return !!(this.header('x-requested-with')?.toLowerCase() ===
         'xmlhttprequest' ||
       this.header('accept')?.includes('application/json'));
   }
 
-  public get ip(): string {
-    return this.info.remoteAddr.hostname;
+  public isFormRequest(): boolean {
+    return ![HttpMethod.Get, HttpMethod.Head].includes(this.method);
+  }
+
+  public isSecure(): boolean {
+    return ['https', 'wss'].includes(this.protocol);
+  }
+
+  public locale(): string | string[] {
+    return this.header('accept-language')?.slice(0, 2) ?? 'en';
   }
 
   public get method(): HttpMethod {
