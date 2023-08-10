@@ -12,7 +12,7 @@ export class WebSocketServer {
 
   private readonly configurator = inject(Configurator);
 
-  private readonly encryoter = inject(Encrypter);
+  private readonly encrypter = inject(Encrypter);
 
   private readonly logger = inject(Logger);
 
@@ -25,7 +25,7 @@ export class WebSocketServer {
 
     for (const channel of this.channels) {
       const channelInstance = inject(channel);
-      const socketId = this.encryoter.generateUuid();
+      const socketId = this.encrypter.generateUuid();
 
       socket.onopen = () => {
         channelInstance.activeSockets.set(socketId, socket);
