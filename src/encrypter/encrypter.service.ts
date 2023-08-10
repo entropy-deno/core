@@ -1,13 +1,27 @@
+import {
+  decode as base64Decode,
+  encode as base64Encode,
+} from 'https://deno.land/std@0.198.0/encoding/base64.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 
 export class Encrypter {
   private readonly configurator = inject(Configurator);
 
+  private readonly decoder = new TextDecoder();
+
   private readonly encoder = new TextEncoder();
 
   public async compareHash(plainText: string, hash: string): Promise<boolean> {
     return await this.hash(plainText) === hash;
+  }
+
+  public base64Decode(encoded: string): string {
+    return this.decoder.decode(base64Decode(encoded));
+  }
+
+  public base64Encode(plainText: string | ArrayBuffer): string {
+    return base64Encode(plainText);
   }
 
   public generateRandomString(length = 32): string {
