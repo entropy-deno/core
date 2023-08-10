@@ -103,13 +103,18 @@ export class Server {
         break;
     }
 
+    const path = richRequest.path.substring(0, 40);
     const responseTime = (performance.now() - performanceTimerStart).toFixed(1);
 
     this.logger.log(
-      `%c[${status}] %c${richRequest.path.substring(0, 40)}%c • ${responseTime}ms`,
+      `%c[${status}] %c${path}%c ${
+        this.configurator.entries.isDenoDeploy ? '•' : '.'.repeat(
+          Deno.consoleSize().columns - path.length - responseTime.length - 20,
+        )
+      } ${responseTime}ms`,
       {
         badge: 'Request',
-        colors: [statusColor, 'white', 'gray'],
+        colors: [statusColor, '', 'gray'],
       },
     );
 
