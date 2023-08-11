@@ -31,11 +31,11 @@ export class TemplateCompiler {
 
   private currentRequest: HttpRequest | undefined = undefined;
 
+  private currentStacks = new Map<string, string[]>();
+
   private currentTemplate = '';
 
   private currentVariables: Record<string, unknown> = {};
-
-  private currentStacks = new Map<string, string[]>();
 
   constructor() {
     this.directives = [
@@ -428,13 +428,12 @@ export class TemplateCompiler {
     const matches = this.currentTemplate.matchAll(
       /\[switch ?(.*?)\](\n|\r\n*?)?((.|\n|\r\n)*?)\[\/switch\]/gm,
     ) ?? [];
-
-    for (const [wholeMatch, , , casesString] of matches) {
+    for (const [wholeMatch, condition, , casesString] of matches) {
       const renderFunction = this.getRenderFunction(
-        `return ${casesString};`,
+        `return ${condition};`,
       );
-      const switchCondition = renderFunction<unknown>();
 
+      const switchCondition = renderFunction<unknown>();
       const cases = new Map<unknown, string>();
 
       let defaultCaseValue: string | null = null;
