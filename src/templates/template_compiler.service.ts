@@ -281,7 +281,7 @@ export class TemplateCompiler {
 
       const value = matchValue.trim();
 
-      const renderFunction = this.getRenderFunction(
+      const renderedExpression = this.getRenderFunction(
         `
         const expression = typeof ${value} === 'object'
           ? JSON.stringify(${value})
@@ -291,9 +291,7 @@ export class TemplateCompiler {
           ? expression
           : $escape(expression);
         `,
-      );
-
-      const renderedExpression = renderFunction();
+      )();
 
       this.currentTemplate = this.currentTemplate.replace(
         wholeMatch,
@@ -308,11 +306,10 @@ export class TemplateCompiler {
     ) ?? [];
 
     for (const [wholeMatch, variableName, , iterableValue, , block] of matches) {
-      const renderFunction = this.getRenderFunction(
+      let iterable = this.getRenderFunction(
         `return ${iterableValue};`,
-      );
+      )<unknown[]>();
 
-      let iterable = renderFunction<unknown[]>();
       let result = '';
       let iterator = 0;
 
@@ -367,11 +364,9 @@ export class TemplateCompiler {
       [];
 
     for (const [wholeMatch, , , content] of matches) {
-      const renderFunction = this.getRenderFunction(
+      const condition = this.getRenderFunction(
         `return ${content};`,
-      );
-
-      const condition = renderFunction<boolean>();
+      )<boolean>();
 
       if (condition) {
         this.currentTemplate = this.currentTemplate.replace(wholeMatch, content);
@@ -389,11 +384,9 @@ export class TemplateCompiler {
     ) ?? [];
 
     for (const [wholeMatch, , , value, , , content] of matches) {
-      const renderFunction = this.getRenderFunction(
+      const condition = this.getRenderFunction(
         `return ${value};`,
-      );
-
-      const condition = renderFunction<boolean>();
+      )<boolean>();
 
       if (condition) {
         this.currentTemplate = this.currentTemplate.replace(wholeMatch, value);
@@ -428,12 +421,12 @@ export class TemplateCompiler {
     const matches = this.currentTemplate.matchAll(
       /\[switch ?(.*?)\](\n|\r\n*?)?((.|\n|\r\n)*?)\[\/switch\]/gm,
     ) ?? [];
-    for (const [wholeMatch, condition, , casesString] of matches) {
-      const renderFunction = this.getRenderFunction(
-        `return ${condition};`,
-      );
 
-      const switchCondition = renderFunction<unknown>();
+    for (const [wholeMatch, conditionString, , casesString] of matches) {
+      const condition = this.getRenderFunction(
+        `return ${conditionString};`,
+      )();
+
       const cases = new Map<unknown, string>();
 
       let defaultCaseValue: string | null = null;
@@ -442,11 +435,11 @@ export class TemplateCompiler {
         /\[(case|default) ?(.*?)\](\n|\r\n*?)?((.|\n|\r\n)*?)\[\/(case|default)\]/gm,
       );
 
-      for (const [, caseType, caseValue, , caseContent] of caseMatches) {
+      for (const [, caseType, caseConditionString, , caseContent] of caseMatches) {
         if (caseType === 'default') {
           if (defaultCaseValue) {
             throw new Error(
-              'Switch directive can only have one default case',
+              '[switch] directive can only have one default case',
             );
           }
 
@@ -455,17 +448,17 @@ export class TemplateCompiler {
           continue;
         }
 
-        const caseRenderFunction = this.getRenderFunction(
-          `return ${caseValue};`,
-        );
+        const caseCondition = this.getRenderFunction(
+          `return ${caseConditionString};`,
+        )();
 
-        cases.set(caseRenderFunction<unknown>(), caseContent);
+        cases.set(caseCondition, caseContent);
       }
 
       let matchesOneCase = false;
 
       for (const [key, value] of cases) {
-        if (key === switchCondition) {
+        if (key === condition) {
           this.currentTemplate = this.currentTemplate.replace(wholeMatch, value);
 
           matchesOneCase = true;
