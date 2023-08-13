@@ -289,22 +289,42 @@ export class Server {
         }
 
         const hotReloadChannel = inject(HotReloadChannel);
+        const hotReloadNotifiers = new Map<string, number>();
 
         for await (const event of watcher) {
-          if (event.kind === 'modify') {
-            switch (true) {
-              case event.paths[0]?.includes('src') ||
-                event.paths[0]?.includes('views'):
-                hotReloadChannel.sendReloadRequest();
+          const eventString = JSON.stringify(event);
 
-                break;
+          if (hotReloadNotifiers.has(eventString)) {
+            clearTimeout(hotReloadNotifiers.get(eventString));
 
-              case event.paths[0]?.includes('locales'):
-                await this.localizator.setup();
-
-                break;
-            }
+            hotReloadNotifiers.delete(eventString);
           }
+
+          hotReloadNotifiers.set(
+            eventString,
+            setTimeout(async () => {
+              hotReloadNotifiers.delete(eventString);
+
+              if (event.kind === 'modify') {
+                switch (true) {
+                  case event.paths[0]?.includes('src') ||
+                    event.paths[0]?.includes('views'):
+                    this.logger.log('Reload request...', {
+                      badge: 'Hot reload',
+                    });
+
+                    hotReloadChannel.sendReloadRequest();
+
+                    break;
+
+                  case event.paths[0]?.includes('locales'):
+                    await this.localizator.setup();
+
+                    break;
+                }
+              }
+            }, 20),
+          );
         }
       }
     } catch (error) {
