@@ -246,7 +246,10 @@ export class TemplateCompiler {
     ];
   }
 
-  private getRenderFunction(body: string, variables: Record<string, unknown> = {}) {
+  private renderNatively<T>(
+    code: string,
+    variables: Record<string, unknown> = {},
+  ): T {
     const globalVariables = {
       $request: this.currentRequest,
       ...Object.keys(constants).reduce((result, key) => ({
@@ -260,15 +263,12 @@ export class TemplateCompiler {
     const header = [
       ...Object.keys(globalVariables),
       ...Object.keys(variables),
-      body,
+      code,
     ];
 
-    return <T>(...args: unknown[]): T => {
-      return new Function(...header)(
-        ...Object.values(globalVariables),
-        ...args,
-      ) as T;
-    };
+    return new Function(...header)(
+      ...Object.values(globalVariables),
+    ) as T;
   }
 
   private parseDataInterpolations(): void {
@@ -281,7 +281,7 @@ export class TemplateCompiler {
 
       const value = matchValue.trim();
 
-      const renderedExpression = this.getRenderFunction(
+      const renderedExpression = this.renderNatively(
         `
         const expression = typeof ${value} === 'object'
           ? JSON.stringify(${value})
@@ -291,7 +291,7 @@ export class TemplateCompiler {
           ? expression
           : $escape(expression);
         `,
-      )();
+      );
 
       this.currentTemplate = this.currentTemplate.replace(
         wholeMatch,
@@ -306,9 +306,9 @@ export class TemplateCompiler {
     ) ?? [];
 
     for (const [wholeMatch, variableName, , iterableValue, , block] of matches) {
-      let iterable = this.getRenderFunction(
+      let iterable = this.renderNatively<unknown[]>(
         `return ${iterableValue};`,
-      )<unknown[]>();
+      );
 
       let result = '';
       let iterator = 0;
@@ -364,9 +364,9 @@ export class TemplateCompiler {
       [];
 
     for (const [wholeMatch, , , content] of matches) {
-      const condition = this.getRenderFunction(
+      const condition = this.renderNatively(
         `return ${content};`,
-      )<boolean>();
+      );
 
       if (condition) {
         this.currentTemplate = this.currentTemplate.replace(wholeMatch, content);
@@ -384,9 +384,9 @@ export class TemplateCompiler {
     ) ?? [];
 
     for (const [wholeMatch, , , value, , , content] of matches) {
-      const condition = this.getRenderFunction(
+      const condition = this.renderNatively(
         `return ${value};`,
-      )<boolean>();
+      );
 
       if (condition) {
         this.currentTemplate = this.currentTemplate.replace(wholeMatch, value);
@@ -423,9 +423,9 @@ export class TemplateCompiler {
     ) ?? [];
 
     for (const [wholeMatch, conditionString, , casesString] of matches) {
-      const condition = this.getRenderFunction(
+      const condition = this.renderNatively(
         `return ${conditionString};`,
-      )();
+      );
 
       const cases = new Map<unknown, string>();
 
@@ -448,9 +448,9 @@ export class TemplateCompiler {
           continue;
         }
 
-        const caseCondition = this.getRenderFunction(
+        const caseCondition = this.renderNatively(
           `return ${caseConditionString};`,
-        )();
+        );
 
         cases.set(caseCondition, caseContent);
       }
@@ -535,14 +535,8 @@ export class TemplateCompiler {
         [];
 
       for (const [expression, hasArguments, args, , blockContent] of matches) {
-        const argumentsRenderFunction = hasArguments
-          ? this.getRenderFunction(
-            `return ${`[${args}]`};`,
-          )
-          : () => [];
-
         const resolvedArguments = hasArguments
-          ? argumentsRenderFunction<unknown[]>()
+          ? this.renderNatively<unknown[]>(`return ${`[${args}]`};`)
           : [];
 
         const result = directive.type === 'single'
