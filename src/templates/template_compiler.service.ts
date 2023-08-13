@@ -363,9 +363,9 @@ export class TemplateCompiler {
     ) ??
       [];
 
-    for (const [wholeMatch, , , content] of matches) {
+    for (const [wholeMatch, conditionString, , content] of matches) {
       const condition = this.renderNatively(
-        `return ${content};`,
+        `return ${conditionString};`,
       );
 
       if (condition) {
@@ -383,18 +383,27 @@ export class TemplateCompiler {
       /\[if ?(.*?)\](\n|\r\n*?)?((.|\n|\r\n)*?)(\[else\])((.|\n|\r\n)*?)\[\/if\]/gm,
     ) ?? [];
 
-    for (const [wholeMatch, , , value, , , content] of matches) {
+    for (
+      const [wholeMatch, conditionString, , ifBlockContent, , , elseBlockontent]
+        of matches
+    ) {
       const condition = this.renderNatively(
-        `return ${value};`,
+        `return ${conditionString};`,
       );
 
       if (condition) {
-        this.currentTemplate = this.currentTemplate.replace(wholeMatch, value);
+        this.currentTemplate = this.currentTemplate.replace(
+          wholeMatch,
+          ifBlockContent,
+        );
 
         continue;
       }
 
-      this.currentTemplate = this.currentTemplate.replace(wholeMatch, content);
+      this.currentTemplate = this.currentTemplate.replace(
+        wholeMatch,
+        elseBlockontent,
+      );
     }
   }
 
