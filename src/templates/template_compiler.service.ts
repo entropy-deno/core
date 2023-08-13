@@ -448,11 +448,26 @@ export class TemplateCompiler {
           continue;
         }
 
-        const caseCondition = this.renderNatively(
-          `return ${caseConditionString};`,
+        const caseRegex = /\[case ?(.*?)\]/g;
+        const cleanCaseContent = caseContent.replaceAll(caseRegex, '');
+
+        cases.set(
+          this.renderNatively(
+            `return ${caseConditionString};`,
+          ),
+          cleanCaseContent,
         );
 
-        cases.set(caseCondition, caseContent);
+        const parallelCaseMatches = caseContent.matchAll(caseRegex);
+
+        for (const [, parallelCaseConditionString] of parallelCaseMatches) {
+          cases.set(
+            this.renderNatively(
+              `return ${parallelCaseConditionString};`,
+            ),
+            cleanCaseContent,
+          );
+        }
       }
 
       let matchesOneCase = false;
