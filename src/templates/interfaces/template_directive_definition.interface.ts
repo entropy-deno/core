@@ -2,5 +2,6 @@ export interface TemplateDirectiveDefinition {
   name: string;
   type: 'single' | 'double' | 'block';
   pattern?: RegExp;
-  render: (...args: unknown[]) => string | Promise<string>;
+  // deno-lint-ignore no-explicit-any
+  render: (...args: any[]) => string | Promise<string>;
 }
