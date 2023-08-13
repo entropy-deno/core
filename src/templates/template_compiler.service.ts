@@ -368,41 +368,17 @@ export class TemplateCompiler {
         `return ${conditionString};`,
       );
 
-      if (condition) {
-        this.currentTemplate = this.currentTemplate.replace(wholeMatch, content);
-
-        continue;
-      }
-
-      this.currentTemplate = this.currentTemplate.replace(wholeMatch, '');
-    }
-  }
-
-  private parseIfElseDirectives(): void {
-    const matches = this.currentTemplate.matchAll(
-      /\[if ?(.*?)\](\n|\r\n*?)?((.|\n|\r\n)*?)(\[else\])((.|\n|\r\n)*?)\[\/if\]/gm,
-    ) ?? [];
-
-    for (
-      const [wholeMatch, conditionString, , ifBlockContent, , , elseBlockontent]
-        of matches
-    ) {
-      const condition = this.renderNatively(
-        `return ${conditionString};`,
-      );
+      const [ifContent, elseContent] = content.split('[else]');
 
       if (condition) {
-        this.currentTemplate = this.currentTemplate.replace(
-          wholeMatch,
-          ifBlockContent,
-        );
+        this.currentTemplate = this.currentTemplate.replace(wholeMatch, ifContent);
 
         continue;
       }
 
       this.currentTemplate = this.currentTemplate.replace(
         wholeMatch,
-        elseBlockontent,
+        elseContent ?? '',
       );
     }
   }
@@ -542,7 +518,6 @@ export class TemplateCompiler {
 
     await this.parseEachDirectives();
 
-    this.parseIfElseDirectives();
     this.parseIfDirectives();
     this.parseDataInterpolations();
     this.parseSwitchDirectives();
