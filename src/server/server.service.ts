@@ -1,6 +1,9 @@
 import { load as loadDotEnv } from 'https://deno.land/std@0.198.0/dotenv/mod.ts';
 import { parse as parseFlags } from 'https://deno.land/std@0.198.0/flags/mod.ts';
+import { Broadcaster } from '../web_socket/broadcaster.class.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
+import { Constructor } from '../utils/interfaces/constructor.interface.ts';
+import { Encrypter } from '../encrypter/encrypter.service.ts';
 import { ErrorHandler } from '../error_handler/error_handler.service.ts';
 import { HotReloadChannel } from './channels/hot_reload.channel.ts';
 import { inject } from '../injector/functions/inject.function.ts';
@@ -14,12 +17,13 @@ import { TemplateCompiler } from '../templates/template_compiler.service.ts';
 import { Utils } from '../utils/utils.class.ts';
 import { Validator } from '../validator/validator.service.ts';
 import { WebClientAlias } from './enums/web_client_alias.enum.ts';
-import { WebSocketServer } from '../web_socket/web_socket_server.service.ts';
 
 export class Server {
   private readonly configurator = inject(Configurator);
 
   private readonly devServerCheckKey = '$entropy/dev-server';
+
+  private readonly encrypter = inject(Encrypter);
 
   private readonly errorHandler = inject(ErrorHandler);
 
@@ -37,7 +41,7 @@ export class Server {
 
   private readonly validator = inject(Validator);
 
-  private readonly webSocketServer = inject(WebSocketServer);
+  private readonly webSocketChannels: Constructor<Broadcaster>[] = [];
 
   private addExitSignalListener(callback: () => void): void {
     for (const signal of this.exitSignals) {
@@ -70,6 +74,13 @@ export class Server {
     request: Request,
     info: Deno.ServeHandlerInfo,
   ): Promise<Response> {
+    if (
+      request.headers.get('upgrade')?.toLowerCase() === 'websocket' &&
+      this.configurator.entries.webSocket.enabled
+    ) {
+      return this.handleWebSocketConnection(request);
+    }
+
     const performanceTimerStart = performance.now();
     const richRequest = new HttpRequest(
       request,
@@ -121,24 +132,43 @@ export class Server {
     return response;
   }
 
+  private handleWebSocketConnection(request: Request): Response {
+    const { socket, response } = Deno.upgradeWebSocket(request);
+
+    for (const channel of this.webSocketChannels) {
+      const channelInstance = inject(channel);
+      const socketId = this.encrypter.generateUuid();
+
+      socket.onopen = () => {
+        channelInstance.activeSockets.set(socketId, socket);
+      };
+
+      socket.onclose = () => {
+        channelInstance.activeSockets.delete(socketId);
+      };
+    }
+
+    return response;
+  }
+
   private setup(): void {
     this.router.registerControllers(this.options.controllers ?? []);
     this.validator.registerRules(this.configurator.entries.validatorRules);
     this.templateCompiler.registerDirectives(
       this.configurator.entries.templateDirectives,
     );
-    this.webSocketServer.registerChannels(this.options.channels ?? []);
+    this.webSocketChannels.push(...this.options.channels ?? []);
 
     for (const module of this.options.modules ?? []) {
       const instance = inject(module);
 
       this.router.registerControllers(instance.controllers ?? []);
-      this.webSocketServer.registerChannels(instance.channels ?? []);
+      this.webSocketChannels.push(...instance.channels ?? []);
     }
   }
 
   private setupDevelopmentEnvironment(): void {
-    this.webSocketServer.registerChannel(HotReloadChannel);
+    this.webSocketChannels.push(HotReloadChannel);
 
     const flags = parseFlags(Deno.args, {
       boolean: ['open'],
@@ -265,10 +295,6 @@ export class Server {
         },
       }, async (request, info) => await this.handleRequest(request, info));
 
-      if (this.configurator.entries.webSocket.enabled) {
-        await this.webSocketServer.start();
-      }
-
       if (flags.dev) {
         let watcher: Deno.FsWatcher;
 
@@ -289,21 +315,21 @@ export class Server {
         }
 
         const hotReloadChannel = inject(HotReloadChannel);
-        const hotReloadNotifiers = new Map<string, number>();
+        const watcherNotifiers = new Map<string, number>();
 
         for await (const event of watcher) {
           const eventString = JSON.stringify(event);
 
-          if (hotReloadNotifiers.has(eventString)) {
-            clearTimeout(hotReloadNotifiers.get(eventString));
+          if (watcherNotifiers.has(eventString)) {
+            clearTimeout(watcherNotifiers.get(eventString));
 
-            hotReloadNotifiers.delete(eventString);
+            watcherNotifiers.delete(eventString);
           }
 
-          hotReloadNotifiers.set(
+          watcherNotifiers.set(
             eventString,
             setTimeout(async () => {
-              hotReloadNotifiers.delete(eventString);
+              watcherNotifiers.delete(eventString);
 
               if (event.kind === 'modify') {
                 switch (true) {
@@ -328,7 +354,7 @@ export class Server {
         }
       }
     } catch (error) {
-      this.errorHandler.handle(error);
+      this.errorHandler.handle(error as Error);
     }
   }
 }

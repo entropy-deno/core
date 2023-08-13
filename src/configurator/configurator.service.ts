@@ -40,8 +40,6 @@ export class Configurator {
     validatorRules: [],
     webSocket: {
       enabled: true,
-      port: this.getEnv<number>('WEB_SOCKET_PORT') ??
-        (this.getEnv<number>('PORT') ?? 5050) + 1,
     },
   };
 

@@ -36,6 +36,5 @@ export interface AppConfig {
   validatorRules: ValidationRuleDefinition[];
   webSocket: {
     enabled: boolean;
-    port: number;
   };
 }

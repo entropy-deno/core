@@ -109,7 +109,7 @@ export class TemplateCompiler {
             <script nonce="${this.currentRequest?.nonce ?? ''}">
               const ws = new WebSocket('${
             this.configurator.entries.tls.enabled ? 'wss' : 'ws'
-          }://${this.configurator.entries.host}:${this.configurator.entries.webSocket.port}');
+          }://${this.configurator.entries.host}:${this.configurator.entries.port}');
 
               ws.onmessage = (event) => {
                 if (JSON.parse(event.data).channel === '$hot-reload') {

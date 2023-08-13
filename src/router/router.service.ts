@@ -484,7 +484,7 @@ export class Router {
       throw new HttpError(HttpStatus.NotFound);
     } catch (error) {
       if (!(error instanceof HttpError)) {
-        this.errorHandler.handle(error, false);
+        this.errorHandler.handle(error as Error, false);
       }
 
       const { statusCode } = error;
