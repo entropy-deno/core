@@ -8,7 +8,10 @@ export abstract class Broadcaster {
     channel?: string,
   ): void {
     for (const socket of this.activeSockets.values()) {
-      const channelName = Reflector.getMetadata<string>('name', this.constructor);
+      const channelName = Reflector.getMetadata<string>(
+        'name',
+        this.constructor,
+      );
 
       if (!channel) {
         channel = channelName;
@@ -19,7 +22,9 @@ export abstract class Broadcaster {
       });
 
       if (
-        pattern?.test({ pathname: `${channel?.[0] === '/' ? '' : '/'}${channel}` })
+        pattern?.test({
+          pathname: `${channel?.[0] === '/' ? '' : '/'}${channel}`,
+        })
       ) {
         socket?.send(JSON.stringify({
           channel,

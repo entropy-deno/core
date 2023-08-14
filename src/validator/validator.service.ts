@@ -215,7 +215,8 @@ export class Validator {
         name: 'numeric',
         errorMessage: `Field :field must be numeric`,
         validate: ([value]) => {
-          return !isNaN(parseInt(value ?? '')) || !isNaN(parseFloat(value ?? ''));
+          return !isNaN(parseInt(value ?? '')) ||
+            !isNaN(parseFloat(value ?? ''));
         },
       },
       {
@@ -300,7 +301,9 @@ export class Validator {
       }
 
       for (const [rule, ruleValue] of Object.entries(ruleSet)) {
-        const ruleObject = this.rules.find((ruleData) => ruleData.name === rule);
+        const ruleObject = this.rules.find((ruleData) =>
+          ruleData.name === rule
+        );
 
         if (!ruleObject) {
           throw new Error(`Invalid validation rule '${rule}'`);
@@ -322,7 +325,9 @@ export class Validator {
               .replaceAll(':field', fieldName)
               .replaceAll(
                 ':value',
-                Array.isArray(ruleValue) ? ruleValue.join(', ') : String(ruleValue),
+                Array.isArray(ruleValue)
+                  ? ruleValue.join(', ')
+                  : String(ruleValue),
               ),
           );
         }

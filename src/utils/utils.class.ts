@@ -15,7 +15,10 @@ export abstract class Utils {
     return fromFileUrl(import.meta.url);
   }
 
-  public static deepMerge<T = Record<string, unknown>, U = Record<string, unknown>>(
+  public static deepMerge<
+    T = Record<string, unknown>,
+    U = Record<string, unknown>,
+  >(
     target: T,
     ...elements: U[]
   ): T {
@@ -54,7 +57,8 @@ export abstract class Utils {
     value: T,
     enumObject: Record<string, unknown>,
   ): string {
-    return Object.keys(enumObject).find((key) => enumObject[key] === value) ?? '';
+    return Object.keys(enumObject).find((key) => enumObject[key] === value) ??
+      '';
   }
 
   public static escape(html: string) {

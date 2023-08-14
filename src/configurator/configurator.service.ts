@@ -62,7 +62,9 @@ export class Configurator {
     }
 
     try {
-      return JSON.parse(Deno.env.get(key)?.toString() ?? 'null') as T | undefined;
+      return JSON.parse(Deno.env.get(key)?.toString() ?? 'null') as
+        | T
+        | undefined;
     } catch {
       return Deno.env.get(key) as T;
     }

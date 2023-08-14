@@ -16,7 +16,7 @@
       "*.md"
     ],
     "indentWidth": 2,
-    "lineWidth": 85,
+    "lineWidth": 80,
     "semiColons": true,
     "singleQuote": true
   },

@@ -36,8 +36,9 @@
 
 ## Introducing Entropy
 
-Entropy is a modern and declarative backend development framework for Deno. It makes
-it easy to create fast and secure web applications with awesome developer experience.
+Entropy is a modern and declarative backend development framework for Deno. It
+makes it easy to create fast and secure web applications with awesome developer
+experience.
 
 > Entropy is currently in the `alpha` stage. Although it is already suitable for
 > creating apps, you may still encounter some bugs and breaking changes.
@@ -48,8 +49,8 @@ To run Entropy, your environment has to meet following requirements:
 
 - Deno 1.36.0+
 
-We recommend to always have the latest version of Deno installed. To update Deno, run
-the following command:
+We recommend to always have the latest version of Deno installed. To update
+Deno, run the following command:
 
 ```shell
 deno upgrade

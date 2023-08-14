@@ -27,7 +27,11 @@ export class Server {
 
   private readonly errorHandler = inject(ErrorHandler);
 
-  private readonly exitSignals: Deno.Signal[] = ['SIGINT', 'SIGTERM', 'SIGQUIT'];
+  private readonly exitSignals: Deno.Signal[] = [
+    'SIGINT',
+    'SIGTERM',
+    'SIGQUIT',
+  ];
 
   private readonly localizator = inject(Localizator);
 

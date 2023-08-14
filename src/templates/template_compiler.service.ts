@@ -171,7 +171,9 @@ export class TemplateCompiler {
         type: 'single',
         render: async (partial: string) => {
           const file = `${
-            this.currentOptions.file ? `${this.currentOptions.file}/..` : 'app/views'
+            this.currentOptions.file
+              ? `${this.currentOptions.file}/..`
+              : 'app/views'
           }/${partial}.html`;
 
           try {
@@ -204,7 +206,9 @@ export class TemplateCompiler {
         type: 'block',
         render: async (layout: string) => {
           const file = `${
-            this.currentOptions.file ? `${this.currentOptions.file}/..` : 'app/views'
+            this.currentOptions.file
+              ? `${this.currentOptions.file}/..`
+              : 'app/views'
           }/${layout}.html`;
 
           try {
@@ -303,7 +307,9 @@ export class TemplateCompiler {
       /\[each *?\((.*?) (in|of) (.*)\)\](\n|\r\n)?((.*?|\s*?)*?)\[\/each\]/gm,
     ) ?? [];
 
-    for (const [wholeMatch, variableName, , iterableValue, , block] of matches) {
+    for (
+      const [wholeMatch, variableName, , iterableValue, , block] of matches
+    ) {
       let iterable = this.renderNatively<unknown[]>(
         `return ${iterableValue};`,
       );
@@ -369,7 +375,10 @@ export class TemplateCompiler {
       const [ifContent, elseContent] = content.split('[else]');
 
       if (condition) {
-        this.currentTemplate = this.currentTemplate.replace(wholeMatch, ifContent);
+        this.currentTemplate = this.currentTemplate.replace(
+          wholeMatch,
+          ifContent,
+        );
 
         continue;
       }
@@ -382,9 +391,10 @@ export class TemplateCompiler {
   }
 
   private parseRawDirectives(): void {
-    const matches =
-      this.currentTemplate.matchAll(/\[raw\](\n|\r\n)?((.*?|\s*?)*?)\[\/raw\]/gm) ??
-        [];
+    const matches = this.currentTemplate.matchAll(
+      /\[raw\](\n|\r\n)?((.*?|\s*?)*?)\[\/raw\]/gm,
+    ) ??
+      [];
 
     let count = 0;
 
@@ -418,7 +428,9 @@ export class TemplateCompiler {
         /\[(case|default) ?(.*?)\](\n|\r\n*?)?((.|\n|\r\n)*?)\[\/(case|default)\]/gm,
       );
 
-      for (const [, caseType, caseConditionString, , caseContent] of caseMatches) {
+      for (
+        const [, caseType, caseConditionString, , caseContent] of caseMatches
+      ) {
         if (caseType === 'default') {
           if (defaultCaseValue) {
             throw new Error(
@@ -457,7 +469,10 @@ export class TemplateCompiler {
 
       for (const [key, value] of cases) {
         if (key === condition) {
-          this.currentTemplate = this.currentTemplate.replace(wholeMatch, value);
+          this.currentTemplate = this.currentTemplate.replace(
+            wholeMatch,
+            value,
+          );
 
           matchesOneCase = true;
 
@@ -479,7 +494,8 @@ export class TemplateCompiler {
   }
 
   private removeComments(): void {
-    const matches = this.currentTemplate.matchAll(/\{\{(@?)--(.*?)--\}\}/g) ?? [];
+    const matches = this.currentTemplate.matchAll(/\{\{(@?)--(.*?)--\}\}/g) ??
+      [];
 
     for (const [wholeMatch] of matches) {
       this.currentTemplate = this.currentTemplate.replace(wholeMatch, '');
@@ -528,8 +544,9 @@ export class TemplateCompiler {
           'gm',
         );
 
-      const matches = this.currentTemplate.matchAll(directive.pattern ?? pattern) ??
-        [];
+      const matches =
+        this.currentTemplate.matchAll(directive.pattern ?? pattern) ??
+          [];
 
       for (const [expression, hasArguments, args, , blockContent] of matches) {
         const resolvedArguments = hasArguments

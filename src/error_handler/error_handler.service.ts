@@ -44,16 +44,20 @@ export class ErrorHandler {
 
     this.currentLine = +(fileMatch[1]?.match(/(.*):(.*):(.*)/)?.[2] ?? 1);
 
-    this.currentStack = stack.split('\n').slice(1).map((line) => line.trim()).join(
-      '\n',
-    ).replace(/\n.*$/, '');
+    this.currentStack = stack.split('\n').slice(1).map((line) => line.trim())
+      .join(
+        '\n',
+      ).replace(/\n.*$/, '');
 
     if (this.currentFile.includes('src/')) {
       this.currentFile = `src/${this.currentFile.split('src/')[1]}`;
     }
   }
 
-  public handle(error: Error, die = this.configurator.entries.isProduction): void {
+  public handle(
+    error: Error,
+    die = this.configurator.entries.isProduction,
+  ): void {
     this.currentError = error;
 
     this.readErrorStack();

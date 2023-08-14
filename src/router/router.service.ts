@@ -60,9 +60,11 @@ export class Router {
   ): Promise<Response> {
     const payload = {
       statusCode,
-      message:
-        Utils.enumKey(statusCode, HttpStatus).replace(/([a-z])([A-Z])/g, '$1 $2') ??
-          'Error',
+      message: Utils.enumKey(statusCode, HttpStatus).replace(
+        /([a-z])([A-Z])/g,
+        '$1 $2',
+      ) ??
+        'Error',
     };
 
     if (request.isAjax) {
@@ -83,7 +85,9 @@ export class Router {
     );
   }
 
-  private async handleStaticFileRequest(request: HttpRequest): Promise<Response> {
+  private async handleStaticFileRequest(
+    request: HttpRequest,
+  ): Promise<Response> {
     const filePath = `public${request.path}`;
 
     try {
@@ -188,7 +192,8 @@ export class Router {
       'base-uri': `'self'`,
       'connect-src': `'self' 'nonce-${request.nonce}' ${cspDirectives}`,
       'default-src': `'self' 'nonce-${request.nonce}' ${cspDirectives}`,
-      'font-src': `'self' 'nonce-${request.nonce}' ${cspDirectives} https: data:`,
+      'font-src':
+        `'self' 'nonce-${request.nonce}' ${cspDirectives} https: data:`,
       'form-action': `'self'`,
       'frame-ancestors': `'self'`,
       'img-src': '*',
@@ -372,7 +377,9 @@ export class Router {
 
         if (redirectUrl) {
           return Response.redirect(
-            redirectUrl[0] === '/' ? `${request.origin}${redirectUrl}` : redirectUrl,
+            redirectUrl[0] === '/'
+              ? `${request.origin}${redirectUrl}`
+              : redirectUrl,
           );
         }
 
@@ -438,7 +445,9 @@ export class Router {
         >)
           [controllerRouteMethod](args[0], ...Object.values(groups));
 
-        return methodResult instanceof Promise ? await methodResult : methodResult;
+        return methodResult instanceof Promise
+          ? await methodResult
+          : methodResult;
       });
     }
   }
@@ -489,7 +498,9 @@ export class Router {
 
       const { statusCode } = error;
 
-      if (this.configurator.entries.isProduction || error instanceof HttpError) {
+      if (
+        this.configurator.entries.isProduction || error instanceof HttpError
+      ) {
         if (
           this.customHttpHandlers.has(undefined) ||
           this.customHttpHandlers.has(statusCode)

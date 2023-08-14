@@ -112,7 +112,9 @@ export class HttpRequest {
   public get queryParams(): Record<string, string> {
     const params: Record<string, string> = {};
 
-    for (const [key, value] of new URL(this.request.url).searchParams.entries()) {
+    for (
+      const [key, value] of new URL(this.request.url).searchParams.entries()
+    ) {
       params[key] = value;
     }
 

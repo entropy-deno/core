@@ -47,7 +47,9 @@ export class Encrypter {
   }
 
   public async hash(plainText: string): Promise<string> {
-    const keyBuffer = this.encoder.encode(this.configurator.entries.encryption.key);
+    const keyBuffer = this.encoder.encode(
+      this.configurator.entries.encryption.key,
+    );
     const dataBuffer = this.encoder.encode(plainText);
 
     const hmacKey = await crypto.subtle.importKey(

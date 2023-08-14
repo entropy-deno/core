@@ -35,7 +35,9 @@ export class Localizator {
       }) ?? text;
 
       if (!Array.isArray(this.translations.get(key))) {
-        throw new TypeError(`Pluralized translation for '${text}' is not an array`);
+        throw new TypeError(
+          `Pluralized translation for '${text}' is not an array`,
+        );
       }
 
       return this.translations.get(key)?.[0] ?? text;
