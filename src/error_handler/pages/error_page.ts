@@ -59,7 +59,7 @@ export const errorPage = `<!doctype html>
         }
 
         .content {
-          max-width: 1600px;
+          max-width: 1240px;
           width: 100%;
           display: flex;
           flex-direction: column;
@@ -73,29 +73,30 @@ export const errorPage = `<!doctype html>
           font-size: 13px;
           background: var(--red);
           padding: 4px 9px;
-          border-radius: 22px;
+          border-radius: 8px;
           align-self: flex-start;
-          margin-bottom: 6px;
+          margin-bottom: 8px;
         }
 
         .button {
-          background: none;
-          border: 2px solid var(--theme-light);
-          color: var(--theme-light);
-          padding: 9px 16px;
-          border-radius: 22px;
+          background: var(--theme);
+          border: none;
+          color: var(--text);
+          padding: 12px 16px;
+          border-radius: 12px;
           display: block;
           text-decoration: none;
           font: inherit;
           margin-top: 12px;
           user-select: none;
           cursor: pointer;
+          transition: opacity 0.2s ease;
           align-self: flex-end;
           margin-top: 72px;
         }
 
         .button:hover {
-          opacity: 0.9;
+          opacity: 0.95;
         }
       </style>
     [/raw]
