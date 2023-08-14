@@ -503,7 +503,7 @@ export class Router {
 
         return await this.createAbortResponse(
           request,
-          HttpStatus.InternalServerError,
+          (error as HttpError).statusCode,
         );
       }
 
