@@ -146,6 +146,13 @@ export class TemplateCompiler {
         },
       },
       {
+        name: 'nonceProp',
+        type: 'single',
+        render: () => {
+          return `nonce="${this.currentRequest?.nonce ?? ''}"`;
+        },
+      },
+      {
         name: 'prod',
         type: 'block',
         render: (content: string) => {
