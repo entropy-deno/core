@@ -141,9 +141,7 @@ export class TemplateCompiler {
       {
         name: 'nonce',
         type: 'single',
-        render: (method: string) => {
-          method = method.toUpperCase();
-
+        render: () => {
           return this.currentRequest?.nonce ?? '';
         },
       },

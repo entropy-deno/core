@@ -75,7 +75,7 @@ export class Router {
     }
 
     return this.createResponse(
-      await this.templateCompiler.render(statusPage, payload),
+      await this.templateCompiler.render(statusPage, payload, {}, request),
       {
         statusCode,
       },
@@ -120,7 +120,7 @@ export class Router {
 
       case body instanceof ViewResponse: {
         const template = await (body as ViewResponse).template();
-        const compiledTemplate = await inject(TemplateCompiler).render(
+        const compiledTemplate = await this.templateCompiler.render(
           template,
           (body as ViewResponse).variables,
           {
@@ -508,9 +508,14 @@ export class Router {
       }
 
       return this.createResponse(
-        await this.templateCompiler.render(errorPage, {
-          error,
-        }),
+        await this.templateCompiler.render(
+          errorPage,
+          {
+            error,
+          },
+          {},
+          request,
+        ),
         {
           statusCode: HttpStatus.InternalServerError,
         },

@@ -335,7 +335,7 @@ export class Server {
                 switch (true) {
                   case event.paths[0]?.includes('src') ||
                     event.paths[0]?.includes('views'):
-                    this.logger.log('Reload request...', {
+                    this.logger.log('View reload request...', {
                       badge: 'Hot reload',
                     });
 

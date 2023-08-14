@@ -46,7 +46,7 @@ export class ErrorHandler {
 
     this.currentStack = stack.split('\n').slice(1).map((line) => line.trim()).join(
       '\n',
-    );
+    ).replace(/\n.*$/, '');
 
     if (this.currentFile.includes('src/')) {
       this.currentFile = `src/${this.currentFile.split('src/')[1]}`;

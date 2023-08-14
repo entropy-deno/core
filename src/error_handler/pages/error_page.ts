@@ -114,7 +114,7 @@ export const errorPage = `<!doctype html>
       </button>
     </main>
 
-    <script>
+    <script nonce="[nonce]">
       const reloadButton = document.getElementById('reload');
 
       reloadButton.addEventListener('click', () => {
