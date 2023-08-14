@@ -6,12 +6,12 @@ export const statusPage = `<!doctype html>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>{{ statusCode }} {{ message }}</title>
+    <title>{{ message }} • {{ statusCode }}</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap"
     >
 
     [raw]
@@ -46,7 +46,6 @@ export const statusPage = `<!doctype html>
         }
 
         .header {
-          font-size: 38px;
           line-height: 54px;
           font-weight: 600;
           letter-spacing: -1.2px;
@@ -54,7 +53,7 @@ export const statusPage = `<!doctype html>
         }
 
         .header--small {
-          font-size: 32px;
+          font-size: 34px !important;
           letter-spacing: -1px;
         }
 
