@@ -460,8 +460,10 @@ export class Router {
 
   public async respond(request: HttpRequest): Promise<Response> {
     try {
+      const requestMethod = await request.method();
+
       for (const [path, { action, methods }] of this.routes) {
-        if (!methods.includes(request.method as HttpMethod)) {
+        if (!methods.includes(requestMethod)) {
           continue;
         }
 
@@ -470,7 +472,7 @@ export class Router {
         });
 
         for (const method of methods) {
-          if (request.method === method && urlPattern.test(request.url)) {
+          if (requestMethod === method && urlPattern.test(request.url)) {
             const resolvedParams = Object.values(
               urlPattern.exec(request.url)?.pathname?.groups ?? {},
             );
@@ -484,7 +486,7 @@ export class Router {
       }
 
       if (
-        request.method === HttpMethod.Get &&
+        requestMethod === HttpMethod.Get &&
         request.path.includes('.')
       ) {
         return await this.handleStaticFileRequest(request);

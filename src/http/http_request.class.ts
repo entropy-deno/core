@@ -65,8 +65,8 @@ export class HttpRequest {
       this.header('accept')?.includes('application/json'));
   }
 
-  public isFormRequest(): boolean {
-    return ![HttpMethod.Get, HttpMethod.Head].includes(this.method);
+  public async isFormRequest(): Promise<boolean> {
+    return ![HttpMethod.Get, HttpMethod.Head].includes(await this.method());
   }
 
   public isSecure(): boolean {
@@ -77,8 +77,14 @@ export class HttpRequest {
     return this.header('accept-language')?.slice(0, 2) ?? 'en';
   }
 
-  public get method(): HttpMethod {
-    return this.request.method as HttpMethod;
+  public async method(): Promise<HttpMethod> {
+    const method = await this.input('_method') ?? this.request.method ??
+      HttpMethod.Get;
+
+    return (
+      Object.values(HttpMethod).find((value) => value === method) ??
+        HttpMethod.Get
+    );
   }
 
   public get mode(): RequestMode {
