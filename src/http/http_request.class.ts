@@ -78,6 +78,10 @@ export class HttpRequest {
   }
 
   public async method(): Promise<HttpMethod> {
+    if (!this.headers.get('content-type')) {
+      return HttpMethod.Get;
+    }
+
     const method = await this.input('_method') ?? this.request.method ??
       HttpMethod.Get;
 

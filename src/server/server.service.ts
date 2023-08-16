@@ -122,14 +122,11 @@ export class Server {
     const responseTime = (performance.now() - performanceTimerStart).toFixed(1);
 
     this.logger.log(
-      `%c[${status}] %c${path}%c ${
-        this.configurator.entries.isDenoDeploy ? '•' : '.'.repeat(
-          Deno.consoleSize().columns - path.length - responseTime.length - 20,
-        )
-      } ${responseTime}ms`,
+      `%c[${status}] %c${path}`,
       {
+        additionalInfo: `${responseTime}ms`,
         badge: 'Request',
-        colors: [statusColor, '', 'gray'],
+        colors: [statusColor, ''],
       },
     );
 
