@@ -412,7 +412,9 @@ export class Router {
               );
             }
 
-            return Response.redirect(request.url); // TODO: redirect back
+            return Response.redirect(
+              request.headers.get('referrer') ?? request.url,
+            );
           }
         }
 
