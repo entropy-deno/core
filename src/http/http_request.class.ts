@@ -10,7 +10,7 @@ export class HttpRequest {
 
   constructor(
     private readonly request: Request,
-    private readonly info: Deno.ServeHandlerInfo,
+    private readonly info?: Deno.ServeHandlerInfo,
   ) {
     this.request = request;
   }
@@ -55,8 +55,8 @@ export class HttpRequest {
     return this.request.integrity;
   }
 
-  public get ip(): string {
-    return this.info.remoteAddr.hostname;
+  public get ip(): string | null {
+    return this.info?.remoteAddr.hostname ?? null;
   }
 
   public get isAjax(): boolean {
