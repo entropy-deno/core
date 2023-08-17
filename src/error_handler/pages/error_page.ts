@@ -8,14 +8,15 @@ export const errorPage = `<!doctype html>
 
     <title>Error: {{ error.message }}</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com" [nonceProp]>
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Roboto+Mono&display=swap"
+      [nonceProp]
     >
 
     [raw]
-      <style>
+      <style [nonceProp]>
         *,
         *::before,
         *::after {
@@ -115,7 +116,7 @@ export const errorPage = `<!doctype html>
       </button>
     </main>
 
-    <script nonce="[nonce]">
+    <script [nonceProp]>
       const reloadButton = document.getElementById('reload');
 
       reloadButton.addEventListener('click', () => {

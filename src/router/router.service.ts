@@ -426,7 +426,7 @@ export class Router {
           pathname: path,
         });
 
-        const groups = urlPattern.exec(request.url)?.pathname?.groups ?? {};
+        const groups = urlPattern.exec(request.url)?.pathname.groups ?? {};
 
         if (paramPipes) {
           for (const [paramName, pipe] of Object.entries(paramPipes)) {
@@ -473,7 +473,7 @@ export class Router {
         for (const method of methods) {
           if (requestMethod === method && urlPattern.test(request.url)) {
             const resolvedParams = Object.values(
-              urlPattern.exec(request.url)?.pathname?.groups ?? {},
+              urlPattern.exec(request.url)?.pathname.groups ?? {},
             );
 
             return await this.parseResponse(
