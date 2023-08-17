@@ -413,17 +413,14 @@ export class Router {
             }
 
             return Response.redirect(
-              request.headers.get('referrer') ?? request.url,
+              request.headers.get('referer') ?? request.url,
             );
           }
         }
 
-        const transformParams = Reflector.getMetadata<
+        const paramPipes = Reflector.getMetadata<
           Record<string, Constructor<Pipe>>
-        >(
-          'transformParams',
-          controllerMethod,
-        );
+        >('paramPipes', controllerMethod);
 
         const urlPattern = new URLPattern({
           pathname: path,
@@ -431,8 +428,8 @@ export class Router {
 
         const groups = urlPattern.exec(request.url)?.pathname?.groups ?? {};
 
-        if (transformParams) {
-          for (const [paramName, pipe] of Object.entries(transformParams)) {
+        if (paramPipes) {
+          for (const [paramName, pipe] of Object.entries(paramPipes)) {
             const transformed = inject(pipe).transform(groups[paramName] ?? '');
 
             groups[paramName] = transformed instanceof Promise
@@ -445,7 +442,7 @@ export class Router {
           string,
           (...args: unknown[]) => unknown
         >)
-          [controllerRouteMethod](args[0], ...Object.values(groups));
+          [controllerRouteMethod](request, ...Object.values(groups));
 
         return methodResult instanceof Promise
           ? await methodResult
