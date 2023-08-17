@@ -80,7 +80,7 @@ export class Server {
   ): Promise<Response> {
     if (
       request.headers.get('upgrade')?.toLowerCase() === 'websocket' &&
-      this.configurator.entries.webSocket.enabled
+      this.configurator.entries.webSocket
     ) {
       return this.handleWebSocketConnection(request);
     }

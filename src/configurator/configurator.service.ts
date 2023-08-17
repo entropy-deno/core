@@ -29,6 +29,9 @@ export class Configurator {
       (!!this.getEnv<string>('DENO_DEPLOYMENT_ID') ?? false),
     logger: true,
     port: this.getEnv<number>('PORT') ?? 5050,
+    seo: {
+      robots: true,
+    },
     templateDirectives: [],
     tls: {
       cert: this.getEnv<string>('TLS_CERT') ?? false,
@@ -38,9 +41,7 @@ export class Configurator {
       keyFile: false,
     },
     validatorRules: [],
-    webSocket: {
-      enabled: true,
-    },
+    webSocket: true,
   };
 
   public all(): AppConfig {

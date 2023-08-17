@@ -85,6 +85,26 @@ export class Router {
     );
   }
 
+  private createSeoRobotsFile(request: HttpRequest): Response {
+    const directives: [string, string][] = [
+      ['User-agent', '*'],
+      ['Allow', '*'],
+      ['Sitemap', `${request.origin}/sitemap.xml`],
+    ];
+
+    return this.createResponse(
+      directives.map(([key, value]) => `${key}: ${value}`).join(
+        '\n',
+      ),
+      {
+        headers: {
+          'content-type': 'text/plain; charset=utf-8',
+        },
+      },
+      request,
+    );
+  }
+
   private async handleStaticFileRequest(
     request: HttpRequest,
   ): Promise<Response> {
@@ -488,6 +508,10 @@ export class Router {
         requestMethod === HttpMethod.Get &&
         request.path.includes('.')
       ) {
+        if (request.path === '/robots.txt') {
+          return this.createSeoRobotsFile(request);
+        }
+
         return await this.handleStaticFileRequest(request);
       }
 

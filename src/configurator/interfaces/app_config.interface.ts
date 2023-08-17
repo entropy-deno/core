@@ -25,6 +25,9 @@ export interface AppConfig {
   isProduction: boolean;
   logger: boolean;
   port: number;
+  seo: {
+    robots: boolean;
+  };
   templateDirectives: TemplateDirectiveDefinition[];
   tls: {
     cert: string | false;
@@ -34,7 +37,5 @@ export interface AppConfig {
     keyFile: string | false;
   };
   validatorRules: ValidationRuleDefinition[];
-  webSocket: {
-    enabled: boolean;
-  };
+  webSocket: boolean;
 }
