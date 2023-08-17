@@ -138,6 +138,16 @@ export class Router {
     }
 
     switch (true) {
+      case ['bigint', 'boolean', 'number', 'string', 'symbol', 'undefined']
+        .includes(
+          typeof body,
+        ) ||
+        body === null: {
+        body = String(body);
+
+        break;
+      }
+
       case body instanceof Response: {
         return body as Response;
       }
@@ -164,16 +174,6 @@ export class Router {
           (body as Record<string, unknown>).constructor === Object): {
         body = JSON.stringify(body);
         contentType = 'application/json';
-
-        break;
-      }
-
-      case ['bigint', 'boolean', 'function', 'number', 'string', 'undefined']
-        .includes(
-          typeof body,
-        ) ||
-        body === null: {
-        body = String(body);
 
         break;
       }
