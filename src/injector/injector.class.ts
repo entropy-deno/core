@@ -46,12 +46,4 @@ export abstract class Injector {
 
     return instance;
   }
-
-  public static use<TTarget>(target: Constructor<TTarget>): TTarget {
-    if (!this.has(target)) {
-      throw new Error(`Cannot use ${target.name} before binding it`);
-    }
-
-    return this.cachedInstances.get(target) as TTarget;
-  }
 }
