@@ -1,3 +1,3 @@
-export interface Constructor<T = unknown> {
-  new (...args: unknown[]): T;
+export interface Constructor<TTarget = unknown> {
+  new (...args: unknown[]): TTarget;
 }

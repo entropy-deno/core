@@ -2,6 +2,7 @@ import { contentType } from 'https://deno.land/std@0.198.0/media_types/content_t
 import { Configurator } from '../configurator/configurator.service.ts';
 import { Constructor } from '../utils/interfaces/constructor.interface.ts';
 import { Controller } from '../http/controller.class.ts';
+import { EnumValuesUnion } from '../utils/types/enum_values_union.type.ts';
 import { ErrorHandler } from '../error_handler/error_handler.service.ts';
 import { errorPage } from '../error_handler/pages/error_page.ts';
 import { HttpError } from '../http/http_error.class.ts';
@@ -20,7 +21,6 @@ import { TemplateCompiler } from '../templates/template_compiler.service.ts';
 import { Utils } from '../utils/utils.class.ts';
 import { ValidationRules } from '../validator/interfaces/validation_rules.interface.ts';
 import { Validator } from '../validator/validator.service.ts';
-import { ValuesUnion } from '../utils/types/values_union.type.ts';
 import { ViewResponse } from '../http/view_response.class.ts';
 
 interface ResponseOptions {
@@ -28,12 +28,13 @@ interface ResponseOptions {
   statusCode: HttpStatus;
 }
 
-type RouteDecoratorFunction<T> = T extends ValuesUnion<HttpMethod>[] ? (
+type RouteDecoratorFunction<THttpMethods> = THttpMethods extends
+  EnumValuesUnion<HttpMethod>[] ? (
     path: RoutePath,
     options?: RouteOptions,
   ) => MethodDecorator
   : (
-    methods: ValuesUnion<HttpMethod>[],
+    methods: EnumValuesUnion<HttpMethod>[],
     path: RoutePath,
     options?: RouteOptions,
   ) => MethodDecorator;
@@ -68,20 +69,20 @@ export class Router {
     };
 
     if (request.isAjax) {
-      return this.createResponse(JSON.stringify(payload), {
+      return this.createResponse(request, JSON.stringify(payload), {
         statusCode,
         headers: {
           'content-type': 'application/json; charset=utf-8',
         },
-      }, request);
+      });
     }
 
     return this.createResponse(
+      request,
       await this.templateCompiler.render(statusPage, payload, {}, request),
       {
         statusCode,
       },
-      request,
     );
   }
 
@@ -93,6 +94,7 @@ export class Router {
     ];
 
     return this.createResponse(
+      request,
       directives.map(([key, value]) => `${key}: ${value}`).join(
         '\n',
       ),
@@ -101,7 +103,6 @@ export class Router {
           'content-type': 'text/plain; charset=utf-8',
         },
       },
-      request,
     );
   }
 
@@ -114,13 +115,13 @@ export class Router {
       const fileSize = (await Deno.stat(filePath)).size;
       const body = (await Deno.open(filePath)).readable;
 
-      return this.createResponse(body, {
+      return this.createResponse(request, body, {
         headers: {
           'content-length': fileSize.toString(),
           'content-type': contentType(filePath.split('.')?.pop() ?? '') ??
             'application/octet-stream',
         },
-      }, request);
+      });
     } catch {
       throw new HttpError(HttpStatus.NotFound);
     }
@@ -183,18 +184,18 @@ export class Router {
       }
     }
 
-    return this.createResponse(body as string, {
+    return this.createResponse(request, body as string, {
       statusCode,
       headers: {
         'content-type': `${contentType}; charset=utf-8`,
       },
-    }, request);
+    });
   }
 
   public createResponse(
+    request: HttpRequest,
     body: ReadableStream | XMLHttpRequestBodyInit | null,
     { headers = {}, statusCode = HttpStatus.Ok }: Partial<ResponseOptions> = {},
-    request: HttpRequest,
   ): Response {
     const cspDirectives = ` ${
       this.configurator.entries.contentSecurityPolicy.allowedOrigins.join(' ')
@@ -286,11 +287,11 @@ export class Router {
   }
 
   public createRouteDecorator<
-    T extends ValuesUnion<HttpMethod>[] | undefined = undefined,
-  >(httpMethods?: T): RouteDecoratorFunction<T> {
+    THttpMethods extends EnumValuesUnion<HttpMethod>[] | undefined = undefined,
+  >(httpMethods?: THttpMethods): RouteDecoratorFunction<THttpMethods> {
     const decoratorCallback = (
       path: RoutePath,
-      methods: ValuesUnion<HttpMethod>[],
+      methods: EnumValuesUnion<HttpMethod>[],
       options: RouteOptions = {},
     ): MethodDecorator => {
       return (_target, _methodName, descriptor) => {
@@ -317,13 +318,13 @@ export class Router {
           return decoratorCallback(path, httpMethods, options);
         }
         : (
-          methods: ValuesUnion<HttpMethod>[],
+          methods: EnumValuesUnion<HttpMethod>[],
           path: RoutePath,
           options: RouteOptions = {},
         ) => {
           return decoratorCallback(path, methods, options);
         }
-    ) as RouteDecoratorFunction<T>;
+    ) as RouteDecoratorFunction<THttpMethods>;
   }
 
   public registerController(controller: Constructor): void {
@@ -419,6 +420,7 @@ export class Router {
           if (Object.keys(errors).length > 0) {
             if (request.isAjax) {
               return this.createResponse(
+                request,
                 JSON.stringify({
                   errors,
                 }),
@@ -428,7 +430,6 @@ export class Router {
                     'content-type': 'application/json; charset=utf-8',
                   },
                 },
-                request,
               );
             }
 
@@ -544,6 +545,7 @@ export class Router {
       }
 
       return this.createResponse(
+        request,
         await this.templateCompiler.render(
           errorPage,
           {
@@ -555,7 +557,6 @@ export class Router {
         {
           statusCode: HttpStatus.InternalServerError,
         },
-        request,
       );
     }
   }
@@ -698,7 +699,7 @@ export class Router {
 
   public registerRoute(
     path: RoutePath,
-    methods: ValuesUnion<HttpMethod>[],
+    methods: EnumValuesUnion<HttpMethod>[],
     action: (...args: unknown[]) => Promise<unknown>,
     options: RouteOptions = {},
   ): void {

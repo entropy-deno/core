@@ -53,8 +53,8 @@ export abstract class Utils {
     return this.deepMerge(target, ...elements);
   }
 
-  public static enumKey<T = string | number>(
-    value: T,
+  public static enumKey<TValue = string | number>(
+    value: TValue,
     enumObject: Record<string, unknown>,
   ): string {
     return Object.keys(enumObject).find((key) => enumObject[key] === value) ??

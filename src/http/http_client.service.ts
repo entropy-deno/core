@@ -1,13 +1,13 @@
+import { EnumValuesUnion } from '../utils/types/enum_values_union.type.ts';
 import { HttpMethod } from './enums/http_method.enum.ts';
-import { ValuesUnion } from '../utils/types/values_union.type.ts';
 
 export class HttpClient {
-  private async fetch<T>(
+  private async fetch<TPayload>(
     url: string,
     payload: Record<string, string | Blob>,
     headers: Record<string, string>,
-    method: ValuesUnion<HttpMethod>,
-  ): Promise<T | null> {
+    method: EnumValuesUnion<HttpMethod>,
+  ): Promise<TPayload | null> {
     try {
       const body = new FormData();
 
@@ -15,7 +15,7 @@ export class HttpClient {
         body.append(key, value);
       }
 
-      const response: Response = await fetch(url, {
+      const response = await fetch(url, {
         body,
         headers,
         method,
@@ -27,51 +27,56 @@ export class HttpClient {
     }
   }
 
-  public async delete<T>(
+  public async delete<TPayload>(
     url: string,
     payload: Record<string, string | Blob> = {},
     headers: Record<string, string> = {},
-  ): Promise<T | null> {
-    return await this.fetch<T>(url, payload, headers, HttpMethod.Delete);
+  ): Promise<TPayload | null> {
+    return await this.fetch<TPayload>(url, payload, headers, HttpMethod.Delete);
   }
 
-  public async get<T>(
+  public async get<TPayload>(
     url: string,
     payload: Record<string, string | Blob> = {},
     headers: Record<string, string> = {},
-  ): Promise<T | null> {
-    return await this.fetch<T>(url, payload, headers, HttpMethod.Get);
+  ): Promise<TPayload | null> {
+    return await this.fetch<TPayload>(url, payload, headers, HttpMethod.Get);
   }
 
-  public async options<T>(
+  public async options<TPayload>(
     url: string,
     payload: Record<string, string | Blob> = {},
     headers: Record<string, string> = {},
-  ): Promise<T | null> {
-    return await this.fetch<T>(url, payload, headers, HttpMethod.Options);
+  ): Promise<TPayload | null> {
+    return await this.fetch<TPayload>(
+      url,
+      payload,
+      headers,
+      HttpMethod.Options,
+    );
   }
 
-  public async patch<T>(
+  public async patch<TPayload>(
     url: string,
     payload: Record<string, string | Blob> = {},
     headers: Record<string, string> = {},
-  ): Promise<T | null> {
-    return await this.fetch<T>(url, payload, headers, HttpMethod.Patch);
+  ): Promise<TPayload | null> {
+    return await this.fetch<TPayload>(url, payload, headers, HttpMethod.Patch);
   }
 
-  public async post<T>(
+  public async post<TPayload>(
     url: string,
     payload: Record<string, string | Blob> = {},
     headers: Record<string, string> = {},
-  ): Promise<T | null> {
-    return await this.fetch<T>(url, payload, headers, HttpMethod.Post);
+  ): Promise<TPayload | null> {
+    return await this.fetch<TPayload>(url, payload, headers, HttpMethod.Post);
   }
 
-  public async put<T>(
+  public async put<TPayload>(
     url: string,
     payload: Record<string, string | Blob> = {},
     headers: Record<string, string> = {},
-  ): Promise<T | null> {
-    return await this.fetch<T>(url, payload, headers, HttpMethod.Put);
+  ): Promise<TPayload | null> {
+    return await this.fetch<TPayload>(url, payload, headers, HttpMethod.Put);
   }
 }

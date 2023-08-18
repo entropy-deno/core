@@ -26,12 +26,12 @@ export abstract class Injector {
     return this.cachedInstances.has(target);
   }
 
-  public static resolve<T>(
-    target: Constructor<T>,
+  public static resolve<TTarget>(
+    target: Constructor<TTarget>,
     options: Partial<ServiceResolveOptions> = {},
-  ): T {
+  ): TTarget {
     if ((options.singleton ?? true) && this.has(target)) {
-      return this.cachedInstances.get(target) as T;
+      return this.cachedInstances.get(target) as TTarget;
     }
 
     const instance = new target();
@@ -47,11 +47,11 @@ export abstract class Injector {
     return instance;
   }
 
-  public static use<T>(target: Constructor<T>): T {
+  public static use<TTarget>(target: Constructor<TTarget>): TTarget {
     if (!this.has(target)) {
       throw new Error(`Cannot use ${target.name} before binding it`);
     }
 
-    return this.cachedInstances.get(target) as T;
+    return this.cachedInstances.get(target) as TTarget;
   }
 }

@@ -255,10 +255,10 @@ export class TemplateCompiler {
     ];
   }
 
-  private renderNatively<T>(
+  private renderNatively<TValue>(
     code: string,
     variables: Record<string, unknown> = {},
-  ): T {
+  ): TValue {
     const globalVariables = {
       $request: this.currentRequest,
       ...Object.keys(constants).reduce((result, key) => ({
@@ -277,7 +277,7 @@ export class TemplateCompiler {
 
     return new Function(...header)(
       ...Object.values(globalVariables),
-    ) as T;
+    ) as TValue;
   }
 
   private parseDataInterpolations(): void {

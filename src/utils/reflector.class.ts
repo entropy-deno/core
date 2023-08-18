@@ -1,9 +1,9 @@
 export abstract class Reflector {
   private static metadata = new WeakMap<object, Record<string, unknown>>();
 
-  public static defineMetadata<T>(
+  public static defineMetadata<TValue>(
     key: string,
-    value: T,
+    value: TValue,
     target: object,
   ): void {
     this.metadata.set(target, {
@@ -12,11 +12,11 @@ export abstract class Reflector {
     });
   }
 
-  public static getMetadata<T>(
+  public static getMetadata<TValue>(
     key: string,
     target: object,
-  ): T | undefined {
-    return this.metadata.get(target)?.[key] as T | undefined;
+  ): TValue | undefined {
+    return this.metadata.get(target)?.[key] as TValue | undefined;
   }
 
   public static hasMetadata(key: string, target: object): boolean {

@@ -52,22 +52,22 @@ export class Configurator {
     return this.options;
   }
 
-  public get<T = string>(option: string, defaultValue: T): T {
-    return this.options[option as keyof Readonly<AppConfig>] as T ??
+  public get<TValue = string>(option: string, defaultValue: TValue): TValue {
+    return this.options[option as keyof Readonly<AppConfig>] as TValue ??
       defaultValue;
   }
 
-  public getEnv<T extends EnvVariable>(key: string): T | undefined {
+  public getEnv<TValue extends EnvVariable>(key: string): TValue | undefined {
     if (!(key in Deno.env.toObject())) {
       return undefined;
     }
 
     try {
       return JSON.parse(Deno.env.get(key)?.toString() ?? 'null') as
-        | T
+        | TValue
         | undefined;
     } catch {
-      return Deno.env.get(key) as T;
+      return Deno.env.get(key) as TValue;
     }
   }
 

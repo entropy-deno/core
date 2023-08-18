@@ -1,3 +1,3 @@
-export type DeepPartial<T> = {
-  [P in keyof T]?: DeepPartial<T[P]>;
+export type DeepPartial<TObject> = {
+  [P in keyof TObject]?: DeepPartial<TObject[P]>;
 };

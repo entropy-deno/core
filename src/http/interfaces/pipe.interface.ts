@@ -1,3 +1,3 @@
-export interface Pipe<T = unknown> {
-  transform: (value: string) => T;
+export interface Pipe<TData = unknown> {
+  transform: (value: string) => TData;
 }
