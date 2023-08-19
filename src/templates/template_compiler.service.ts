@@ -189,7 +189,7 @@ export class TemplateCompiler {
             });
 
             const fileContent = await Deno.readTextFile(file);
-            const compiledPartial = await compiler.compile(
+            const compiledPartial = await compiler.$compile(
               fileContent,
               this.currentVariables,
               {},
@@ -224,7 +224,7 @@ export class TemplateCompiler {
             });
 
             const fileContent = await Deno.readTextFile(file);
-            const compiledLayout = await compiler.compile(
+            const compiledLayout = await compiler.$compile(
               fileContent,
               this.currentVariables,
               {},
@@ -350,7 +350,7 @@ export class TemplateCompiler {
             singleton: false,
           });
 
-          content = await compiler.compile(
+          content = await compiler.$compile(
             content,
             {
               ...this.currentVariables,
@@ -522,7 +522,7 @@ export class TemplateCompiler {
     }
   }
 
-  public async compile(
+  public async $compile(
     template: string,
     variables: Record<string, unknown> = {},
     options: TemplateCompilerOptions = {},
@@ -585,7 +585,7 @@ export class TemplateCompiler {
     options: TemplateCompilerOptions = {},
     request?: HttpRequest,
   ): Promise<string> {
-    const compiledTemplate = await this.compile(
+    const compiledTemplate = await this.$compile(
       template,
       variables,
       options,
