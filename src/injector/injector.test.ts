@@ -2,8 +2,8 @@ import {
   assert,
   assertEquals,
 } from 'https://deno.land/std@0.198.0/assert/mod.ts';
-import { Injector } from './injector.class.ts';
 import { inject } from './functions/inject.function.ts';
+import { Injector } from './injector.class.ts';
 
 class TestService {
   public readonly test = 'test';
@@ -25,9 +25,6 @@ Deno.test('injector module', async (test) => {
   });
 
   await test.step('injector creates singletons', () => {
-    const firstService = Injector.resolve(TestService);
-    const secondService = Injector.resolve(TestService);
-
-    assertEquals(firstService, secondService);
+    assertEquals(Injector.resolve(TestService), Injector.resolve(TestService));
   });
 });
