@@ -26,22 +26,22 @@ export abstract class Injector {
     return this.cachedInstances.has(target);
   }
 
-  public static resolve<TTarget>(
-    target: Constructor<TTarget>,
+  public static resolve<TService>(
+    service: Constructor<TService>,
     options: Partial<ServiceResolveOptions> = {},
-  ): TTarget {
-    if ((options.singleton ?? true) && this.has(target)) {
-      return this.cachedInstances.get(target) as TTarget;
+  ): TService {
+    if ((options.singleton ?? true) && this.has(service)) {
+      return this.cachedInstances.get(service) as TService;
     }
 
-    const instance = new target();
+    const instance = new service();
 
     if (options.singleton ?? true) {
-      this.cachedInstances.set(target, instance);
+      this.cachedInstances.set(service, instance);
     }
 
-    if (!this.requestScopedServices.includes(target)) {
-      this.requestScopedServices.push(target);
+    if (!this.requestScopedServices.includes(service)) {
+      this.requestScopedServices.push(service);
     }
 
     return instance;
