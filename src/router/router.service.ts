@@ -363,8 +363,8 @@ export class Router {
 
     const controllerRouteMethods = properties.filter((property) => {
       return (
-        typeof controller.prototype[property] === 'function' &&
         !['constructor', 'toString', 'toLocaleString'].includes(property) &&
+        typeof controller.prototype[property] === 'function' &&
         property[0] !== '_'
       );
     });
