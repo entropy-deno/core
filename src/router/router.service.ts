@@ -11,7 +11,7 @@ import { HttpStatus } from '../http/enums/http_status.enum.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { Middleware } from '../http/interfaces/middleware.interface.ts';
 import { Reflector } from '../utils/reflector.class.ts';
-import { RouteDefinition } from './interfaces/route_definition.interface.ts';
+import { Route } from './interfaces/route.interface.ts';
 import { RouteOptions } from './interfaces/route_options.interface.ts';
 import { RoutePath } from './types/route_path.type.ts';
 import { Pipe } from '../http/interfaces/pipe.interface.ts';
@@ -49,7 +49,7 @@ export class Router {
 
   private readonly errorHandler = inject(ErrorHandler);
 
-  private readonly routes = new Map<string, RouteDefinition>();
+  private readonly routes = new Map<string, Route>();
 
   private readonly templateCompiler = inject(TemplateCompiler);
 
@@ -295,8 +295,8 @@ export class Router {
       options: RouteOptions = {},
     ): MethodDecorator => {
       return (_target, _methodName, descriptor) => {
-        Reflector.defineMetadata<Partial<RouteDefinition>>(
-          'routeDefinition',
+        Reflector.defineMetadata<Partial<Route>>(
+          'Route',
           {
             methods,
             path,
@@ -366,9 +366,9 @@ export class Router {
       }
 
       const { methods, path } = Reflector.getMetadata<
-        Exclude<RouteDefinition, 'action'>
+        Exclude<Route, 'action'>
       >(
-        'routeDefinition',
+        'Route',
         controllerMethod,
       )!;
 
