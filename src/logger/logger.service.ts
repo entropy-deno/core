@@ -1,4 +1,4 @@
-import { Configurator } from '../configurator/configurator.module.ts';
+import { Configurator } from '../configurator/configurator.service.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { LogOptions } from './interfaces/log_options.interface.ts';
 
