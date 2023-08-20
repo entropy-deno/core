@@ -12,6 +12,7 @@ import { HttpStatus } from '../http/enums/http_status.enum.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { Middleware } from '../http/interfaces/middleware.interface.ts';
 import { Pipe } from '../http/interfaces/pipe.interface.ts';
+import { RedirectDestination } from './types/redirect_destination.type.ts';
 import { Reflector } from '../utils/reflector.class.ts';
 import { Route } from './interfaces/route.interface.ts';
 import { RouteOptions } from './interfaces/route_options.interface.ts';
@@ -287,13 +288,7 @@ export class Router {
     });
   }
 
-  public createRedirect(
-    destination: RoutePath | Url | {
-      name: string;
-      params?: Record<string, string>;
-    },
-    statusCode = HttpStatus.Found,
-  ): Response {
+  public createRedirect(destination: RedirectDestination, statusCode = HttpStatus.Found): Response {
     if (typeof destination === 'string') {
       return Response.redirect(
         destination[0] === '/'
@@ -427,9 +422,7 @@ export class Router {
           }
         }
 
-        const redirectDestination = Reflector.getMetadata<
-          RoutePath | Url | { name: string; params?: Record<string, string> }
-        >(
+        const redirectDestination = Reflector.getMetadata<RedirectDestination>(
           'redirectDestination',
           controllerMethod,
         );

@@ -1,15 +1,9 @@
 import { Reflector } from '../../utils/reflector.class.ts';
-import { RoutePath } from '../../router/types/route_path.type.ts';
-import { Url } from '../../router/types/url.type.ts';
+import { RedirectDestination } from '../../router/types/redirect_destination.type.ts';
 
-export function Redirect(
-  destination: RoutePath | Url | {
-    name: string;
-    params?: Record<string, string>;
-  },
-): MethodDecorator {
+export function Redirect(destination: RedirectDestination): MethodDecorator {
   return (_target, _methodName, descriptor) => {
-    Reflector.defineMetadata(
+    Reflector.defineMetadata<RedirectDestination>(
       'redirectDestination',
       destination,
       descriptor.value as ((...args: unknown[]) => unknown),
