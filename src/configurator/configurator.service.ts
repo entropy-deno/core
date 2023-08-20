@@ -4,7 +4,7 @@ import { EnvVariable } from './types/env_variable.type.ts';
 import { Utils } from '../utils/utils.class.ts';
 
 export class Configurator {
-  private options: Readonly<AppConfig> = {
+  private options: AppConfig = {
     contentSecurityPolicy: {
       allowInlineScripts: false,
       allowInlineStyles: true,
@@ -48,12 +48,12 @@ export class Configurator {
     return this.entries;
   }
 
-  public get entries(): Readonly<AppConfig> {
+  public get entries(): AppConfig {
     return this.options;
   }
 
   public get<TValue = string>(option: string, defaultValue: TValue): TValue {
-    return this.options[option as keyof Readonly<AppConfig>] as TValue ??
+    return this.options[option as keyof AppConfig] as TValue ??
       defaultValue;
   }
 

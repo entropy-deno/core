@@ -86,6 +86,14 @@ export class Server {
     }
 
     const performanceTimerStart = performance.now();
+
+    if (
+      this.configurator.entries.isProduction &&
+      this.configurator.entries.host === 'localhost'
+    ) {
+      this.configurator.entries.host = new URL(request.url).hostname;
+    }
+
     const richRequest = new HttpRequest(
       request,
       info,
