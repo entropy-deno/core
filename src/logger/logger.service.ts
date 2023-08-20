@@ -24,17 +24,17 @@ export class Logger {
     const trimmedMessage = message.slice(
       0,
       Deno.consoleSize().columns - outputWidth - 3,
-    );
+    ).replace(/(%c|%)$/, '');
 
     console.error(
       `%c${badge[0]?.toUpperCase() ?? ''}${
         badge.slice(1) ?? ''
       } %c${trimmedMessage}${exceedsSpace ? '...' : ''}`,
       'color: red',
-      'color: lightgray',
+      '',
       ...colors.slice(
         0,
-        trimmedMessage.match(/%c/g)?.length,
+        trimmedMessage.match(/%c/g)?.length ?? 0,
       ).map((color) => `color: ${color}`),
     );
   }
@@ -56,17 +56,17 @@ export class Logger {
     const trimmedMessage = message.slice(
       0,
       Deno.consoleSize().columns - outputWidth - 3,
-    );
+    ).replace(/(%c|%)$/, '');
 
     console.log(
       `%c${badge[0]?.toUpperCase() ?? ''}${
         badge.slice(1) ?? ''
       } %c${trimmedMessage}${exceedsSpace ? '...' : ''}`,
       'color: blue',
-      'color: lightgray',
+      '',
       ...colors.slice(
         0,
-        trimmedMessage.match(/%c/g)?.length,
+        trimmedMessage.match(/%c/g)?.length ?? 0,
       ).map((color) => `color: ${color}`),
     );
   }
@@ -95,7 +95,7 @@ export class Logger {
     console.log(
       output,
       'color: blue',
-      'color: lightgray',
+      '',
       ...colors.map((color) => `color: ${color}`),
       'color: gray',
     );
@@ -122,17 +122,17 @@ export class Logger {
     const trimmedMessage = message.slice(
       0,
       Deno.consoleSize().columns - outputWidth - 3,
-    );
+    ).replace(/(%c|%)$/, '');
 
     console.warn(
       `%c${badge[0]?.toUpperCase() ?? ''}${
         badge.slice(1) ?? ''
       } %c${trimmedMessage}${exceedsSpace ? '...' : ''}`,
       'color: orange',
-      'color: lightgray',
+      '',
       ...colors.slice(
         0,
-        trimmedMessage.match(/%c/g)?.length,
+        trimmedMessage.match(/%c/g)?.length ?? 0,
       ).map((color) => `color: ${color}`),
     );
   }
