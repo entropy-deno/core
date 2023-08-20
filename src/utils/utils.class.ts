@@ -1,4 +1,5 @@
 import { fromFileUrl } from 'https://deno.land/std@0.198.0/path/mod.ts';
+import { resolve as resolvePath } from 'https://deno.land/std@0.198.0/path/mod.ts';
 
 export abstract class Utils {
   public static callerFile() {
@@ -85,6 +86,30 @@ export abstract class Utils {
     }
 
     return Array.from({ length: end - start + 1 }, (_, i) => i + start);
+  }
+
+  public static resolveViewFile(caller: string, file: string): string {
+    switch (true) {
+      case file.startsWith('./'):
+        file = `${caller}/../${file.slice(2)}`;
+
+        break;
+
+      case file[0] === '/':
+        file = `views/${file.slice(1)}`;
+
+        break;
+
+      case file.startsWith('/views/'):
+        file = file.slice(1);
+
+        break;
+
+      default:
+        file = `views/${file}`;
+    }
+
+    return resolvePath(file);
   }
 
   public static runShellCommand(name: string, args: string[] = []): void {

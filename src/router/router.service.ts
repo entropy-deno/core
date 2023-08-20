@@ -288,7 +288,10 @@ export class Router {
     });
   }
 
-  public createRedirect(destination: RedirectDestination, statusCode = HttpStatus.Found): Response {
+  public createRedirect(
+    destination: RedirectDestination,
+    statusCode = HttpStatus.Found,
+  ): Response {
     if (typeof destination === 'string') {
       return Response.redirect(
         destination[0] === '/'
