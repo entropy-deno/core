@@ -7,17 +7,18 @@ import { ErrorHandler } from '../error_handler/error_handler.service.ts';
 import { errorPage } from '../error_handler/pages/error.page.ts';
 import { HttpError } from '../http/http_error.class.ts';
 import { HttpMethod } from '../http/enums/http_method.enum.ts';
+import { HttpRequest } from '../http/http_request.class.ts';
 import { HttpStatus } from '../http/enums/http_status.enum.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { Middleware } from '../http/interfaces/middleware.interface.ts';
+import { Pipe } from '../http/interfaces/pipe.interface.ts';
 import { Reflector } from '../utils/reflector.class.ts';
 import { Route } from './interfaces/route.interface.ts';
 import { RouteOptions } from './interfaces/route_options.interface.ts';
 import { RoutePath } from './types/route_path.type.ts';
-import { Pipe } from '../http/interfaces/pipe.interface.ts';
-import { HttpRequest } from '../http/http_request.class.ts';
 import { statusPage } from '../http/pages/status.page.ts';
 import { TemplateCompiler } from '../templates/template_compiler.service.ts';
+import { Url } from './types/url.type.ts';
 import { Utils } from '../utils/utils.class.ts';
 import { ValidationRules } from '../validator/interfaces/validation_rules.interface.ts';
 import { Validator } from '../validator/validator.service.ts';
@@ -84,6 +85,100 @@ export class Router {
         statusCode,
       },
     );
+  }
+
+  private createResponse(
+    request: HttpRequest,
+    body: ReadableStream | XMLHttpRequestBodyInit | null,
+    { headers = {}, statusCode = HttpStatus.Ok }: Partial<ResponseOptions> = {},
+  ): Response {
+    const cspDirectives = ` ${
+      this.configurator.entries.contentSecurityPolicy.allowedOrigins.join(' ')
+    } ${
+      this.configurator.entries.isProduction
+        ? ''
+        : `${
+          this.configurator.entries.tls.enabled ? 'https' : 'http'
+        }://${this.configurator.entries.host}:* ${
+          this.configurator.entries.tls.enabled ? 'wss' : 'ws'
+        }://${this.configurator.entries.host}:*`
+    }`;
+
+    const csp = {
+      'base-uri': `'self'`,
+      'connect-src': `'self' 'nonce-${request.nonce}' ${cspDirectives}`,
+      'default-src': `'self' 'nonce-${request.nonce}' ${cspDirectives}`,
+      'font-src':
+        `'self' 'nonce-${request.nonce}' ${cspDirectives} https: data:`,
+      'form-action': `'self'`,
+      'frame-ancestors': `'self'`,
+      'img-src': '*',
+      'media-src': `'self'`,
+      'object-src': `'none'`,
+      'script-src': `'self' ${
+        this.configurator.entries.contentSecurityPolicy.allowInlineScripts
+          ? `'unsafe-inline'`
+          : `'nonce-${request.nonce}'`
+      } ${cspDirectives}`,
+      'script-src-attr': `'${
+        this.configurator.entries.contentSecurityPolicy.allowInlineScripts
+          ? 'unsafe-inline'
+          : 'none'
+      }'`,
+      'style-src': `'self' ${
+        this.configurator.entries.contentSecurityPolicy.allowInlineStyles
+          ? `'unsafe-inline'`
+          : `'nonce-${request.nonce}'`
+      } ${cspDirectives}`,
+      'upgrade-insecure-requests': '',
+    };
+
+    const { cors } = this.configurator.entries;
+
+    const securityHeaders = {
+      'access-control-allow-credentials': String(cors.allowCredentials),
+      'access-control-allow-headers': cors.allowedHeaders.length
+        ? cors.allowedHeaders.join(',')
+        : (request.header('access-control-request-headers') ?? ''),
+      ...(cors.allowedMethods.length && {
+        'access-control-allow-methods': cors.allowedMethods.join(','),
+      }),
+      ...((cors.allowedOrigins.length &&
+        cors.allowedOrigins.includes(request.header('origin') as string)) && {
+        'access-control-allow-origin': cors.allowedOrigins[0] === '*'
+          ? '*'
+          : request.header('origin') ?? 'false',
+      }),
+      ...(cors.exposedHeaders.length && {
+        'access-control-expose-headers': cors.exposedHeaders.join(','),
+      }),
+      'access-control-max-age': String(cors.maxAge),
+      'content-security-policy': Object.entries(csp).map(([key, value]) =>
+        `${key} ${value}`
+      ).join(';'),
+      'cross-origin-opener-policy': 'same-origin',
+      'cross-origin-resource-policy': 'same-origin',
+      'origin-agent-cluster': '?1',
+      'permissions-policy':
+        'autoplay=(self), camera=(), encrypted-media=(self), geolocation=(self), microphone=(), payment=(), sync-xhr=(self)',
+      'referrer-policy': 'no-referrer',
+      'strict-transport-security': 'max-age=31536000; includeSubDomains',
+      'x-content-type-options': 'nosniff',
+      'x-dns-prefetch-control': 'off',
+      'x-xss-protection': '0',
+      ...(!cors.allowedMethods.includes('*') && {
+        'vary': 'origin',
+      }),
+    };
+
+    return new Response(body, {
+      status: statusCode,
+      headers: {
+        'content-type': 'text/html; charset=utf-8',
+        ...securityHeaders,
+        ...headers,
+      },
+    });
   }
 
   private createSeoRobotsFile(request: HttpRequest): Response {
@@ -192,98 +287,39 @@ export class Router {
     });
   }
 
-  public createResponse(
-    request: HttpRequest,
-    body: ReadableStream | XMLHttpRequestBodyInit | null,
-    { headers = {}, statusCode = HttpStatus.Ok }: Partial<ResponseOptions> = {},
+  public createRedirect(
+    destination: RoutePath | Url | {
+      name: string;
+      params?: Record<string, string>;
+    },
+    statusCode = HttpStatus.Found,
   ): Response {
-    const cspDirectives = ` ${
-      this.configurator.entries.contentSecurityPolicy.allowedOrigins.join(' ')
-    } ${
-      this.configurator.entries.isProduction
-        ? ''
-        : `${
-          this.configurator.entries.tls.enabled ? 'https' : 'http'
-        }://${this.configurator.entries.host}:* ${
-          this.configurator.entries.tls.enabled ? 'wss' : 'ws'
-        }://${this.configurator.entries.host}:*`
-    }`;
+    if (typeof destination === 'string') {
+      return Response.redirect(
+        destination[0] === '/'
+          ? `${
+            this.configurator.entries.tls.enabled ? 'https' : 'http'
+          }://${this.configurator.entries.host}:${this.configurator.entries.port}${destination}`
+          : destination,
+        statusCode,
+      );
+    }
 
-    const csp = {
-      'base-uri': `'self'`,
-      'connect-src': `'self' 'nonce-${request.nonce}' ${cspDirectives}`,
-      'default-src': `'self' 'nonce-${request.nonce}' ${cspDirectives}`,
-      'font-src':
-        `'self' 'nonce-${request.nonce}' ${cspDirectives} https: data:`,
-      'form-action': `'self'`,
-      'frame-ancestors': `'self'`,
-      'img-src': '*',
-      'media-src': `'self'`,
-      'object-src': `'none'`,
-      'script-src': `'self' ${
-        this.configurator.entries.contentSecurityPolicy.allowInlineScripts
-          ? `'unsafe-inline'`
-          : `'nonce-${request.nonce}'`
-      } ${cspDirectives}`,
-      'script-src-attr': `'${
-        this.configurator.entries.contentSecurityPolicy.allowInlineScripts
-          ? 'unsafe-inline'
-          : 'none'
-      }'`,
-      'style-src': `'self' ${
-        this.configurator.entries.contentSecurityPolicy.allowInlineStyles
-          ? `'unsafe-inline'`
-          : `'nonce-${request.nonce}'`
-      } ${cspDirectives}`,
-      'upgrade-insecure-requests': '',
-    };
+    for (const [path, routeData] of this.routes.entries()) {
+      if (routeData.name === destination.name) {
+        let resolvedPath = path;
 
-    const { cors } = this.configurator.entries;
+        for (
+          const [param, paramValue] of Object.entries(destination.params ?? {})
+        ) {
+          resolvedPath = resolvedPath.replace(`:${param}`, paramValue);
+        }
 
-    const securityHeaders = {
-      'access-control-allow-credentials': String(cors.allowCredentials),
-      'access-control-allow-headers': cors.allowedHeaders.length
-        ? cors.allowedHeaders.join(',')
-        : (request.header('access-control-request-headers') ?? ''),
-      ...(cors.allowedMethods.length && {
-        'access-control-allow-methods': cors.allowedMethods.join(','),
-      }),
-      ...((cors.allowedOrigins.length &&
-        cors.allowedOrigins.includes(request.header('origin') as string)) && {
-        'access-control-allow-origin': cors.allowedOrigins[0] === '*'
-          ? '*'
-          : request.header('origin') ?? 'false',
-      }),
-      ...(cors.exposedHeaders.length && {
-        'access-control-expose-headers': cors.exposedHeaders.join(','),
-      }),
-      'access-control-max-age': String(cors.maxAge),
-      'content-security-policy': Object.entries(csp).map(([key, value]) =>
-        `${key} ${value}`
-      ).join(';'),
-      'cross-origin-opener-policy': 'same-origin',
-      'cross-origin-resource-policy': 'same-origin',
-      'origin-agent-cluster': '?1',
-      'permissions-policy':
-        'autoplay=(self), camera=(), encrypted-media=(self), geolocation=(self), microphone=(), payment=(), sync-xhr=(self)',
-      'referrer-policy': 'no-referrer',
-      'strict-transport-security': 'max-age=31536000; includeSubDomains',
-      'x-content-type-options': 'nosniff',
-      'x-dns-prefetch-control': 'off',
-      'x-xss-protection': '0',
-      ...(!cors.allowedMethods.includes('*') && {
-        'vary': 'origin',
-      }),
-    };
+        return Response.redirect(resolvedPath, statusCode);
+      }
+    }
 
-    return new Response(body, {
-      status: statusCode,
-      headers: {
-        'content-type': 'text/html; charset=utf-8',
-        ...securityHeaders,
-        ...headers,
-      },
-    });
+    throw new Error(`Invalid named route '${destination.name}'`);
   }
 
   public createRouteDecorator<
@@ -391,17 +427,15 @@ export class Router {
           }
         }
 
-        const redirectUrl = Reflector.getMetadata<string>(
-          'redirectUrl',
+        const redirectDestination = Reflector.getMetadata<
+          RoutePath | Url | { name: string; params?: Record<string, string> }
+        >(
+          'redirectDestination',
           controllerMethod,
         );
 
-        if (redirectUrl) {
-          return Response.redirect(
-            redirectUrl[0] === '/'
-              ? `${request.origin}${redirectUrl}`
-              : redirectUrl,
-          );
+        if (redirectDestination) {
+          return this.createRedirect(redirectDestination);
         }
 
         const validationRules = Reflector.getMetadata<
@@ -433,9 +467,11 @@ export class Router {
               );
             }
 
-            return Response.redirect(
-              request.headers.get('referer') ?? request.url,
-            );
+            if (!request.headers.get('referer')) {
+              throw new HttpError(HttpStatus.BadRequest);
+            }
+
+            return this.createRedirect(request.headers.get('referer')! as Url);
           }
         }
 

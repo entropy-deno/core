@@ -1,16 +1,22 @@
 import { HttpStatus } from './enums/http_status.enum.ts';
+import { inject } from '../injector/functions/inject.function.ts';
 import { TemplateCompilerOptions } from '../templates/interfaces/template_compiler_options.interface.ts';
 import { resolveViewFile } from '../templates/functions/resolve_view_file.function.ts';
+import { Router } from '../router/router.service.ts';
 import { RoutePath } from '../router/types/route_path.type.ts';
+import { Url } from '../router/types/url.type.ts';
 import { Utils } from '../utils/utils.class.ts';
 import { ViewResponse } from './view_response.class.ts';
 
 export abstract class Controller {
   protected redirectResponse(
-    url: string | RoutePath,
-    statusCode: HttpStatus,
+    destination: RoutePath | Url | {
+      name: string;
+      params?: Record<string, string>;
+    },
+    statusCode = HttpStatus.Found,
   ): Response {
-    return Response.redirect(url, statusCode);
+    return inject(Router).createRedirect(destination, statusCode);
   }
 
   protected renderView(

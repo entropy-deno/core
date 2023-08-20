@@ -264,7 +264,11 @@ export class Server {
           ? await Deno.readTextFile(this.configurator.entries.tls.keyFile)
           : false);
 
-      if (tlsCert && tlsKey) {
+      if (
+        tlsCert && tlsKey ||
+        this.configurator.entries.isProduction &&
+          this.configurator.entries.tls.enabled
+      ) {
         this.configurator.entries.tls.enabled = true;
       }
 
