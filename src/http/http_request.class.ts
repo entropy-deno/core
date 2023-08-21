@@ -6,7 +6,7 @@ import { inject } from '../injector/functions/inject.function.ts';
 export class HttpRequest {
   private readonly encrypter = inject(Encrypter);
 
-  private readonly cspNonce = this.encrypter.generateRandomString(16);
+  private readonly cspNonce = this.encrypter.generateRandomString(24);
 
   constructor(
     private readonly request: Request,
