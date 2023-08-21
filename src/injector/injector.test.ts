@@ -1,7 +1,7 @@
 import {
   assert,
   assertEquals,
-} from 'https://deno.land/std@0.198.0/assert/mod.ts';
+} from 'https://deno.land/std@0.199.0/assert/mod.ts';
 import { inject } from './functions/inject.function.ts';
 import { Injector } from './injector.class.ts';
 
