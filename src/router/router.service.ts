@@ -71,7 +71,7 @@ export class Router {
     };
 
     if (request.isAjax) {
-      return this.createResponse(request, JSON.stringify(payload), {
+      return await this.createResponse(request, JSON.stringify(payload), {
         statusCode,
         headers: {
           'content-type': 'application/json; charset=utf-8',
@@ -79,7 +79,7 @@ export class Router {
       });
     }
 
-    return this.createResponse(
+    return await this.createResponse(
       request,
       await this.templateCompiler.render(statusPage, payload, {}, request),
       {
@@ -88,11 +88,11 @@ export class Router {
     );
   }
 
-  private createResponse(
+  private async createResponse(
     request: HttpRequest,
-    body: ReadableStream | XMLHttpRequestBodyInit | null,
+    body: unknown,
     { headers = {}, statusCode = HttpStatus.Ok }: Partial<ResponseOptions> = {},
-  ): Response {
+  ): Promise<Response> {
     const cspDirectives = ` ${
       this.configurator.entries.contentSecurityPolicy.allowedOrigins.join(' ')
     } ${
@@ -172,24 +172,29 @@ export class Router {
       }),
     };
 
-    return new Response(body, {
+    const { body: parsedBody, contentType } = await this.parseResponseBody(
+      request,
+      body,
+    );
+
+    return new Response(parsedBody, {
       status: statusCode,
       headers: {
-        'content-type': 'text/html; charset=utf-8',
+        'content-type': `${contentType}; charset=utf-8`,
         ...securityHeaders,
         ...headers,
       },
     });
   }
 
-  private createSeoRobotsFile(request: HttpRequest): Response {
+  private async createSeoRobotsFile(request: HttpRequest): Promise<Response> {
     const directives: [string, string][] = [
       ['User-agent', '*'],
       ['Allow', '*'],
       ['Sitemap', `${request.origin}/sitemap.xml`],
     ];
 
-    return this.createResponse(
+    return await this.createResponse(
       request,
       directives.map(([key, value]) => `${key}: ${value}`).join(
         '\n',
@@ -202,7 +207,7 @@ export class Router {
     );
   }
 
-  private async handleStaticFileRequest(
+  private async createStaticFileResponse(
     request: HttpRequest,
   ): Promise<Response> {
     const filePath = `public${request.path}`;
@@ -211,7 +216,7 @@ export class Router {
       const fileSize = (await Deno.stat(filePath)).size;
       const body = (await Deno.open(filePath)).readable;
 
-      return this.createResponse(request, body, {
+      return await this.createResponse(request, body, {
         headers: {
           'content-length': fileSize.toString(),
           'content-type': contentType(filePath.split('.')?.pop() ?? '') ??
@@ -223,11 +228,10 @@ export class Router {
     }
   }
 
-  private async parseResponse(
+  private async parseResponseBody(
     request: HttpRequest,
     body: unknown,
-    statusCode = HttpStatus.Ok,
-  ): Promise<Response> {
+  ): Promise<{ body: string | ReadableStream; contentType: string }> {
     let contentType = 'text/html';
 
     if (body instanceof Promise) {
@@ -243,10 +247,6 @@ export class Router {
         body = String(body);
 
         break;
-      }
-
-      case body instanceof Response: {
-        return body as Response;
       }
 
       case body instanceof ViewResponse: {
@@ -276,16 +276,18 @@ export class Router {
       }
 
       default: {
+        if (body instanceof ReadableStream) {
+          break;
+        }
+
         throw new Error('Invalid response type');
       }
     }
 
-    return this.createResponse(request, body as string, {
-      statusCode,
-      headers: {
-        'content-type': `${contentType}; charset=utf-8`,
-      },
-    });
+    return {
+      body: body as string | ReadableStream,
+      contentType,
+    };
   }
 
   public createRedirect(
@@ -361,7 +363,7 @@ export class Router {
     ) as RouteDecoratorFunction<THttpMethods>;
   }
 
-  public registerController(controller: Constructor): void {
+  public registerController(controller: Constructor<Controller>): void {
     const properties = Object.getOwnPropertyNames(controller.prototype);
 
     const controllerRouteMethods = properties.filter((property) => {
@@ -449,7 +451,7 @@ export class Router {
 
           if (Object.keys(errors).length > 0) {
             if (request.isAjax) {
-              return this.createResponse(
+              return await this.createResponse(
                 request,
                 JSON.stringify({
                   errors,
@@ -467,7 +469,7 @@ export class Router {
               throw new HttpError(HttpStatus.BadRequest);
             }
 
-            return this.createRedirect(request.headers.get('referer')! as Url);
+            return this.createRedirect(request.headers.get('referer') as Url);
           }
         }
 
@@ -479,13 +481,15 @@ export class Router {
           pathname: path,
         });
 
-        const groups = urlPattern.exec(request.url)?.pathname.groups ?? {};
+        const paramGroups = urlPattern.exec(request.url)?.pathname.groups ?? {};
 
         if (paramPipes) {
           for (const [paramName, pipe] of Object.entries(paramPipes)) {
-            const transformed = inject(pipe).transform(groups[paramName] ?? '');
+            const transformed = inject(pipe).transform(
+              paramGroups[paramName] ?? '',
+            );
 
-            groups[paramName] = transformed instanceof Promise
+            paramGroups[paramName] = transformed instanceof Promise
               ? await transformed
               : transformed;
           }
@@ -495,7 +499,7 @@ export class Router {
           string,
           (...args: unknown[]) => unknown
         >)
-          [controllerRouteMethod](request, ...Object.values(groups));
+          [controllerRouteMethod](request, ...Object.values(paramGroups));
 
         return methodResult instanceof Promise
           ? await methodResult
@@ -529,7 +533,7 @@ export class Router {
               urlPattern.exec(request.url)?.pathname.groups ?? {},
             );
 
-            return await this.parseResponse(
+            return await this.createResponse(
               request,
               await action(request, ...resolvedParams),
             );
@@ -542,10 +546,10 @@ export class Router {
         request.path.includes('.')
       ) {
         if (request.path === '/robots.txt') {
-          return this.createSeoRobotsFile(request);
+          return await this.createSeoRobotsFile(request);
         }
 
-        return await this.handleStaticFileRequest(request);
+        return await this.createStaticFileResponse(request);
       }
 
       throw new HttpError(HttpStatus.NotFound);
@@ -567,7 +571,9 @@ export class Router {
             this.customHttpHandlers.has(statusCode) ? statusCode : undefined,
           )?.(statusCode);
 
-          return await this.parseResponse(request, body, statusCode);
+          return await this.createResponse(request, body, {
+            statusCode,
+          });
         }
 
         return await this.createAbortResponse(
@@ -576,7 +582,7 @@ export class Router {
         );
       }
 
-      return this.createResponse(
+      return await this.createResponse(
         request,
         await this.templateCompiler.render(
           errorPage,
