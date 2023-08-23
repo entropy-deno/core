@@ -11,7 +11,7 @@ export const errorPage = `<!doctype html>
     <link rel="preconnect" href="https://fonts.googleapis.com" [nonceProp]>
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Roboto+Mono&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;700&family=Roboto+Mono&display=swap"
       [nonceProp]
     >
 
@@ -27,15 +27,15 @@ export const errorPage = `<!doctype html>
 
         :root {
           --bg: #000;
-          --bg-block: #181818;
+          --bg-block: #141414;
           --border: #232323;
           --font-mono: 'Roboto Mono', monospace;
-          --font-sans: 'Inter', sans-serif;
+          --font-sans: 'Noto Sans', sans-serif;
           --red: #ff5c57;
           --text: #f5f5f5;
           --text-gray: #b2b2b2;
-          --theme: #9868ff;
-          --theme-light: #a981ff;
+          --theme: #4b3bff;
+          --theme-light: #5646ff;
         }
 
         body {
@@ -97,7 +97,7 @@ export const errorPage = `<!doctype html>
         }
 
         .button:hover {
-          opacity: 0.95;
+          opacity: 0.9;
         }
       </style>
     [/raw]

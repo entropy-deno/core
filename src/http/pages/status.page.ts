@@ -11,7 +11,7 @@ export const statusPage = `<!doctype html>
     <link rel="preconnect" href="https://fonts.googleapis.com" [nonceProp]>
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500&display=swap"
       [nonceProp]
     >
 
@@ -27,9 +27,9 @@ export const statusPage = `<!doctype html>
 
         :root {
           --bg: #000;
-          --font-sans: 'Inter', sans-serif;
+          --font-sans: 'Noto Sans', sans-serif;
           --text: #f5f5f5;
-          --theme: #9868ff;
+          --theme: #4b3bff;
         }
 
         body {
