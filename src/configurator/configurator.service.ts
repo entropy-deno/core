@@ -31,6 +31,8 @@ export class Configurator {
     port: this.getEnv<number>('PORT') ?? 5050,
     seo: {
       robots: true,
+      sitemap: true,
+      sitemapUrls: [],
     },
     templateDirectives: [],
     tls: {

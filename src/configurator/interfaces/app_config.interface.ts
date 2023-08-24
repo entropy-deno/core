@@ -1,3 +1,4 @@
+import { RoutePath } from '../../router/types/route_path.type.ts';
 import { TemplateDirectiveDefinition } from '../../templates/interfaces/template_directive_definition.interface.ts';
 import { ValidationRuleDefinition } from '../../validator/interfaces/validation_rule_definition.interface.ts';
 
@@ -27,6 +28,8 @@ export interface AppConfig {
   port: number;
   seo: {
     robots: boolean;
+    sitemap: boolean;
+    sitemapUrls: RoutePath[];
   };
   templateDirectives: TemplateDirectiveDefinition[];
   tls: {

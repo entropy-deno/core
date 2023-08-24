@@ -191,8 +191,11 @@ export class Router {
     const directives: [string, string][] = [
       ['User-agent', '*'],
       ['Allow', '*'],
-      ['Sitemap', `${request.origin}/sitemap.xml`],
     ];
+
+    if (this.configurator.entries.seo.sitemap) {
+      directives.push(['Sitemap', `${request.origin}/sitemap.xml`]);
+    }
 
     return await this.createResponse(
       request,
@@ -202,6 +205,33 @@ export class Router {
       {
         headers: {
           'content-type': 'text/plain; charset=utf-8',
+        },
+      },
+    );
+  }
+
+  private async createSeoSitemapFile(request: HttpRequest): Promise<Response> {
+    const urls = [
+      ...this.routes.keys(),
+      ...this.configurator.entries.seo.sitemapUrls,
+    ].filter((path) => !path.includes(':'));
+
+    return await this.createResponse(
+      request,
+      `<?xml version="1.0" encoding="UTF-8"?>
+      <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+        ${
+        urls.map((url) =>
+          `<url>
+            <loc>${request.origin}${url}</loc>
+            <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+          </url>`
+        )
+      }
+      </urlset>`,
+      {
+        headers: {
+          'content-type': 'application/xml; charset=utf-8',
         },
       },
     );
@@ -545,8 +575,17 @@ export class Router {
         requestMethod === HttpMethod.Get &&
         request.path.includes('.')
       ) {
-        if (request.path === '/robots.txt') {
+        if (
+          request.path === '/robots.txt' && this.configurator.entries.seo.robots
+        ) {
           return await this.createSeoRobotsFile(request);
+        }
+
+        if (
+          request.path === '/sitemap.xml' &&
+          this.configurator.entries.seo.sitemap
+        ) {
+          return await this.createSeoSitemapFile(request);
         }
 
         return await this.createStaticFileResponse(request);
