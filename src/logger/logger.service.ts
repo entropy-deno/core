@@ -97,7 +97,7 @@ export class Logger {
       'color: blue',
       '',
       ...colors.map((color) => `color: ${color}`),
-      'color: gray',
+      ...[additionalInfo ? 'color: gray' : ''],
     );
   }
 
