@@ -321,18 +321,25 @@ export class TemplateCompiler {
         `return ${iterableValue};`,
       );
 
+      if (typeof iterable === 'number') {
+        iterable = Utils.range(iterable);
+      }
+
       let result = '';
       let iterator = 0;
 
-      if (typeof iterable === 'number') {
-        iterable = Utils.range(iterable);
+      const [blockContent, , elseContent] = block.split(/\[(else|empty)\]/);
+
+      if (!Object.keys(iterable).length) {
+        this.currentTemplate = this.currentTemplate.replace(
+          wholeMatch,
+          elseContent ?? '',
+        );
       }
 
       for (const [key, item] of Object.entries(iterable)) {
         if (Object.hasOwn(iterable, key)) {
           const index = JSON.parse(`"${key}"`);
-
-          let content = block;
 
           const scopeVariables = {
             [variableName]: item,
@@ -350,8 +357,8 @@ export class TemplateCompiler {
             singleton: false,
           });
 
-          content = await compiler.$compile(
-            content,
+          result += await compiler.$compile(
+            blockContent,
             {
               ...this.currentVariables,
               ...scopeVariables,
@@ -359,8 +366,6 @@ export class TemplateCompiler {
             {},
             this.currentRequest,
           );
-
-          result += content;
         }
       }
 
