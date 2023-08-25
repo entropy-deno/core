@@ -440,7 +440,14 @@ export class Router {
         controllerMethod,
       )!;
 
-      this.registerRoute(path, methods, async (...args: unknown[]) => {
+      const basePath =
+        Reflector.getMetadata<RoutePath>('basePath', controller.prototype) ??
+          '/';
+      const resolvedPath = `${basePath}${
+        path[0] !== '/' && basePath[0] !== '/' ? '/' : ''
+      }${path}` as RoutePath;
+
+      this.registerRoute(resolvedPath, methods, async (...args: unknown[]) => {
         const request = args[0] as HttpRequest;
         const middleware = Reflector.getMetadata<Constructor<Middleware>[]>(
           'middleware',
@@ -450,13 +457,7 @@ export class Router {
         for (const middlewareHandler of middleware) {
           const result = inject(middlewareHandler).handle();
 
-          if (result instanceof Promise) {
-            await result;
-          }
-
-          if (result) {
-            return result;
-          }
+          return result instanceof Promise ? await result : result;
         }
 
         const redirectDestination = Reflector.getMetadata<RedirectDestination>(
@@ -510,7 +511,7 @@ export class Router {
         >('paramPipes', controllerMethod);
 
         const urlPattern = new URLPattern({
-          pathname: path,
+          pathname: resolvedPath,
         });
 
         const paramGroups = urlPattern.exec(request.url)?.pathname.groups ?? {};
