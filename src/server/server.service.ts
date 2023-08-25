@@ -11,6 +11,7 @@ import { Localizator } from '../localizator/localizator.module.ts';
 import { Logger } from '../logger/logger.service.ts';
 import { MIN_DENO_VERSION } from '../constants.ts';
 import { HttpRequest } from '../http/http_request.class.ts';
+import { Reflector } from '../utils/reflector.class.ts';
 import { Router } from '../router/router.service.ts';
 import { ServerOptions } from './interfaces/server_options.interface.ts';
 import { TemplateCompiler } from '../templates/template_compiler.service.ts';
@@ -148,8 +149,37 @@ export class Server {
       const channelInstance = inject(channel);
       const socketId = this.encrypter.generateUuid();
 
+      const channelProperties = Object.getOwnPropertyNames(channel.prototype);
+
+      const channelListenerMethods = channelProperties.filter((property) => {
+        return (
+          !['constructor', 'broadcast'].includes(property) &&
+          property[0] !== '_' &&
+          typeof channel.prototype[property] === 'function' &&
+          !!Reflector.getMetadata<string>(
+            'subscribeEvent',
+            channel.prototype[property],
+          )
+        );
+      });
+
       socket.onopen = () => {
         channelInstance.activeSockets.set(socketId, socket);
+      };
+
+      socket.onmessage = ({ data }) => {
+        for (const channelListenerMethod of channelListenerMethods) {
+          const channelMethod = channel.prototype[channelListenerMethod];
+
+          const channelName = Reflector.getMetadata<string>(
+            'name',
+            channel.prototype,
+          );
+
+          if (JSON.parse(data).channel === channelName) {
+            channelMethod.call(channelInstance, JSON.parse(data).payload);
+          }
+        }
       };
 
       socket.onclose = () => {

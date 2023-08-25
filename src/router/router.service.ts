@@ -394,13 +394,15 @@ export class Router {
   }
 
   public registerController(controller: Constructor<Controller>): void {
-    const properties = Object.getOwnPropertyNames(controller.prototype);
+    const controllerProperties = Object.getOwnPropertyNames(
+      controller.prototype,
+    );
 
-    const controllerRouteMethods = properties.filter((property) => {
+    const controllerRouteMethods = controllerProperties.filter((property) => {
       return (
-        !['constructor', 'toString', 'toLocaleString'].includes(property) &&
-        typeof controller.prototype[property] === 'function' &&
-        property[0] !== '_'
+        property !== 'constructor' &&
+        property[0] !== '_' &&
+        typeof controller.prototype[property] === 'function'
       );
     });
 

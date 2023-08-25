@@ -17,15 +17,13 @@ export abstract class Broadcaster {
         channel = channelName;
       }
 
+      const path = `${channel?.[0] === '/' ? '' : '/'}${channel}`;
+
       const pattern = new URLPattern({
-        pathname: `${channel?.[0] === '/' ? '' : '/'}${channel}`,
+        pathname: path,
       });
 
-      if (
-        pattern?.test({
-          pathname: `${channel?.[0] === '/' ? '' : '/'}${channel}`,
-        })
-      ) {
+      if (pattern?.test({ pathname: path })) {
         socket?.send(JSON.stringify({
           channel,
           payload,
