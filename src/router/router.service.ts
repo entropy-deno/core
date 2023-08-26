@@ -444,7 +444,7 @@ export class Router {
         Reflector.getMetadata<RoutePath>('basePath', controller.prototype) ??
           '/';
       const resolvedPath = `${basePath}${
-        path[0] !== '/' && basePath[0] !== '/' ? '/' : ''
+        path[0] !== '/' && basePath.split('').pop() !== '/' ? '/' : ''
       }${path}` as RoutePath;
 
       this.registerRoute(resolvedPath, methods, async (...args: unknown[]) => {
