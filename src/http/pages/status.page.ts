@@ -29,7 +29,7 @@ export const statusPage = `<!doctype html>
           --bg: #000;
           --font-sans: 'Noto Sans', sans-serif;
           --text: #f5f5f5;
-          --theme: #4b3bff;
+          --theme-light: #5646ff;
         }
 
         body {
@@ -54,17 +54,17 @@ export const statusPage = `<!doctype html>
         }
 
         .header--small {
-          font-size: 34px !important;
+          font-size: 30px !important;
           letter-spacing: -1px;
         }
 
         .text-theme {
-          color: var(--theme);
+          color: var(--theme-light);
         }
 
         @media (min-width: 800px) {
           .header--small {
-            font-size: 36px;
+            font-size: 34px;
           }
         }
       </style>
