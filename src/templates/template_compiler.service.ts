@@ -1,3 +1,4 @@
+import { resolve as resolvePath } from 'https://deno.land/std@0.199.0/path/mod.ts';
 import * as constants from '../constants.ts';
 import { TemplateCompilerOptions } from './interfaces/template_compiler_options.interface.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
@@ -177,10 +178,14 @@ export class TemplateCompiler {
         name: 'include',
         type: 'single',
         render: async (partial: string) => {
+          if (!partial) {
+            throw new Error('View partial name not provided');
+          }
+
           const file = `${
             this.currentOptions.file
               ? `${this.currentOptions.file}/..`
-              : 'app/views'
+              : 'views'
           }/${partial}.html`;
 
           try {
@@ -188,9 +193,8 @@ export class TemplateCompiler {
               singleton: false,
             });
 
-            const fileContent = await Deno.readTextFile(file);
             const compiledPartial = await compiler.$compile(
-              fileContent,
+              await Deno.readTextFile(resolvePath(file)),
               this.currentVariables,
               {},
               this.currentRequest,
@@ -209,13 +213,17 @@ export class TemplateCompiler {
         },
       },
       {
-        name: 'use',
+        name: 'layout',
         type: 'block',
-        render: async (layout: string) => {
+        render: async (content: string, layout: string) => {
+          if (!layout) {
+            throw new Error('View layout name not provided');
+          }
+
           const file = `${
             this.currentOptions.file
               ? `${this.currentOptions.file}/..`
-              : 'app/views'
+              : 'views'
           }/${layout}.html`;
 
           try {
@@ -223,15 +231,14 @@ export class TemplateCompiler {
               singleton: false,
             });
 
-            const fileContent = await Deno.readTextFile(file);
             const compiledLayout = await compiler.$compile(
-              fileContent,
+              await Deno.readTextFile(resolvePath(file)),
               this.currentVariables,
               {},
               this.currentRequest,
             );
 
-            return compiledLayout;
+            return compiledLayout.replace('[slot]', content);
           } catch (error) {
             if (!(error instanceof Deno.errors.NotFound)) {
               throw error;
