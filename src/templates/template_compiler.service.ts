@@ -183,7 +183,7 @@ export class TemplateCompiler {
           }
 
           const file = `${
-            this.currentOptions.file
+            this.currentOptions.file && partial[0] === '.'
               ? `${this.currentOptions.file}/..`
               : 'views'
           }/${partial}.html`;
@@ -201,11 +201,7 @@ export class TemplateCompiler {
             );
 
             return compiledPartial;
-          } catch (error) {
-            if (!(error instanceof Deno.errors.NotFound)) {
-              throw error;
-            }
-
+          } catch {
             throw new Error(
               `View partial '${partial}' does not exist`,
             );
@@ -221,7 +217,7 @@ export class TemplateCompiler {
           }
 
           const file = `${
-            this.currentOptions.file
+            this.currentOptions.file && layout[0] === '.'
               ? `${this.currentOptions.file}/..`
               : 'views'
           }/${layout}.html`;
@@ -239,11 +235,7 @@ export class TemplateCompiler {
             );
 
             return compiledLayout.replace('[slot]', content);
-          } catch (error) {
-            if (!(error instanceof Deno.errors.NotFound)) {
-              throw error;
-            }
-
+          } catch {
             throw new Error(
               `View layout '${layout}' does not exist`,
             );
