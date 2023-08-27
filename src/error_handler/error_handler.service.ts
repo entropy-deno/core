@@ -63,7 +63,7 @@ export class ErrorHandler {
     this.readErrorStack();
 
     this.logger.error(
-      `Error: ${error.message} %c[${this.currentFile}${
+      `${error.message} %c[${this.currentFile}${
         this.currentLine && this.currentFile !== this.defaultFile
           ? `:${this.currentLine}`
           : ''
@@ -74,7 +74,7 @@ export class ErrorHandler {
     );
 
     if (this.currentStack) {
-      this.logger.raw(`\n%c${this.currentStack}\n`, 'color: gray');
+      this.logger.raw(`%c${this.currentStack}\n`, 'color: gray');
     }
 
     if (die && !this.configurator.entries.isDenoDeploy) {

@@ -310,33 +310,43 @@ export class Server {
         this.configurator.entries.tls.enabled = true;
       }
 
-      Deno.serve({
-        ...(this.configurator.entries.tls.enabled
-          ? {
-            cert: tlsCert,
-            key: tlsKey,
-          }
-          : {}),
-        hostname: this.configurator.entries.host,
-        port: this.configurator.entries.port,
-        onListen: () => {
-          if (!this.configurator.entries.isDenoDeploy) {
-            this.logger.info(
-              `HTTP server is running on ${
-                this.configurator.entries.isProduction
-                  ? `port %c${this.configurator.entries.port}`
-                  : `%c${
-                    this.configurator.entries.tls.enabled ? 'https' : 'http'
-                  }://${this.configurator.entries.host}:${this.configurator.entries.port}`
-              } %c[${Deno.build.os === 'darwin' ? '⌃C' : 'Ctrl+C'} to quit]`,
-              {
-                badge: 'Server',
-                colors: ['blue', 'gray'],
-              },
-            );
-          }
-        },
-      }, async (request, info) => await this.handleRequest(request, info));
+      try {
+        Deno.serve({
+          ...(this.configurator.entries.tls.enabled
+            ? {
+              cert: tlsCert,
+              key: tlsKey,
+            }
+            : {}),
+          hostname: this.configurator.entries.host,
+          port: this.configurator.entries.port,
+          onListen: () => {
+            if (!this.configurator.entries.isDenoDeploy) {
+              this.logger.info(
+                `HTTP server is running on ${
+                  this.configurator.entries.isProduction
+                    ? `port %c${this.configurator.entries.port}`
+                    : `%c${
+                      this.configurator.entries.tls.enabled ? 'https' : 'http'
+                    }://${this.configurator.entries.host}:${this.configurator.entries.port}`
+                } %c[${Deno.build.os === 'darwin' ? '⌃C' : 'Ctrl+C'} to quit]`,
+                {
+                  badge: 'Server',
+                  colors: ['blue', 'gray'],
+                },
+              );
+            }
+          },
+        }, async (request, info) => await this.handleRequest(request, info));
+      } catch (error) {
+        if (!(error instanceof Deno.errors.AddrInUse)) {
+          throw error;
+        }
+
+        throw new Error(
+          `Port ${this.configurator.entries.port} is already in use`,
+        );
+      }
 
       if (flags.dev) {
         let watcher: Deno.FsWatcher;
