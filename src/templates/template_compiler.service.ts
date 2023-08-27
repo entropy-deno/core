@@ -26,8 +26,6 @@ export class TemplateCompiler {
     '$translate': translate,
   };
 
-  private currentOptions: TemplateCompilerOptions = {};
-
   private currentRawContent: string[] = [];
 
   private currentRequest: HttpRequest | undefined = undefined;
@@ -37,6 +35,8 @@ export class TemplateCompiler {
   private currentTemplate = '';
 
   private currentVariables: Record<string, unknown> = {};
+
+  public currentOptions: TemplateCompilerOptions = {};
 
   constructor() {
     this.directives = [
@@ -182,19 +182,23 @@ export class TemplateCompiler {
             throw new Error('View partial name not provided');
           }
 
-          const file = `${
-            this.currentOptions.file && partial[0] === '.'
-              ? `${this.currentOptions.file}/..`
-              : 'views'
-          }/${partial}.html`;
+          const file = resolvePath(
+            `${
+              this.currentOptions.file && partial[0] === '.'
+                ? `${this.currentOptions.file}/..`
+                : 'views'
+            }/${partial}.html`,
+          );
 
           try {
             const compiler = inject(TemplateCompiler, {
               singleton: false,
             });
 
+            compiler.currentOptions.file = file;
+
             const compiledPartial = await compiler.$compile(
-              await Deno.readTextFile(resolvePath(file)),
+              await Deno.readTextFile(file),
               this.currentVariables,
               {},
               this.currentRequest,
@@ -216,19 +220,23 @@ export class TemplateCompiler {
             throw new Error('View layout name not provided');
           }
 
-          const file = `${
-            this.currentOptions.file && layout[0] === '.'
-              ? `${this.currentOptions.file}/..`
-              : 'views'
-          }/${layout}.html`;
+          const file = resolvePath(
+            `${
+              this.currentOptions.file && layout[0] === '.'
+                ? `${this.currentOptions.file}/..`
+                : 'views'
+            }/${layout}.html`,
+          );
 
           try {
             const compiler = inject(TemplateCompiler, {
               singleton: false,
             });
 
+            compiler.currentOptions.file = file;
+
             const compiledLayout = await compiler.$compile(
-              await Deno.readTextFile(resolvePath(file)),
+              await Deno.readTextFile(file),
               this.currentVariables,
               {},
               this.currentRequest,
