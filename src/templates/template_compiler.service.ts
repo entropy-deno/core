@@ -234,7 +234,7 @@ export class TemplateCompiler {
               this.currentRequest,
             );
 
-            return compiledLayout.replace('[slot]', content);
+            return compiledLayout.replaceAll('[slot]', content);
           } catch {
             throw new Error(
               `View layout '${layout}' does not exist`,
