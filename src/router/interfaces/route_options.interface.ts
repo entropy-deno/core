@@ -16,4 +16,5 @@ export interface RouteOptions {
     string,
     Partial<ValidationRules> | Record<string, unknown>
   >;
+  view?: string;
 }

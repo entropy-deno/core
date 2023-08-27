@@ -2,6 +2,7 @@ export * from './controller.class.ts';
 export * from './decorators/base_path.decorator.ts';
 export * from './decorators/headers.decorator.ts';
 export * from './decorators/redirect.decorator.ts';
+export * from './decorators/render.decorator.ts';
 export * from './decorators/status_code.decorator.ts';
 export * from './decorators/transform.decorator.ts';
 export * from './decorators/use.decorator.ts';

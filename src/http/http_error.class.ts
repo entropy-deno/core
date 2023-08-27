@@ -9,7 +9,7 @@ export class HttpError extends Error {
     customMessage?: string,
   ) {
     const message = customMessage ??
-      Utils.enumKey(statusCode, HttpStatus).replace(
+      Utils.getEnumKey(statusCode, HttpStatus).replace(
         /([a-z])([A-Z])/g,
         '$1 $2',
       ) ??

@@ -54,14 +54,6 @@ export abstract class Utils {
     return this.deepMerge(target, ...elements);
   }
 
-  public static enumKey<TValue = string | number>(
-    value: TValue,
-    enumObject: Record<string, unknown>,
-  ): string {
-    return Object.keys(enumObject).find((key) => enumObject[key] === value) ??
-      '';
-  }
-
   public static escape(html: string) {
     return html.replace(
       /[&<>'"]/g,
@@ -77,6 +69,14 @@ export abstract class Utils {
         return entities[char as '&' | '<' | '>' | '"' | `'`];
       },
     );
+  }
+
+  public static getEnumKey<TValue = string | number>(
+    value: TValue,
+    enumObject: Record<string, unknown>,
+  ): string {
+    return Object.keys(enumObject).find((key) => enumObject[key] === value) ??
+      '';
   }
 
   public static range(start: number, end?: number) {

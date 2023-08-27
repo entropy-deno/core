@@ -63,7 +63,7 @@ export class Router {
   ): Promise<Response> {
     const payload = {
       statusCode,
-      message: Utils.enumKey(statusCode, HttpStatus).replace(
+      message: Utils.getEnumKey(statusCode, HttpStatus).replace(
         /([a-z])([A-Z])/g,
         '$1 $2',
       ) ??
@@ -321,7 +321,7 @@ export class Router {
   }
 
   private resolveRoutePath(basePath: RoutePath, path: RoutePath): RoutePath {
-    return path === '/'
+    return basePath === '/'
       ? path
       : `${basePath}${
         path[0] !== '/' && basePath.split('').pop() !== '/' ? '/' : ''
@@ -450,6 +450,7 @@ export class Router {
         redirectTo,
         statusCode,
         validationRules,
+        view,
       } = Reflector.getMetadata<
         Exclude<Route, 'action'>
       >('route', controllerMethod)!;
@@ -496,6 +497,10 @@ export class Router {
           'validationRules',
           controllerMethod,
         ) ?? validationRules,
+        view: Reflector.getMetadata<string>(
+          'view',
+          controllerMethod,
+        ) ?? view,
       });
     }
   }
@@ -522,6 +527,7 @@ export class Router {
             redirectTo,
             statusCode,
             validationRules,
+            view,
           },
         ] of this.routes
       ) {
@@ -543,6 +549,25 @@ export class Router {
           if (requestMethod === method && urlPattern.test(request.url)) {
             if (redirectTo) {
               return this.createRedirect(redirectTo);
+            }
+
+            if (view) {
+              const file = view.endsWith('.html') ? view : `${view}.html`;
+
+              try {
+                return await this.createResponse(
+                  request,
+                  await Deno.readTextFile(file),
+                );
+              } catch (error) {
+                if (!(error instanceof Deno.errors.NotFound)) {
+                  throw error;
+                }
+
+                throw new Error(
+                  `View '${file}' does not exist`,
+                );
+              }
             }
 
             if (validationRules) {
