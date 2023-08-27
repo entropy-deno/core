@@ -1,4 +1,4 @@
-import { resolve as resolvePath } from 'https://deno.land/std@0.199.0/path/mod.ts';
+import { resolve as resolvePath } from 'https://deno.land/std@0.200.0/path/mod.ts';
 import * as constants from '../constants.ts';
 import { TemplateCompilerOptions } from './interfaces/template_compiler_options.interface.ts';
 import { Configurator } from '../configurator/configurator.service.ts';

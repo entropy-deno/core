@@ -1,4 +1,4 @@
-import { assertEquals } from 'https://deno.land/std@0.199.0/assert/mod.ts';
+import { assertEquals } from 'https://deno.land/std@0.200.0/assert/mod.ts';
 import { Encrypter } from './encrypter.service.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 
