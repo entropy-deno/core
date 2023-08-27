@@ -320,6 +320,14 @@ export class Router {
     };
   }
 
+  private resolveRoutePath(basePath: RoutePath, path: RoutePath): RoutePath {
+    return path === '/'
+      ? path
+      : `${basePath}${
+        path[0] !== '/' && basePath.split('').pop() !== '/' ? '/' : ''
+      }${path}` as RoutePath;
+  }
+
   public createRedirect(
     destination: RedirectDestination,
     statusCode = HttpStatus.Found,
@@ -362,7 +370,7 @@ export class Router {
     ): MethodDecorator => {
       return (_target, _methodName, descriptor) => {
         Reflector.defineMetadata<Partial<Route>>(
-          'Route',
+          'route',
           {
             methods,
             path,
@@ -433,110 +441,61 @@ export class Router {
         continue;
       }
 
-      const { methods, path } = Reflector.getMetadata<
+      const {
+        headers,
+        methods,
+        middleware,
+        path,
+        paramPipes,
+        redirectTo,
+        statusCode,
+        validationRules,
+      } = Reflector.getMetadata<
         Exclude<Route, 'action'>
-      >(
-        'Route',
-        controllerMethod,
-      )!;
+      >('route', controllerMethod)!;
 
       const basePath =
         Reflector.getMetadata<RoutePath>('basePath', controller.prototype) ??
           '/';
-      const resolvedPath = `${basePath}${
-        path[0] !== '/' && basePath.split('').pop() !== '/' ? '/' : ''
-      }${path}` as RoutePath;
+
+      const resolvedPath = this.resolveRoutePath(basePath, path);
 
       this.registerRoute(resolvedPath, methods, async (...args: unknown[]) => {
-        const request = args[0] as HttpRequest;
-        const middleware = Reflector.getMetadata<Constructor<Middleware>[]>(
-          'middleware',
-          controllerMethod,
-        ) ?? [];
-
-        for (const middlewareHandler of middleware) {
-          const result = inject(middlewareHandler).handle();
-
-          return result instanceof Promise ? await result : result;
-        }
-
-        const redirectDestination = Reflector.getMetadata<RedirectDestination>(
-          'redirectDestination',
-          controllerMethod,
-        );
-
-        if (redirectDestination) {
-          return this.createRedirect(redirectDestination);
-        }
-
-        const validationRules = Reflector.getMetadata<
-          Record<string, Partial<ValidationRules> | Record<string, unknown>>
-        >(
-          'validationRules',
-          controllerMethod,
-        );
-
-        if (validationRules) {
-          const errors = await this.validator.validate(
-            validationRules,
-            request,
-          );
-
-          if (Object.keys(errors).length > 0) {
-            if (request.isAjax) {
-              return await this.createResponse(
-                request,
-                JSON.stringify({
-                  errors,
-                }),
-                {
-                  statusCode: HttpStatus.BadRequest,
-                  headers: {
-                    'content-type': 'application/json; charset=utf-8',
-                  },
-                },
-              );
-            }
-
-            if (!request.headers.get('referer')) {
-              throw new HttpError(HttpStatus.BadRequest);
-            }
-
-            return this.createRedirect(request.headers.get('referer') as Url);
-          }
-        }
-
-        const paramPipes = Reflector.getMetadata<
-          Record<string, Constructor<Pipe>>
-        >('paramPipes', controllerMethod);
-
-        const urlPattern = new URLPattern({
-          pathname: resolvedPath,
-        });
-
-        const paramGroups = urlPattern.exec(request.url)?.pathname.groups ?? {};
-
-        if (paramPipes) {
-          for (const [paramName, pipe] of Object.entries(paramPipes)) {
-            const transformed = inject(pipe).transform(
-              paramGroups[paramName] ?? '',
-            );
-
-            paramGroups[paramName] = transformed instanceof Promise
-              ? await transformed
-              : transformed;
-          }
-        }
-
         const methodResult = (inject(controller) as unknown as Record<
           string,
           (...args: unknown[]) => unknown
         >)
-          [controllerRouteMethod](request, ...Object.values(paramGroups));
+          [controllerRouteMethod](...args);
 
         return methodResult instanceof Promise
           ? await methodResult
           : methodResult;
+      }, {
+        headers: Reflector.getMetadata<Record<string, string>>(
+          'headers',
+          controllerMethod,
+        ) ?? headers,
+        middleware: Reflector.getMetadata<Constructor<Middleware>[]>(
+          'middleware',
+          controllerMethod,
+        ) ?? middleware,
+        paramPipes: Reflector.getMetadata<
+          Record<string, Constructor<Pipe>>
+        >('paramPipes', controllerMethod) ?? paramPipes,
+        redirectTo: Reflector.getMetadata<RedirectDestination>(
+          'redirectDestination',
+          controllerMethod,
+        ) ?? redirectTo,
+        statusCode: Reflector.getMetadata<HttpStatus>(
+          'statusCode',
+          controllerMethod,
+        ) ?? statusCode,
+        validationRules: Reflector.getMetadata<
+          Record<string, Partial<ValidationRules> | Record<string, unknown>>
+        >(
+          'validationRules',
+          controllerMethod,
+        ) ?? validationRules,
       });
     }
   }
@@ -551,9 +510,29 @@ export class Router {
     try {
       const requestMethod = await request.method();
 
-      for (const [path, { action, methods }] of this.routes) {
+      for (
+        const [
+          path,
+          {
+            action,
+            headers,
+            methods,
+            middleware,
+            paramPipes,
+            redirectTo,
+            statusCode,
+            validationRules,
+          },
+        ] of this.routes
+      ) {
         if (!methods.includes(requestMethod)) {
           continue;
+        }
+
+        for (const middlewareHandler of middleware ?? []) {
+          const result = inject(middlewareHandler).handle();
+
+          result instanceof Promise ? await result : result;
         }
 
         const urlPattern = new URLPattern({
@@ -562,13 +541,66 @@ export class Router {
 
         for (const method of methods) {
           if (requestMethod === method && urlPattern.test(request.url)) {
-            const resolvedParams = Object.values(
-              urlPattern.exec(request.url)?.pathname.groups ?? {},
-            );
+            if (redirectTo) {
+              return this.createRedirect(redirectTo);
+            }
+
+            if (validationRules) {
+              const errors = await this.validator.validate(
+                validationRules,
+                request,
+              );
+
+              if (Object.keys(errors).length > 0) {
+                if (request.isAjax) {
+                  return await this.createResponse(
+                    request,
+                    JSON.stringify({
+                      errors,
+                    }),
+                    {
+                      statusCode: HttpStatus.BadRequest,
+                      headers: {
+                        'content-type': 'application/json; charset=utf-8',
+                      },
+                    },
+                  );
+                }
+
+                if (!request.headers.get('referer')) {
+                  throw new HttpError(HttpStatus.BadRequest);
+                }
+
+                return this.createRedirect(
+                  request.headers.get('referer') as Url,
+                );
+              }
+            }
+
+            const paramGroups = urlPattern.exec(request.url)?.pathname.groups ??
+              {};
+
+            if (paramPipes) {
+              for (const [paramName, pipe] of Object.entries(paramPipes)) {
+                const transformed = inject(pipe).transform(
+                  paramGroups[paramName] ?? '',
+                );
+
+                paramGroups[paramName] = transformed instanceof Promise
+                  ? await transformed
+                  : transformed;
+              }
+            }
+
+            const resolvedParams = Object.values(paramGroups);
 
             return await this.createResponse(
               request,
               await action(request, ...resolvedParams),
+              {
+                headers,
+                statusCode,
+              },
             );
           }
         }
@@ -775,6 +807,15 @@ export class Router {
     options: RouteOptions = {},
   ): void {
     this.registerRoute(path, [HttpMethod.Unlock], action, options);
+  }
+
+  public methods(
+    methods: EnumValuesUnion<HttpMethod>[],
+    path: RoutePath,
+    action: (...args: unknown[]) => Promise<unknown>,
+    options: RouteOptions = {},
+  ): void {
+    this.registerRoute(path, methods, action, options);
   }
 
   public registerRoute(
