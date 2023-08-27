@@ -101,6 +101,8 @@ export const errorPage = `<!doctype html>
         }
       </style>
     [/raw]
+
+    [hotReload]
   </head>
 
   <body>
