@@ -1,7 +1,7 @@
+*.log
+*.sln
+*coverage
 .DS_Store
 .fleet
 .idea
 .vscode
-*.log
-*.sln
-*coverage
