@@ -23,7 +23,7 @@ export class Logger {
 
     const trimmedMessage = message.slice(
       0,
-      Deno.consoleSize().columns - outputWidth - 3,
+      Deno.consoleSize().columns - outputWidth - 1,
     ).replace(/(%c|%)$/, '');
 
     console.error(
@@ -55,7 +55,7 @@ export class Logger {
 
     const trimmedMessage = message.slice(
       0,
-      Deno.consoleSize().columns - outputWidth - 3,
+      Deno.consoleSize().columns - outputWidth - 1,
     ).replace(/(%c|%)$/, '');
 
     console.log(
@@ -121,7 +121,7 @@ export class Logger {
 
     const trimmedMessage = message.slice(
       0,
-      Deno.consoleSize().columns - outputWidth - 3,
+      Deno.consoleSize().columns - outputWidth - 1,
     ).replace(/(%c|%)$/, '');
 
     console.warn(
