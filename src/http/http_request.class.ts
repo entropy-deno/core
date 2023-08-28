@@ -112,7 +112,7 @@ export class HttpRequest {
   }
 
   public get protocol(): string {
-    return new URL(this.request.url).protocol;
+    return new URL(this.request.url).protocol.replace(':', '');
   }
 
   public queryParam(name: string): string | null {
