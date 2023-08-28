@@ -244,7 +244,7 @@ export class Router {
 
     try {
       const fileSize = (await Deno.stat(filePath)).size;
-      const body = (await Deno.open(filePath)).readable;
+      const body = await Deno.readFile(filePath);
 
       return await this.createResponse(request, body, {
         headers: {
@@ -306,7 +306,7 @@ export class Router {
       }
 
       default: {
-        if (body instanceof ReadableStream) {
+        if (body instanceof ReadableStream || body instanceof Uint8Array) {
           break;
         }
 
