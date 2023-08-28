@@ -216,25 +216,22 @@ export class Router {
       ...this.configurator.entries.seo.sitemapUrls,
     ].filter((path) => !path.includes(':'));
 
-    return await this.createResponse(
-      request,
-      `<?xml version="1.0" encoding="UTF-8"?>
-      <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-        ${
-        urls.map((url) =>
-          `<url>
-            <loc>${request.origin}${url}</loc>
-            <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-          </url>`
-        )
-      }
-      </urlset>`,
-      {
-        headers: {
-          'content-type': 'application/xml; charset=utf-8',
-        },
+    const xml = [
+      '<?xml version="1.0" encoding="UTF-8"?>',
+      '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+      ...urls.map((url) =>
+        `<url><loc>${request.origin}${url}</loc><lastmod>${
+          new Date().toISOString().split('T')[0]
+        }</lastmod></url>`
+      ),
+      '</urlset>',
+    ];
+
+    return await this.createResponse(request, xml.join('\n'), {
+      headers: {
+        'content-type': 'application/xml; charset=utf-8',
       },
-    );
+    });
   }
 
   private async createStaticFileResponse(
