@@ -169,7 +169,9 @@ export class Server {
 
       socket.onmessage = ({ data }) => {
         for (const channelListenerMethod of channelListenerMethods) {
-          const channelMethod = channel.prototype[channelListenerMethod];
+          const channelMethod = channel.prototype[channelListenerMethod] as (
+            payload: string,
+          ) => unknown;
 
           const channelName = Reflector.getMetadata<string>(
             'name',

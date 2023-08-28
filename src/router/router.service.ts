@@ -415,7 +415,10 @@ export class Router {
     });
 
     for (const controllerRouteMethod of controllerRouteMethods) {
-      const controllerMethod = controller.prototype[controllerRouteMethod];
+      const controllerInstance = inject(controller);
+      const controllerMethod = controller.prototype[controllerRouteMethod] as (
+        ...args: unknown[]
+      ) => unknown;
 
       const handler = Reflector.getMetadata<{ statusCode?: HttpStatus }>(
         'httpErrorHandler',
@@ -426,11 +429,10 @@ export class Router {
         this.customHttpHandlers.set(
           handler.statusCode,
           async (statusCode: HttpStatus) => {
-            const methodResult = (inject(controller) as unknown as Record<
-              string,
-              (...args: unknown[]) => unknown
-            >)
-              [controllerRouteMethod](statusCode);
+            const methodResult = controllerMethod.call(
+              controllerInstance,
+              statusCode,
+            );
 
             return methodResult instanceof Promise
               ? await methodResult
@@ -462,11 +464,7 @@ export class Router {
       const resolvedPath = this.resolveRoutePath(basePath, path);
 
       this.registerRoute(resolvedPath, methods, async (...args: unknown[]) => {
-        const methodResult = (inject(controller) as unknown as Record<
-          string,
-          (...args: unknown[]) => unknown
-        >)
-          [controllerRouteMethod](...args);
+        const methodResult = controllerMethod.call(controllerInstance, ...args);
 
         return methodResult instanceof Promise
           ? await methodResult
