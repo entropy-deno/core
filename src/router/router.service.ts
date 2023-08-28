@@ -26,8 +26,9 @@ import { Validator } from '../validator/validator.service.ts';
 import { ViewResponse } from '../http/view_response.class.ts';
 
 interface ResponseOptions {
-  headers: HeadersInit;
-  statusCode: HttpStatus;
+  cookies?: Record<string, string>;
+  headers?: HeadersInit;
+  statusCode?: HttpStatus;
 }
 
 type RouteDecoratorFunction<THttpMethods> = THttpMethods extends
@@ -91,7 +92,8 @@ export class Router {
   private async createResponse(
     request: HttpRequest,
     body: unknown,
-    { headers = {}, statusCode = HttpStatus.Ok }: Partial<ResponseOptions> = {},
+    { cookies = {}, headers = {}, statusCode = HttpStatus.Ok }:
+      ResponseOptions = {},
   ): Promise<Response> {
     const cspDirectives = ` ${
       this.configurator.entries.contentSecurityPolicy.allowedOrigins.join(' ')
@@ -177,7 +179,7 @@ export class Router {
       body,
     );
 
-    return new Response(parsedBody, {
+    const response = new Response(parsedBody, {
       status: statusCode,
       headers: {
         'content-type': `${contentType}; charset=utf-8`,
@@ -185,6 +187,17 @@ export class Router {
         ...headers,
       },
     });
+
+    for (const [cookie, cookieValue] of Object.entries(cookies)) {
+      response.headers.append(
+        'set-cookie',
+        `${cookie}=${cookieValue}; secure; max-age=${
+          this.configurator.entries.cookies.maxAge * 24 * 3600
+        }`,
+      );
+    }
+
+    return response;
   }
 
   private async createSeoRobotsFile(request: HttpRequest): Promise<Response> {
@@ -441,6 +454,7 @@ export class Router {
       }
 
       const {
+        cookies,
         headers,
         methods,
         middleware,
@@ -467,6 +481,10 @@ export class Router {
           ? await methodResult
           : methodResult;
       }, {
+        cookies: Reflector.getMetadata<Record<string, string>>(
+          'cookies',
+          controllerMethod,
+        ) ?? cookies,
         headers: Reflector.getMetadata<Record<string, string>>(
           'headers',
           controllerMethod,
@@ -515,6 +533,7 @@ export class Router {
           path,
           {
             action,
+            cookies,
             headers,
             methods,
             middleware,
@@ -553,6 +572,11 @@ export class Router {
                 return await this.createResponse(
                   request,
                   await Deno.readTextFile(file),
+                  {
+                    cookies,
+                    headers,
+                    statusCode,
+                  },
                 );
               } catch (error) {
                 if (!(error instanceof Deno.errors.NotFound)) {
@@ -618,6 +642,7 @@ export class Router {
               request,
               await action(request, ...resolvedParams),
               {
+                cookies,
                 headers,
                 statusCode,
               },

@@ -10,6 +10,9 @@ export class Configurator {
       allowInlineStyles: true,
       allowedOrigins: [],
     },
+    cookies: {
+      maxAge: this.getEnv<number>('COOKIE_MAX_AGE') ?? 30,
+    },
     cors: {
       allowCredentials: false,
       allowedHeaders: [],

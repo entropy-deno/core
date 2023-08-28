@@ -8,6 +8,9 @@ export interface AppConfig {
     allowInlineStyles: boolean;
     allowedOrigins: string[];
   };
+  cookies: {
+    maxAge: number;
+  };
   cors: {
     allowCredentials: boolean;
     allowedHeaders: string[];

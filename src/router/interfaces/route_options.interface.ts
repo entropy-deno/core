@@ -6,6 +6,7 @@ import { RedirectDestination } from '../types/redirect_destination.type.ts';
 import { ValidationRules } from '../../validator/interfaces/validation_rules.interface.ts';
 
 export interface RouteOptions {
+  cookies?: Record<string, string>;
   headers?: Record<string, string>;
   middleware?: Constructor<Middleware>[];
   name?: string;
