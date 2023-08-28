@@ -7,6 +7,7 @@ export class HttpError extends Error {
   constructor(
     public readonly statusCode = HttpStatus.NotFound,
     customMessage?: string,
+    options: ErrorOptions = {},
   ) {
     const message = customMessage ??
       Utils.getEnumKey(statusCode, HttpStatus).replace(
@@ -15,7 +16,7 @@ export class HttpError extends Error {
       ) ??
       'Error';
 
-    super(message);
+    super(message, options);
 
     this.message = message;
   }
