@@ -139,6 +139,10 @@ export class HttpRequest {
     return this.request.referrerPolicy;
   }
 
+  public get searchString(): string {
+    return new URL(this.request.url).search;
+  }
+
   public get url(): string {
     return this.request.url;
   }

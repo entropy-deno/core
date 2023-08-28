@@ -79,16 +79,26 @@ export class Logger {
       return;
     }
 
+    const maxMessageLength = Deno.consoleSize().columns -
+      (additionalInfo?.length ?? 0) - badge.length - 2;
+
+    const trimmedMessage = message.slice(0, maxMessageLength);
+    const exceedsSpace = message.replaceAll('%c', '').length > maxMessageLength;
+
+    const dotsLength = exceedsSpace ? 0 : Deno.consoleSize().columns -
+      trimmedMessage.replaceAll('%c', '').length -
+      (additionalInfo?.length ?? 0) -
+      badge.length - this.rightPadding;
+
     const output = `%c${badge[0]?.toUpperCase() ?? ''}${
       badge.slice(1) ?? ''
-    } %c${message}${
+    } %c${trimmedMessage}${exceedsSpace ? '...' : ''}${
       additionalInfo
         ? ` %c${
-          this.configurator.entries.isDenoDeploy ? '•' : '.'.repeat(
-            Deno.consoleSize().columns - message.replaceAll('%c', '').length -
-              additionalInfo.length - badge.length - this.rightPadding,
-          )
-        } ${additionalInfo}`
+          this.configurator.entries.isDenoDeploy
+            ? '• '
+            : (dotsLength > 0 ? `${'.'.repeat(dotsLength)} ` : '')
+        }${additionalInfo}`
         : ''
     }`;
 

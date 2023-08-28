@@ -127,11 +127,10 @@ export class Server {
         break;
     }
 
-    const path = richRequest.path.substring(0, 40);
     const responseTime = (performance.now() - performanceTimerStart).toFixed(1);
 
     this.logger.log(
-      `%c[${status}] %c${path}`,
+      `%c[${status}] %c${richRequest.path}${richRequest.searchString}`,
       {
         additionalInfo: `${responseTime}ms`,
         badge: 'Request',
