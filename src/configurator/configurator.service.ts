@@ -4,7 +4,7 @@ import { EnvVariable } from './types/env_variable.type.ts';
 import { Utils } from '../utils/utils.class.ts';
 
 export class Configurator {
-  private options: AppConfig = {
+  private configuration: AppConfig = {
     contentSecurityPolicy: {
       allowInlineScripts: false,
       allowInlineStyles: true,
@@ -49,16 +49,36 @@ export class Configurator {
     webSocket: true,
   };
 
+  private validateConfiguration(): void {
+    if (this.configuration.cookies.maxAge < 0) {
+      throw new Error('Cookie max age must be greater than 0');
+    }
+
+    if (!/^[a-z]{2}(-[A-Z]{2})?$/.test(this.configuration.defaultLocale)) {
+      throw new Error(`App locale must follow the format 'xx' or 'xx-XX'`);
+    }
+
+    if (
+      this.configuration.envFile &&
+      !/^\.[a-z_\.\-]*?$/.test(this.configuration.envFile)
+    ) {
+      throw new Error('Invalid dotenv file name');
+    }
+  }
+
   public all(): AppConfig {
     return this.entries;
   }
 
   public get entries(): AppConfig {
-    return this.options;
+    return this.configuration;
   }
 
-  public get<TValue = string>(option: string, defaultValue: TValue): TValue {
-    return this.options[option as keyof AppConfig] as TValue ??
+  public get<TValue = string>(
+    entry: keyof AppConfig,
+    defaultValue: TValue,
+  ): TValue {
+    return this.configuration[entry] as TValue ??
       defaultValue;
   }
 
@@ -76,7 +96,9 @@ export class Configurator {
     }
   }
 
-  public setup(options: DeepPartial<AppConfig> = {}): void {
-    this.options = Utils.deepMerge(this.options, options);
+  public setup(configuration: DeepPartial<AppConfig> = {}): void {
+    this.configuration = Utils.deepMerge(this.configuration, configuration);
+
+    this.validateConfiguration();
   }
 }
