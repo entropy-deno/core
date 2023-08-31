@@ -74,17 +74,30 @@ export class TemplateCompiler {
               const content = await Deno.readTextFile(path);
 
               switch (file.split('.').pop()) {
+                case 'css':
+                  result += `<style>${
+                    minify
+                      ? content.replaceAll(/[\n\t]/g, '').replaceAll('\r\n', '')
+                      : content
+                  }</style>`;
+
+                  break;
+
                 case 'js':
                   result += `<script>${
-                    minify ? content.replaceAll(/[\n\r\n\t]/g, '') : content
+                    minify
+                      ? content.replaceAll(/[\n\t]/g, '').replaceAll('\r\n', '')
+                      : content
                   }</script>`;
 
                   break;
 
-                case 'css':
-                  result += `<style>${
-                    minify ? content.replaceAll(/[\n\r\n\t]/g, '') : content
-                  }</style>`;
+                case 'svg':
+                  result += `${
+                    minify
+                      ? content.replaceAll(/[\n\t]/g, '').replaceAll('\r\n', '')
+                      : content
+                  }`;
 
                   break;
               }
