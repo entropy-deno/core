@@ -52,7 +52,7 @@ export class Router {
 
   private readonly errorHandler = inject(ErrorHandler);
 
-  private readonly routes = new Map<string, Route>();
+  private readonly routes: Route[] = [];
 
   private readonly templateCompiler = inject(TemplateCompiler);
 
@@ -240,7 +240,7 @@ export class Router {
     ];
 
     const urls = [
-      ...this.routes.keys(),
+      ...this.routes.map(({ path }) => path),
       ...this.configurator.entries.seo.sitemapUrls,
     ].filter((path) =>
       directUrlInvalidChars.every((char) =>
@@ -372,14 +372,17 @@ export class Router {
       );
     }
 
-    for (const [path, routeData] of this.routes.entries()) {
-      if (routeData.name === destination.name) {
+    for (const { name, path } of this.routes) {
+      if (name === destination.name) {
         let resolvedPath = path;
 
         for (
           const [param, paramValue] of Object.entries(destination.params ?? {})
         ) {
-          resolvedPath = resolvedPath.replace(`:${param}`, paramValue);
+          resolvedPath = resolvedPath.replace(
+            `:${param}`,
+            paramValue,
+          ) as RoutePath;
         }
 
         return Response.redirect(resolvedPath, statusCode);
@@ -548,21 +551,19 @@ export class Router {
       const requestMethod = await request.method();
 
       for (
-        const [
+        const {
+          action,
+          cookies,
+          headers,
+          methods,
+          middleware,
+          paramPipes,
           path,
-          {
-            action,
-            cookies,
-            headers,
-            methods,
-            middleware,
-            paramPipes,
-            redirectTo,
-            statusCode,
-            validationRules,
-            view,
-          },
-        ] of this.routes
+          redirectTo,
+          statusCode,
+          validationRules,
+          view,
+        } of this.routes
       ) {
         if (!methods.includes(requestMethod)) {
           continue;
@@ -888,7 +889,7 @@ export class Router {
     action: (...args: unknown[]) => Promise<unknown>,
     options: RouteOptions = {},
   ): void {
-    this.routes.set(path, {
+    this.routes.push({
       action,
       methods,
       path,
