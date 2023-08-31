@@ -1,5 +1,6 @@
 import { resolve as resolvePath } from 'https://deno.land/std@0.200.0/path/mod.ts';
 import * as constants from '../constants.ts';
+import { HttpMethod } from '../http/enums/http_method.enum.ts';
 import { TemplateCompilerOptions } from './interfaces/template_compiler_options.interface.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
 import { env } from '../configurator/functions/env.function.ts';
@@ -140,13 +141,21 @@ export class TemplateCompiler {
         name: 'json',
         type: 'single',
         render: (data: unknown, prettyPrint = false) => {
-          return JSON.stringify(data, undefined, prettyPrint ? 2 : 0);
+          try {
+            return JSON.stringify(data, undefined, prettyPrint ? 2 : 0);
+          } catch {
+            throw new Error(`Invalid JSON data '${String(data).slice(0, 32)}'`);
+          }
         },
       },
       {
         name: 'method',
         type: 'single',
         render: (method: string) => {
+          if (!([...Object.values(HttpMethod)] as string[]).includes(method)) {
+            throw new Error(`Unsupported HTTP method '${method}'`);
+          }
+
           method = method.toUpperCase();
 
           return `<input type="hidden" name="_method" value="${method}">`;
