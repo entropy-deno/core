@@ -224,10 +224,29 @@ export class Router {
   }
 
   private async createSeoSitemapFile(request: HttpRequest): Promise<Response> {
+    const directUrlInvalidChars = [
+      '\\',
+      ':',
+      '?',
+      '*',
+      '^',
+      '$',
+      '(',
+      ')',
+      '[',
+      ']',
+      '{',
+      '}',
+    ];
+
     const urls = [
       ...this.routes.keys(),
       ...this.configurator.entries.seo.sitemapUrls,
-    ].filter((path) => !path.includes(':'));
+    ].filter((path) =>
+      directUrlInvalidChars.every((char) =>
+        !path.includes(char) || path.includes(`\\${char}`)
+      )
+    );
 
     const xml = [
       '<?xml version="1.0" encoding="UTF-8"?>',
