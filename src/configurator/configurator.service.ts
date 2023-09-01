@@ -33,8 +33,9 @@ export class Configurator {
     logger: true,
     port: this.getEnv<number>('PORT') ?? 5050,
     seo: {
-      robots: true,
-      sitemap: true,
+      robots: false,
+      sitemap: false,
+      sitemapExcludeUrls: [],
       sitemapUrls: [],
     },
     templateDirectives: [],

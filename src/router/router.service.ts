@@ -242,11 +242,11 @@ export class Router {
     const urls = [
       ...this.routes.map(({ path }) => path),
       ...this.configurator.entries.seo.sitemapUrls,
-    ].filter((path) =>
-      directUrlInvalidChars.every((char) =>
+    ].filter((path) => {
+      return directUrlInvalidChars.every((char) =>
         !path.includes(char) || path.includes(`\\${char}`)
-      )
-    );
+      ) && !this.configurator.entries.seo.sitemapExcludeUrls.includes(path);
+    });
 
     const xml = [
       '<?xml version="1.0" encoding="UTF-8"?>',

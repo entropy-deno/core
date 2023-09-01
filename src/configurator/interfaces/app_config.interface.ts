@@ -32,6 +32,7 @@ export interface AppConfig {
   seo: {
     robots: boolean;
     sitemap: boolean;
+    sitemapExcludeUrls: RoutePath[];
     sitemapUrls: RoutePath[];
   };
   templateDirectives: TemplateDirectiveDefinition[];
