@@ -45,6 +45,7 @@ export class ErrorHandler {
     this.currentLine = +(fileMatch[1]?.match(/(.*):(.*):(.*)/)?.[2] ?? 1);
 
     this.currentStack = stack.split('\n').slice(1).map((line) => line.trim())
+      .slice(0, 4)
       .join(
         '\n',
       ).replace(/\n.*$/, '');

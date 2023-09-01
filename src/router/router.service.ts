@@ -721,12 +721,17 @@ export class Router {
         );
       }
 
+      const stackTrace = (error as Error).stack?.split('\n').map((line) =>
+        line.trim().replace('at ', '')
+      ).filter((line) => !line.startsWith('file')).slice(1, 3);
+
       return await this.createResponse(
         request,
         await this.templateCompiler.render(
           errorPage,
           {
             error,
+            stackTrace,
           },
           {},
           request,

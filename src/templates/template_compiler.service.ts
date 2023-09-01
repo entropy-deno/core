@@ -310,7 +310,8 @@ export class TemplateCompiler {
   }
 
   private parseDataInterpolations(): void {
-    const matches = this.currentTemplate.matchAll(/\{\{(#|@?)(.*?)\}\}/g) ?? [];
+    const matches =
+      this.currentTemplate.matchAll(/\{\{(#|@?)((.|\s)*?)\}\}/gm) ?? [];
 
     for (const [wholeMatch, modifier, matchValue] of matches) {
       if (modifier === '@') {
@@ -321,7 +322,7 @@ export class TemplateCompiler {
 
       const renderedExpression = this.renderNatively(
         `
-        const expression = typeof ${value} === 'object'
+        const expression = typeof (${value}) === 'object'
           ? JSON.stringify(${value})
           : String(${value});
 
