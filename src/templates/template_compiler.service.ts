@@ -59,13 +59,12 @@ export class TemplateCompiler {
           let result = '';
 
           for (const file of files) {
-            if (!file.endsWith('.js') && !file.endsWith('.css')) {
+            if (
+              !file.endsWith('.css') && !file.endsWith('.js') &&
+              !file.endsWith('.svg')
+            ) {
               throw new Error(
-                `Unsupported file extension '.${
-                  file
-                    .split('.')
-                    .pop()
-                }' for embedded file`,
+                `Unsupported file extension of embedded file '${file}'`,
               );
             }
 
@@ -292,7 +291,7 @@ export class TemplateCompiler {
       $request: this.currentRequest,
       ...Object.keys(constants).reduce((result, key) => ({
         ...result,
-        [`$${key}`]: (constants)[key as keyof typeof constants],
+        [`$${key}`]: constants[key as keyof typeof constants],
       }), {}),
       ...this.currentVariables,
       ...this.functions,
