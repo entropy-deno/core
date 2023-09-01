@@ -292,7 +292,7 @@ export class TemplateCompiler {
       $request: this.currentRequest,
       ...Object.keys(constants).reduce((result, key) => ({
         ...result,
-        [`$${key}`]: (constants as Record<string, unknown>)[key],
+        [`$${key}`]: (constants)[key as keyof typeof constants],
       }), {}),
       ...this.currentVariables,
       ...this.functions,
