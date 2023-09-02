@@ -1,4 +1,4 @@
-import { contentType } from 'https://deno.land/std@0.200.0/media_types/content_type.ts';
+import { contentType } from 'https://deno.land/std@0.201.0/media_types/content_type.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
 import { Constructor } from '../utils/interfaces/constructor.interface.ts';
 import { Controller } from '../http/controller.class.ts';
