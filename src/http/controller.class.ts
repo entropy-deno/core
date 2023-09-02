@@ -4,7 +4,7 @@ import { TemplateCompilerOptions } from '../templates/interfaces/template_compil
 import { RedirectDestination } from '../router/types/redirect_destination.type.ts';
 import { Router } from '../router/router.service.ts';
 import { Utils } from '../utils/utils.class.ts';
-import { ViewResponse } from './view_response.class.ts';
+import { View } from '../templates/view.class.ts';
 
 export abstract class Controller {
   protected redirectResponse(
@@ -28,7 +28,7 @@ export abstract class Controller {
     }
 
     try {
-      return new ViewResponse(file, variables, options);
+      return new View(file, variables, options);
     } catch (error) {
       if (!(error instanceof Deno.errors.NotFound)) {
         throw error;

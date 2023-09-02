@@ -23,7 +23,7 @@ import { Url } from './types/url.type.ts';
 import { Utils } from '../utils/utils.class.ts';
 import { ValidationRules } from '../validator/interfaces/validation_rules.interface.ts';
 import { Validator } from '../validator/validator.service.ts';
-import { ViewResponse } from '../http/view_response.class.ts';
+import { View } from '../templates/view.class.ts';
 
 interface ResponseOptions {
   cookies?: Record<string, string>;
@@ -308,14 +308,14 @@ export class Router {
         break;
       }
 
-      case body instanceof ViewResponse: {
-        const template = await (body as ViewResponse).template();
+      case body instanceof View: {
+        const template = await (body as View).template();
         const compiledTemplate = await this.templateCompiler.render(
           template,
-          (body as ViewResponse).variables,
+          (body as View).variables,
           {
-            file: (body as ViewResponse).file,
-            ...(body as ViewResponse).options,
+            file: (body as View).file,
+            ...(body as View).options,
           },
           request,
         );

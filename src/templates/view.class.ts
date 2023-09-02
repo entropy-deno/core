@@ -1,6 +1,6 @@
-import { TemplateCompilerOptions } from '../templates/interfaces/template_compiler_options.interface.ts';
+import { TemplateCompilerOptions } from './interfaces/template_compiler_options.interface.ts';
 
-export class ViewResponse {
+export class View {
   constructor(
     public readonly file: string,
     public readonly variables: Record<string, unknown> = {},

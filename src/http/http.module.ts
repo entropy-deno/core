@@ -22,4 +22,3 @@ export * from './pipes/json.pipe.ts';
 export * from './pipes/lowercase.pipe.ts';
 export * from './pipes/number.pipe.ts';
 export * from './pipes/uppercase.pipe.ts';
-export * from './view_response.class.ts';
