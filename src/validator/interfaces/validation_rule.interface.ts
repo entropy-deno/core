@@ -1,4 +1,4 @@
-export interface ValidationRuleDefinition {
+export interface ValidationRule {
   name: string;
   errorMessage: string;
   validate: (

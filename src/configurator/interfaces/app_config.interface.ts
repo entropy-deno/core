@@ -1,6 +1,6 @@
 import { RoutePath } from '../../router/types/route_path.type.ts';
-import { TemplateDirectiveDefinition } from '../../templates/interfaces/template_directive_definition.interface.ts';
-import { ValidationRuleDefinition } from '../../validator/interfaces/validation_rule_definition.interface.ts';
+import { TemplateDirective } from '../../templates/interfaces/template_directive.interface.ts';
+import { ValidationRule } from '../../validator/interfaces/validation_rule.interface.ts';
 
 export interface AppConfig {
   contentSecurityPolicy: {
@@ -35,7 +35,7 @@ export interface AppConfig {
     sitemapExcludeUrls: RoutePath[];
     sitemapUrls: RoutePath[];
   };
-  templateDirectives: TemplateDirectiveDefinition[];
+  templateDirectives: TemplateDirective[];
   tls: {
     cert: string | false;
     certFile: string | false;
@@ -43,6 +43,6 @@ export interface AppConfig {
     key: string | false;
     keyFile: string | false;
   };
-  validatorRules: ValidationRuleDefinition[];
+  validatorRules: ValidationRule[];
   webSocket: boolean;
 }

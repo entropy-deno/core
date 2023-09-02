@@ -21,7 +21,7 @@ import { statusPage } from '../http/pages/status.page.ts';
 import { TemplateCompiler } from '../templates/template_compiler.service.ts';
 import { Url } from './types/url.type.ts';
 import { Utils } from '../utils/utils.class.ts';
-import { ValidationRules } from '../validator/interfaces/validation_rules.interface.ts';
+import { ValidationRulesList } from '../validator/interfaces/validation_rules_list.interface.ts';
 import { Validator } from '../validator/validator.service.ts';
 import { View } from '../templates/view.class.ts';
 
@@ -527,7 +527,7 @@ export class Router {
           controllerMethod,
         ) ?? statusCode,
         validationRules: Reflector.getMetadata<
-          Record<string, Partial<ValidationRules> | Record<string, unknown>>
+          Record<string, Partial<ValidationRulesList> | Record<string, unknown>>
         >(
           'validationRules',
           controllerMethod,

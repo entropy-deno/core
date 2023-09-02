@@ -36,13 +36,13 @@ export class ErrorHandler {
       whereThrown.length,
     );
 
-    const fileMatch = thrownAt?.match(/\(file:\/\/(.*?)\)/) ?? [];
+    const file = thrownAt?.match(/\(file:\/\/(.*?)\)/)?.[1];
 
-    this.currentFile = fileMatch[1]
-      ? fromFileUrl(`file://${fileMatch[1]}`).split(':')[0]
+    this.currentFile = file
+      ? fromFileUrl(`file://${file}`).split(':')[0]
       : this.defaultFile;
 
-    this.currentLine = +(fileMatch[1]?.match(/(.*):(.*):(.*)/)?.[2] ?? 1);
+    this.currentLine = Number(file?.match(/(.*):(.*):(.*)/)?.[2] ?? 1);
 
     this.currentStack = stack.split('\n').slice(1).map((line) => line.trim())
       .slice(0, 4)

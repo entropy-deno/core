@@ -6,20 +6,17 @@ import { Configurator } from '../configurator/configurator.service.ts';
 import { env } from '../configurator/functions/env.function.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { HttpRequest } from '../http/http_request.class.ts';
-import {
-  TemplateDirectiveDefinition,
-} from './interfaces/template_directive_definition.interface.ts';
+import { TemplateDirective } from './interfaces/template_directive.interface.ts';
 import { translate } from '../localizator/functions/translate.function.ts';
 import { Utils } from '../utils/utils.class.ts';
 
 export class TemplateCompiler {
   private readonly configurator = inject(Configurator);
 
-  private directives: TemplateDirectiveDefinition[] = [];
+  private directives: TemplateDirective[] = [];
 
   private readonly functions = {
     '__': translate,
-    '$': translate,
     '$env': env,
     '$escape': Utils.escape,
     '$inject': inject,
@@ -76,27 +73,21 @@ export class TemplateCompiler {
               switch (file.split('.').pop()) {
                 case 'css':
                   result += `<style>${
-                    minify
-                      ? content.replaceAll(/[\n\t]/g, '').replaceAll('\r\n', '')
-                      : content
+                    minify ? content.replaceAll(/\n|\t|(\r\n)/g, '') : content
                   }</style>`;
 
                   break;
 
                 case 'js':
                   result += `<script>${
-                    minify
-                      ? content.replaceAll(/[\n\t]/g, '').replaceAll('\r\n', '')
-                      : content
+                    minify ? content.replaceAll(/\n|\t|(\r\n)/g, '') : content
                   }</script>`;
 
                   break;
 
                 case 'svg':
                   result += `${
-                    minify
-                      ? content.replaceAll(/[\n\t]/g, '').replaceAll('\r\n', '')
-                      : content
+                    minify ? content.replaceAll(/\n|\t|(\r\n)/g, '') : content
                   }`;
 
                   break;
@@ -139,11 +130,11 @@ export class TemplateCompiler {
       {
         name: 'json',
         type: 'single',
-        render: (data: unknown, prettyPrint = false) => {
+        render: (json: unknown, prettyPrint = false) => {
           try {
-            return JSON.stringify(data, undefined, prettyPrint ? 2 : 0);
+            return JSON.stringify(json, undefined, prettyPrint ? 2 : 0);
           } catch {
-            throw new Error(`Invalid JSON data '${String(data).slice(0, 32)}'`);
+            throw new Error(`Invalid JSON data '${String(json).slice(0, 32)}'`);
           }
         },
       },
@@ -631,11 +622,11 @@ export class TemplateCompiler {
     return compiledTemplate;
   }
 
-  public registerDirective(directive: TemplateDirectiveDefinition): void {
+  public registerDirective(directive: TemplateDirective): void {
     this.directives.push(directive);
   }
 
-  public registerDirectives(directives: TemplateDirectiveDefinition[]): void {
+  public registerDirectives(directives: TemplateDirective[]): void {
     for (const directive of directives) {
       this.registerDirective(directive);
     }

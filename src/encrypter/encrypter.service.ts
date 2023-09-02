@@ -50,7 +50,8 @@ export class Encrypter {
     const keyBuffer = this.encoder.encode(
       this.configurator.entries.encryption.key,
     );
-    const dataBuffer = this.encoder.encode(plainText);
+
+    const buffer = this.encoder.encode(plainText);
 
     const hmacKey = await crypto.subtle.importKey(
       'raw',
@@ -60,7 +61,7 @@ export class Encrypter {
       ['sign'],
     );
 
-    const signature = await crypto.subtle.sign('HMAC', hmacKey, dataBuffer);
+    const signature = await crypto.subtle.sign('HMAC', hmacKey, buffer);
 
     return [...new Uint8Array(signature)].map((byte) =>
       byte.toString(16).padStart(2, '0')

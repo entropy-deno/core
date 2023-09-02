@@ -2,15 +2,15 @@ import { Configurator } from '../configurator/configurator.service.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { Localizator } from '../localizator/localizator.service.ts';
 import { HttpRequest } from '../http/http_request.class.ts';
-import { ValidationRuleDefinition } from './interfaces/validation_rule_definition.interface.ts';
-import { ValidationRules } from './interfaces/validation_rules.interface.ts';
+import { ValidationRule } from './interfaces/validation_rule.interface.ts';
+import { ValidationRulesList } from './interfaces/validation_rules_list.interface.ts';
 
 export class Validator {
   private readonly configurator = inject(Configurator);
 
   private readonly localizator = inject(Localizator);
 
-  private readonly rules: ValidationRuleDefinition[] = [];
+  private readonly rules: ValidationRule[] = [];
 
   constructor() {
     this.rules = [
@@ -277,18 +277,21 @@ export class Validator {
     ];
   }
 
-  public registerRule(rule: ValidationRuleDefinition): void {
+  public registerRule(rule: ValidationRule): void {
     this.rules.push(rule);
   }
 
-  public registerRules(rules: ValidationRuleDefinition[]): void {
+  public registerRules(rules: ValidationRule[]): void {
     for (const rule of rules) {
       this.registerRule(rule);
     }
   }
 
   public async validate(
-    rules: Record<string, Partial<ValidationRules> | Record<string, unknown>>,
+    rules: Record<
+      string,
+      Partial<ValidationRulesList> | Record<string, unknown>
+    >,
     request: HttpRequest,
   ): Promise<Record<string, string[]>> {
     const errors: Record<string, string[]> = {};

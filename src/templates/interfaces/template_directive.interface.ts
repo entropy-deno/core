@@ -1,4 +1,4 @@
-export interface TemplateDirectiveDefinition {
+export interface TemplateDirective {
   name: string;
   type: 'block' | 'single';
   pattern?: RegExp;
