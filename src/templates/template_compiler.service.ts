@@ -8,6 +8,7 @@ import { inject } from '../injector/functions/inject.function.ts';
 import { HttpRequest } from '../http/http_request.class.ts';
 import { TemplateDirective } from './interfaces/template_directive.interface.ts';
 import { translate } from '../localizator/functions/translate.function.ts';
+import { url } from '../router/functions/url.function.ts';
 import { Utils } from '../utils/utils.class.ts';
 
 export class TemplateCompiler {
@@ -22,6 +23,7 @@ export class TemplateCompiler {
     '$inject': inject,
     '$range': Utils.range,
     '$translate': translate,
+    '$url': url,
   };
 
   private currentRawContent: string[] = [];

@@ -18,6 +18,7 @@ import { TemplateCompiler } from '../templates/template_compiler.service.ts';
 import { Utils } from '../utils/utils.class.ts';
 import { Validator } from '../validator/validator.service.ts';
 import { WebClientAlias } from './enums/web_client_alias.enum.ts';
+import { url } from '@entropy';
 
 export class Server {
   private readonly configurator = inject(Configurator);
@@ -232,9 +233,7 @@ export class Server {
             ] ??
               'open'
           }`,
-          [`${
-            this.configurator.entries.tls.enabled ? 'https' : 'http'
-          }://${this.configurator.entries.host}:${this.configurator.entries.port}`],
+          [url()],
         );
       } finally {
         localStorage.setItem(this.devServerCheckKey, 'on');
@@ -327,9 +326,7 @@ export class Server {
                 `HTTP server is running on ${
                   this.configurator.entries.isProduction
                     ? `port %c${this.configurator.entries.port}`
-                    : `%c${
-                      this.configurator.entries.tls.enabled ? 'https' : 'http'
-                    }://${this.configurator.entries.host}:${this.configurator.entries.port}`
+                    : `%c${url()}`
                 } %c[${Deno.build.os === 'darwin' ? '⌃C' : 'Ctrl+C'} to quit]`,
                 {
                   badge: 'Server',

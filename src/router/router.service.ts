@@ -20,6 +20,7 @@ import { RoutePath } from './types/route_path.type.ts';
 import { statusPage } from '../http/pages/status.page.ts';
 import { TemplateCompiler } from '../templates/template_compiler.service.ts';
 import { Url } from './types/url.type.ts';
+import { url } from './functions/url.function.ts';
 import { Utils } from '../utils/utils.class.ts';
 import { ValidationRulesList } from '../validator/interfaces/validation_rules_list.interface.ts';
 import { Validator } from '../validator/validator.service.ts';
@@ -363,11 +364,7 @@ export class Router {
   ): Response {
     if (typeof destination === 'string') {
       return Response.redirect(
-        destination[0] === '/'
-          ? `${
-            this.configurator.entries.tls.enabled ? 'https' : 'http'
-          }://${this.configurator.entries.host}:${this.configurator.entries.port}${destination}`
-          : destination,
+        destination[0] === '/' ? url(destination) : destination,
         statusCode,
       );
     }
@@ -390,6 +387,16 @@ export class Router {
     }
 
     throw new Error(`Invalid named route '${destination.name}'`);
+  }
+
+  public namedRoutePath(name: string): RoutePath {
+    for (const route of this.routes) {
+      if (route.name === name) {
+        return route.path;
+      }
+    }
+
+    throw new Error(`Invalid named route '${name}'`);
   }
 
   public createRouteDecorator<
