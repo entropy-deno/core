@@ -20,7 +20,6 @@ import { RoutePath } from './types/route_path.type.ts';
 import { statusPage } from '../http/pages/status.page.ts';
 import { TemplateCompiler } from '../templates/template_compiler.service.ts';
 import { Url } from './types/url.type.ts';
-import { url } from './functions/url.function.ts';
 import { Utils } from '../utils/utils.class.ts';
 import { ValidationRulesList } from '../validator/interfaces/validation_rules_list.interface.ts';
 import { Validator } from '../validator/validator.service.ts';
@@ -364,7 +363,7 @@ export class Router {
   ): Response {
     if (typeof destination === 'string') {
       return Response.redirect(
-        destination[0] === '/' ? url(destination) : destination,
+        destination[0] === '/' ? this.routeUrl(destination as RoutePath) : destination,
         statusCode,
       );
     }
@@ -387,16 +386,6 @@ export class Router {
     }
 
     throw new Error(`Invalid named route '${destination.name}'`);
-  }
-
-  public namedRoutePath(name: string): RoutePath {
-    for (const route of this.routes) {
-      if (route.name === name) {
-        return route.path;
-      }
-    }
-
-    throw new Error(`Invalid named route '${name}'`);
   }
 
   public createRouteDecorator<
@@ -748,6 +737,28 @@ export class Router {
         },
       );
     }
+  }
+
+  public routeUrl(route?: RoutePath | { name: string }): Url {
+    let namedRoutePath = '';
+
+    if (typeof route === 'string') {
+      for (const route of this.routes) {
+        if (route.name === route.name) {
+          namedRoutePath = route.path;
+        }
+      }
+    }
+
+    return `${
+      this.configurator.entries.tls.enabled ? 'https' : 'http'
+    }://${this.configurator.entries.host}${
+      this.configurator.entries.isProduction
+        ? ''
+        : `:${this.configurator.entries.port}`
+    }${!route || typeof route === 'string' && route[0] === '/' ? '' : '/'}${
+      typeof route === 'string' || !route ? route ?? '' : namedRoutePath
+    }`;
   }
 
   public any(
