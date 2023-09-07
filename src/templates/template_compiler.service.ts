@@ -314,9 +314,13 @@ export class TemplateCompiler {
 
       const renderedExpression = this.renderNatively(
         `
-        const expression = typeof (${value}) === 'object'
+        let expression = typeof (${value}) === 'object'
           ? JSON.stringify(${value})
           : String(${value});
+
+        if (expression instanceof Promise) {
+          expression = await expression;
+        }
 
         return ${modifier === '#' ? true : false}
           ? expression

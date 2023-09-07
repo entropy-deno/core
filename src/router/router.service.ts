@@ -363,7 +363,9 @@ export class Router {
   ): Response {
     if (typeof destination === 'string') {
       return Response.redirect(
-        destination[0] === '/' ? this.routeUrl(destination as RoutePath) : destination,
+        destination[0] === '/'
+          ? this.routeUrl(destination as RoutePath)
+          : destination,
         statusCode,
       );
     }
