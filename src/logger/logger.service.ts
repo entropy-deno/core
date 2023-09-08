@@ -2,78 +2,22 @@ import { Configurator } from '../configurator/configurator.service.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { LogOptions } from './interfaces/log_options.interface.ts';
 
+enum LogType {
+  Error,
+  Log,
+  Info,
+  Warning,
+}
+
 export class Logger {
   private readonly configurator = inject(Configurator);
 
   private readonly rightPadding = 4;
 
-  public error(
+  private write(
+    type: LogType,
     message: string,
-    { additionalInfo, badge = 'Error', colors = [] }: LogOptions = {},
-  ): void {
-    if (!this.configurator.entries.logger) {
-      return;
-    }
-
-    const outputWidth = (additionalInfo ?? '').length + badge.length +
-      message.replaceAll('%c', '').length + this.rightPadding;
-
-    const exceedsSpace = outputWidth >
-      Deno.consoleSize().columns - message.replaceAll('%c', '').length;
-
-    const trimmedMessage = message.slice(
-      0,
-      Deno.consoleSize().columns - outputWidth - 1,
-    ).replace(/(%c|%)$/, '');
-
-    console.error(
-      `%c${badge[0]?.toUpperCase() ?? ''}${
-        badge.slice(1) ?? ''
-      } %c${trimmedMessage}${exceedsSpace ? '...' : ''}`,
-      'color: red',
-      '',
-      ...colors.slice(
-        0,
-        trimmedMessage.match(/%c/g)?.length ?? 0,
-      ).map((color) => `color: ${color}`),
-    );
-  }
-
-  public info(
-    message: string,
-    { additionalInfo, badge = 'Info', colors = [] }: LogOptions = {},
-  ): void {
-    if (!this.configurator.entries.logger) {
-      return;
-    }
-
-    const outputWidth = (additionalInfo ?? '').length + badge.length +
-      message.replaceAll('%c', '').length + this.rightPadding;
-
-    const exceedsSpace = outputWidth >
-      Deno.consoleSize().columns - message.replaceAll('%c', '').length;
-
-    const trimmedMessage = message.slice(
-      0,
-      Deno.consoleSize().columns - outputWidth - 1,
-    ).replace(/(%c|%)$/, '');
-
-    console.log(
-      `%c${badge[0]?.toUpperCase() ?? ''}${
-        badge.slice(1) ?? ''
-      } %c${trimmedMessage}${exceedsSpace ? '...' : ''}`,
-      'color: blue',
-      '',
-      ...colors.slice(
-        0,
-        trimmedMessage.match(/%c/g)?.length ?? 0,
-      ).map((color) => `color: ${color}`),
-    );
-  }
-
-  public log(
-    message: string,
-    { additionalInfo, badge = 'Log', colors = [] }: LogOptions = {},
+    { additionalInfo, badge = 'Log', colors = [] }: LogOptions,
   ): void {
     if (!this.configurator.entries.logger) {
       return;
@@ -102,13 +46,58 @@ export class Logger {
         : ''
     }`;
 
-    console.log(
+    const params = [
       output,
-      'color: blue',
+      `color: ${
+        type === LogType.Error
+          ? 'red'
+          : type === LogType.Warning
+          ? 'orange'
+          : 'blue'
+      }`,
       '',
       ...colors.map((color) => `color: ${color}`),
       ...[additionalInfo ? 'color: gray' : ''],
-    );
+    ];
+
+    switch (type) {
+      case LogType.Error:
+        console.error(...params);
+
+        break;
+
+      case LogType.Log:
+      case LogType.Info:
+        console.log(...params);
+
+        break;
+
+      case LogType.Warning:
+        console.warn(...params);
+
+        break;
+    }
+  }
+
+  public error(
+    message: string,
+    { additionalInfo, badge = 'Error', colors = [] }: LogOptions = {},
+  ): void {
+    this.write(LogType.Error, message, { additionalInfo, badge, colors });
+  }
+
+  public info(
+    message: string,
+    { additionalInfo, badge = 'Info', colors = [] }: LogOptions = {},
+  ): void {
+    this.write(LogType.Info, message, { additionalInfo, badge, colors });
+  }
+
+  public log(
+    message: string,
+    { additionalInfo, badge = 'Log', colors = [] }: LogOptions = {},
+  ): void {
+    this.write(LogType.Log, message, { additionalInfo, badge, colors });
   }
 
   public raw(...messages: string[]): void {
@@ -119,31 +108,6 @@ export class Logger {
     message: string,
     { additionalInfo, badge = 'Warning', colors = [] }: LogOptions = {},
   ): void {
-    if (!this.configurator.entries.logger) {
-      return;
-    }
-
-    const outputWidth = (additionalInfo ?? '').length + badge.length +
-      message.replaceAll('%c', '').length + this.rightPadding;
-
-    const exceedsSpace = outputWidth >
-      Deno.consoleSize().columns - message.replaceAll('%c', '').length;
-
-    const trimmedMessage = message.slice(
-      0,
-      Deno.consoleSize().columns - outputWidth - 1,
-    ).replace(/(%c|%)$/, '');
-
-    console.warn(
-      `%c${badge[0]?.toUpperCase() ?? ''}${
-        badge.slice(1) ?? ''
-      } %c${trimmedMessage}${exceedsSpace ? '...' : ''}`,
-      'color: orange',
-      '',
-      ...colors.slice(
-        0,
-        trimmedMessage.match(/%c/g)?.length ?? 0,
-      ).map((color) => `color: ${color}`),
-    );
+    this.write(LogType.Warning, message, { additionalInfo, badge, colors });
   }
 }
