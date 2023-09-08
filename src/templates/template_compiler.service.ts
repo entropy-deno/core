@@ -8,7 +8,6 @@ import { inject } from '../injector/functions/inject.function.ts';
 import { HttpRequest } from '../http/http_request.class.ts';
 import { TemplateDirective } from './interfaces/template_directive.interface.ts';
 import { translate } from '../localizator/functions/translate.function.ts';
-import { url } from '../router/functions/url.function.ts';
 import { Utils } from '../utils/utils.class.ts';
 
 export class TemplateCompiler {
@@ -23,7 +22,6 @@ export class TemplateCompiler {
     '$inject': inject,
     '$range': Utils.range,
     '$translate': translate,
-    '$url': url,
   };
 
   private currentRawContent: string[] = [];
@@ -276,10 +274,10 @@ export class TemplateCompiler {
     ];
   }
 
-  private renderNatively<TValue>(
+  private async renderNatively<TValue>(
     code: string,
     variables: Record<string, unknown> = {},
-  ): TValue {
+  ): Promise<TValue> {
     const globalVariables = {
       $request: this.currentRequest,
       ...Object.keys(constants).reduce((result, key) => ({
@@ -293,15 +291,15 @@ export class TemplateCompiler {
     const header = [
       ...Object.keys(globalVariables),
       ...Object.keys(variables),
-      code,
+      `return (async () => {${code}})();`,
     ];
 
-    return new Function(...header)(
+    return await new Function(...header)(
       ...Object.values(globalVariables),
     ) as TValue;
   }
 
-  private parseDataInterpolations(): void {
+  private async parseDataInterpolations(): Promise<void> {
     const matches =
       this.currentTemplate.matchAll(/\{\{(#|@?)((.|\s)*?)\}\}/gm) ?? [];
 
@@ -312,7 +310,7 @@ export class TemplateCompiler {
 
       const value = matchValue.trim();
 
-      const renderedExpression = this.renderNatively(
+      const renderedExpression = await this.renderNatively(
         `
         let expression = typeof (${value}) === 'object'
           ? JSON.stringify(${value})
@@ -343,7 +341,7 @@ export class TemplateCompiler {
     for (
       const [wholeMatch, variableName, , iterableValue, , block] of matches
     ) {
-      let iterable = this.renderNatively<unknown[]>(
+      let iterable = await this.renderNatively<unknown[]>(
         `return ${iterableValue};`,
       );
 
@@ -399,14 +397,14 @@ export class TemplateCompiler {
     }
   }
 
-  private parseIfDirectives(): void {
+  private async parseIfDirectives(): Promise<void> {
     const matches = this.currentTemplate.matchAll(
       /\[if ?(.*?)\](\n|\r\n*?)?((.|\n|\r\n)*?)\[\/if\]/gm,
     ) ??
       [];
 
     for (const [wholeMatch, conditionString, , content] of matches) {
-      const condition = this.renderNatively(
+      const condition = await this.renderNatively(
         `return ${conditionString};`,
       );
 
@@ -448,13 +446,13 @@ export class TemplateCompiler {
     }
   }
 
-  private parseSwitchDirectives(): void {
+  private async parseSwitchDirectives(): Promise<void> {
     const matches = this.currentTemplate.matchAll(
       /\[switch ?(.*?)\](\n|\r\n*?)?((.|\n|\r\n)*?)\[\/switch\]/gm,
     ) ?? [];
 
     for (const [wholeMatch, conditionString, , casesString] of matches) {
-      const condition = this.renderNatively(
+      const condition = await this.renderNatively(
         `return ${conditionString};`,
       );
 
@@ -485,7 +483,7 @@ export class TemplateCompiler {
         const cleanCaseContent = caseContent.replaceAll(caseRegex, '');
 
         cases.set(
-          this.renderNatively(
+          await this.renderNatively(
             `return ${caseConditionString};`,
           ),
           cleanCaseContent,
@@ -495,7 +493,7 @@ export class TemplateCompiler {
 
         for (const [, parallelCaseConditionString] of parallelCaseMatches) {
           cases.set(
-            this.renderNatively(
+            await this.renderNatively(
               `return ${parallelCaseConditionString};`,
             ),
             cleanCaseContent,
@@ -569,10 +567,9 @@ export class TemplateCompiler {
     this.removeComments();
 
     await this.parseEachDirectives();
-
-    this.parseIfDirectives();
-    this.parseDataInterpolations();
-    this.parseSwitchDirectives();
+    await this.parseIfDirectives();
+    await this.parseDataInterpolations();
+    await this.parseSwitchDirectives();
 
     for (const directive of this.directives) {
       const pattern = directive.type === 'single'
@@ -588,7 +585,7 @@ export class TemplateCompiler {
 
       for (const [expression, hasArguments, args, , blockContent] of matches) {
         const resolvedArguments = hasArguments
-          ? this.renderNatively<unknown[]>(`return ${`[${args}]`};`)
+          ? await this.renderNatively<unknown[]>(`return ${`[${args}]`};`)
           : [];
 
         const result = directive.type === 'single'
