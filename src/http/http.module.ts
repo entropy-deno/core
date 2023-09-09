@@ -11,6 +11,7 @@ export * from './enums/http_method.enum.ts';
 export * from './enums/http_status.enum.ts';
 export * from './interfaces/middleware.interface.ts';
 export * from './interfaces/pipe.interface.ts';
+export * from './json.class.ts';
 export * from './http_client.service.ts';
 export * from './http_error.class.ts';
 export * from './http_request.class.ts';

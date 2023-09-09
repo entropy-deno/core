@@ -10,6 +10,7 @@ import { HttpMethod } from '../http/enums/http_method.enum.ts';
 import { HttpRequest } from '../http/http_request.class.ts';
 import { HttpStatus } from '../http/enums/http_status.enum.ts';
 import { inject } from '../injector/functions/inject.function.ts';
+import { Json } from '../http/json.class.ts';
 import { Middleware } from '../http/interfaces/middleware.interface.ts';
 import { Pipe } from '../http/interfaces/pipe.interface.ts';
 import { RedirectDestination } from './types/redirect_destination.type.ts';
@@ -321,6 +322,13 @@ export class Router {
         );
 
         body = compiledTemplate;
+
+        break;
+      }
+
+      case body instanceof Json: {
+        body = JSON.stringify((body as Json).json);
+        contentType = 'application/json';
 
         break;
       }
