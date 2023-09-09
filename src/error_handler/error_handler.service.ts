@@ -12,8 +12,6 @@ export class ErrorHandler {
 
   private currentLine: number | null = null;
 
-  private currentStack: string | null = null;
-
   private readonly defaultFile = 'entropy module';
 
   private readonly logger = inject(Logger);
@@ -24,7 +22,6 @@ export class ErrorHandler {
     if (!stack) {
       this.currentFile = this.defaultFile;
       this.currentLine = null;
-      this.currentStack = null;
 
       return;
     }
@@ -43,12 +40,6 @@ export class ErrorHandler {
       : this.defaultFile;
 
     this.currentLine = Number(file?.match(/(.*):(.*):(.*)/)?.[2] ?? 1);
-
-    this.currentStack = stack.split('\n').slice(1).map((line) => line.trim())
-      .slice(0, 4)
-      .join(
-        '\n',
-      ).replace(/\n.*$/, '');
 
     if (this.currentFile.includes('src/')) {
       this.currentFile = `src/${this.currentFile.split('src/')[1]}`;
@@ -73,10 +64,6 @@ export class ErrorHandler {
         colors: ['gray'],
       },
     );
-
-    if (this.currentStack) {
-      this.logger.raw(`%c${this.currentStack}\n`, 'color: gray');
-    }
 
     if (die && !this.configurator.entries.isDenoDeploy) {
       Deno.exit(1);
