@@ -29,18 +29,21 @@ export class Logger {
     }
 
     const maxMessageLength = Deno.consoleSize().columns - badge.length -
-      (additionalInfo?.length ?? 0) - 2;
+      (additionalInfo?.length ? additionalInfo.length + 1 : 0) - 2;
 
-    const exceedsSpace = message.replaceAll('%c', '').length > maxMessageLength;
-    const trimmedMessage = message.slice(0, maxMessageLength);
+    const plainMessage = message.replaceAll('%c', '');
+    const exceedsSpace = plainMessage.length > maxMessageLength;
+    const trimmedMessage = exceedsSpace
+      ? message.slice(0, maxMessageLength)
+      : message;
 
     const dotsLength = exceedsSpace ? 0 : Deno.consoleSize().columns -
-      trimmedMessage.replaceAll('%c', '').length -
+      plainMessage.length -
       (additionalInfo?.length ?? 0) -
       badge.length - this.endPadding;
 
     const output = `%c${badge} %c${trimmedMessage}${exceedsSpace ? '...' : ''}${
-      additionalInfo
+      additionalInfo && !exceedsSpace
         ? ` %c${
           this.configurator.entries.isDenoDeploy
             ? '• '
@@ -59,8 +62,11 @@ export class Logger {
           : 'blue'
       }`,
       '',
-      ...colors.map((color) => `color: ${color}`),
-      ...[additionalInfo ? 'color: gray' : ''],
+      ...colors.slice(
+        0,
+        trimmedMessage.replace(/(%c|%)$/, '').match(/%c/g)?.length ?? 0,
+      ).map((color) => `color: ${color}`),
+      ...(additionalInfo && !exceedsSpace ? ['color: gray'] : []),
     ];
 
     switch (type) {
