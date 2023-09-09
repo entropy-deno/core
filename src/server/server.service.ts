@@ -22,7 +22,6 @@ import { Validator } from '../validator/validator.service.ts';
 enum WebClientAlias {
   darwin = 'open',
   linux = 'sensible-browser',
-  win32 = 'explorer',
   windows = 'explorer',
 }
 
@@ -57,6 +56,10 @@ export class Server {
 
   private addExitSignalListener(callback: () => void): void {
     for (const signal of this.exitSignals) {
+      if (Deno.build.os === 'windows' && signal !== 'SIGINT') {
+        continue;
+      }
+
       Deno.addSignalListener(signal, () => {
         callback();
       });
@@ -235,7 +238,7 @@ export class Server {
         Utils.runShellCommand(
           `${
             WebClientAlias[
-              Deno.build.os as 'darwin' | 'linux' | 'win32' | 'windows'
+              Deno.build.os as 'darwin' | 'linux' | 'windows'
             ] ??
               'open'
           }`,
