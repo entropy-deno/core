@@ -26,16 +26,14 @@ export const errorPage = `<!doctype html>
         }
 
         :root {
-          --bg: #000;
-          --bg-block: #141414;
-          --border: #232323;
+          --bg: #030712;
+          --bg-block: #111827;
           --font-mono: 'Roboto Mono', monospace;
           --font-sans: 'Noto Sans', sans-serif;
-          --red: #ff5c57;
-          --text: #f5f5f5;
+          --red: #f43f5e;
+          --text: #f3f4f6;
           --text-gray: #b2b2b2;
-          --theme: #4b3bff;
-          --theme-light: #5646ff;
+          --theme: #4f46e5;
         }
 
         body {
@@ -62,20 +60,20 @@ export const errorPage = `<!doctype html>
         .info {
           display: flex;
           align-items: center;
-          gap: 14px;
+          gap: 20px;
           margin-bottom: 20px;
         }
 
         .info__badge {
-          font-size: 14px;
+          font-size: 15px;
           background: var(--red);
-          padding: 5px 10px;
+          padding: 6px 12px;
           border-radius: 8px;
           align-self: flex-start;
         }
 
         .info__version {
-          font-size: 13px;
+          font-size: 14px;
           opacity: 0.6;
         }
 
@@ -89,7 +87,7 @@ export const errorPage = `<!doctype html>
         .trace {
           display: flex;
           flex-direction: column;
-          gap: 6px;
+          gap: 8px;
           margin: 30px 0;
         }
 
@@ -155,7 +153,7 @@ export const errorPage = `<!doctype html>
       </h1>
 
       <section class="trace">
-        <h2 class="trace__header">Stack trace:</h2>
+        <h2 class="trace__header">Thrown in:</h2>
 
         [each (entry in stackTrace ?? [])]
           <div class="trace__entry">

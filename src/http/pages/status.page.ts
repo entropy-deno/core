@@ -15,8 +15,8 @@ export const statusPage = `<!doctype html>
       [nonceProp]
     >
 
-    [raw]
-      <style [nonceProp]>
+    <style [nonceProp]>
+      [raw]
         *,
         *::before,
         *::after {
@@ -26,10 +26,10 @@ export const statusPage = `<!doctype html>
         }
 
         :root {
-          --bg: #000;
+          --bg: #030712;
           --font-sans: 'Noto Sans', sans-serif;
-          --text: #f5f5f5;
-          --theme-light: #5646ff;
+          --text: #f3f4f6;
+          --theme: #4f46e5;
         }
 
         body {
@@ -44,6 +44,7 @@ export const statusPage = `<!doctype html>
 
         .error__status {
           margin-right: 8px;
+          letter-spacing: 0;
         }
 
         .header {
@@ -59,7 +60,7 @@ export const statusPage = `<!doctype html>
         }
 
         .text-theme {
-          color: var(--theme-light);
+          color: var(--theme);
         }
 
         @media (min-width: 800px) {
@@ -67,8 +68,8 @@ export const statusPage = `<!doctype html>
             font-size: 34px;
           }
         }
-      </style>
-    [/raw]
+      [/raw]
+    </style>
   </head>
 
   <body>
