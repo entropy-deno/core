@@ -163,7 +163,7 @@ export const errorPage = `<!doctype html>
 
             <p class="trace__entry-file">
               {{
-                entry.split(' ')[1]?.includes('deno.land') || entry.split(' ')[1]?.includes('entropy-deno/core')
+                entry.includes('deno.land') || entry.split(' ')[1]?.includes('entropy-deno/core')
                   ? 'Entropy module'
                   : entry.split(' ')[1]?.split('src/')?.[1]
                     ? \`src/\${entry.split(' ')[1]?.split('src/')?.[1]?.slice(0, -1)}\`
