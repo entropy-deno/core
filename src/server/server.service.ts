@@ -15,10 +15,16 @@ import { Reflector } from '../utils/reflector.class.ts';
 import { Router } from '../router/router.service.ts';
 import { ServerOptions } from './interfaces/server_options.interface.ts';
 import { TemplateCompiler } from '../templates/template_compiler.service.ts';
+import { url } from '../router/functions/url.function.ts';
 import { Utils } from '../utils/utils.class.ts';
 import { Validator } from '../validator/validator.service.ts';
-import { WebClientAlias } from './enums/web_client_alias.enum.ts';
-import { url } from '@entropy';
+
+enum WebClientAlias {
+  darwin = 'open',
+  linux = 'sensible-browser',
+  win32 = 'explorer',
+  windows = 'explorer',
+}
 
 export class Server {
   private readonly configurator = inject(Configurator);
@@ -31,8 +37,8 @@ export class Server {
 
   private readonly exitSignals: Deno.Signal[] = [
     'SIGINT',
-    'SIGTERM',
     'SIGQUIT',
+    'SIGTERM',
   ];
 
   private readonly localizator = inject(Localizator);

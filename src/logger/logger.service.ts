@@ -1,6 +1,11 @@
 import { Configurator } from '../configurator/configurator.service.ts';
 import { inject } from '../injector/functions/inject.function.ts';
-import { LogOptions } from './interfaces/log_options.interface.ts';
+
+interface LogOptions {
+  additionalInfo?: string;
+  badge?: string;
+  colors?: string[];
+}
 
 enum LogType {
   Error,
@@ -12,7 +17,7 @@ enum LogType {
 export class Logger {
   private readonly configurator = inject(Configurator);
 
-  private readonly rightPadding = 4;
+  private readonly endPadding = 4;
 
   private write(
     type: LogType,
@@ -23,25 +28,23 @@ export class Logger {
       return;
     }
 
-    const maxMessageLength = Deno.consoleSize().columns -
-      (additionalInfo?.length ?? 0) - badge.length - 2;
+    const maxMessageLength = Deno.consoleSize().columns - badge.length -
+      (additionalInfo?.length ?? 0) - 2;
 
-    const trimmedMessage = message.slice(0, maxMessageLength);
     const exceedsSpace = message.replaceAll('%c', '').length > maxMessageLength;
+    const trimmedMessage = message.slice(0, maxMessageLength);
 
     const dotsLength = exceedsSpace ? 0 : Deno.consoleSize().columns -
       trimmedMessage.replaceAll('%c', '').length -
       (additionalInfo?.length ?? 0) -
-      badge.length - this.rightPadding;
+      badge.length - this.endPadding;
 
-    const output = `%c${badge[0]?.toUpperCase() ?? ''}${
-      badge.slice(1) ?? ''
-    } %c${trimmedMessage}${exceedsSpace ? '...' : ''}${
+    const output = `%c${badge} %c${trimmedMessage}${exceedsSpace ? '...' : ''}${
       additionalInfo
         ? ` %c${
           this.configurator.entries.isDenoDeploy
             ? '• '
-            : (dotsLength > 0 ? `${'.'.repeat(dotsLength)} ` : '')
+            : (dotsLength ? `${'.'.repeat(dotsLength)} ` : '')
         }${additionalInfo}`
         : ''
     }`;

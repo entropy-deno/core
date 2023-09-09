@@ -613,7 +613,7 @@ export class Router {
                 request,
               );
 
-              if (Object.keys(errors).length > 0) {
+              if (Object.keys(errors).length) {
                 if (request.isAjax) {
                   return await this.createResponse(
                     request,
