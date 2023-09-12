@@ -2,6 +2,7 @@ import { getCookies } from 'https://deno.land/std@0.201.0/http/cookie.ts';
 import { Encrypter } from '../encrypter/encrypter.service.ts';
 import { HttpMethod } from './enums/http_method.enum.ts';
 import { inject } from '../injector/functions/inject.function.ts';
+import { Session } from './session.class.ts';
 
 export class HttpRequest {
   private readonly encrypter = inject(Encrypter);
@@ -141,6 +142,10 @@ export class HttpRequest {
 
   public get searchString(): string {
     return new URL(this.request.url).search;
+  }
+
+  public get session(): Session {
+    return new Session(this.cookie('session_id'));
   }
 
   public get url(): string {

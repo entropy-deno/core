@@ -2,6 +2,7 @@ import { contentType } from 'https://deno.land/std@0.201.0/media_types/content_t
 import { Configurator } from '../configurator/configurator.service.ts';
 import { Constructor } from '../utils/interfaces/constructor.interface.ts';
 import { Controller } from '../http/controller.class.ts';
+import { Encrypter } from '../encrypter/encrypter.service.ts';
 import { EnumValuesUnion } from '../utils/types/enum_values_union.type.ts';
 import { ErrorHandler } from '../error_handler/error_handler.service.ts';
 import { errorPage } from '../error_handler/pages/error.page.ts';
@@ -45,6 +46,8 @@ type RouteDecoratorFunction<THttpMethods> = THttpMethods extends
 
 export class Router {
   private readonly configurator = inject(Configurator);
+
+  private readonly encrypter = inject(Encrypter);
 
   private readonly customHttpHandlers = new Map<
     HttpStatus | undefined,
@@ -188,6 +191,10 @@ export class Router {
         ...headers,
       },
     });
+
+    if (!('session_id' in request.cookies)) {
+      cookies.session_id = this.encrypter.generateUuid(true);
+    }
 
     for (const [cookie, cookieValue] of Object.entries(cookies)) {
       response.headers.append(

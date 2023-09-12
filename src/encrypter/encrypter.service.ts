@@ -42,8 +42,10 @@ export class Encrypter {
     return result;
   }
 
-  public generateUuid(): string {
-    return crypto.randomUUID();
+  public generateUuid(clean = false): string {
+    const uuid = crypto.randomUUID();
+
+    return clean ? uuid.replaceAll('-', '') : uuid;
   }
 
   public async hash(plainText: string): Promise<string> {
