@@ -9,7 +9,7 @@ import { HotReloadChannel } from './channels/hot_reload.channel.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { Localizator } from '../localizator/localizator.module.ts';
 import { Logger } from '../logger/logger.service.ts';
-import { MIN_DENO_VERSION } from '../constants.ts';
+import { MIN_DENO_VERSION, VERSION } from '../constants.ts';
 import { HttpRequest } from '../http/http_request.class.ts';
 import { Reflector } from '../utils/reflector.class.ts';
 import { Router } from '../router/router.service.ts';
@@ -82,6 +82,10 @@ export class Server {
       );
 
       Deno.exit(1);
+    }
+
+    if (VERSION.includes('alpha') || VERSION.includes('beta')) {
+      this.logger.warn('Using pre-release version of Entropy');
     }
   }
 
