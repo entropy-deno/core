@@ -40,6 +40,28 @@ export class Session {
     );
   }
 
+  public all(): Record<string, unknown> {
+    return { ...this.variables };
+  }
+
+  public delete(key: string): void {
+    this.variables.delete(key);
+  }
+
+  public async destroy(): Promise<void> {
+    try {
+      await Deno.remove(`${this.storagePath}/${this.id}.json`);
+    } catch (error) {
+      if (!(error instanceof Deno.errors.NotFound)) {
+        throw error;
+      }
+    }
+
+    this.isLoaded = false;
+
+    this.variables.clear();
+  }
+
   public async get<TValue>(key: string): Promise<TValue | null> {
     if (!this.isLoaded) {
       await this.readData();
@@ -48,6 +70,10 @@ export class Session {
     }
 
     return this.variables.get(key) as TValue ?? null;
+  }
+
+  public has(key: string): boolean {
+    return this.variables.has(key);
   }
 
   public async set<TValue>(key: string, value: TValue): Promise<void> {

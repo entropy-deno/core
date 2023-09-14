@@ -9,6 +9,8 @@ export class HttpRequest {
 
   private readonly cspNonce = this.encrypter.generateRandomString(24);
 
+  private sessionObject: Session | null = null;
+
   constructor(
     private readonly request: Request,
     private readonly info?: Deno.ServeHandlerInfo,
@@ -145,7 +147,11 @@ export class HttpRequest {
   }
 
   public get session(): Session {
-    return new Session(this.cookie('session_id'));
+    if (!this.sessionObject) {
+      this.sessionObject = new Session(this.cookie('session_id'));
+    }
+
+    return this.sessionObject;
   }
 
   public get url(): string {
