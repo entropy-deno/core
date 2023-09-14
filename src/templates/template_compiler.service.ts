@@ -117,7 +117,7 @@ export class TemplateCompiler {
           }://${this.configurator.entries.host}:${this.configurator.entries.port}');
 
               ws.onmessage = (event) => {
-                if (JSON.parse(event.data).channel === '$hot-reload') {
+                if (JSON.parse(event.data).channel === '@entropy/hot-reload') {
                   window.location.reload();
                 }
               };

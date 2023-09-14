@@ -28,7 +28,7 @@ enum WebClientAlias {
 export class Server {
   private readonly configurator = inject(Configurator);
 
-  private readonly devServerCheckKey = '$entropy/dev-server';
+  private readonly devServerCheckKey = '@entropy/dev_server';
 
   private readonly encrypter = inject(Encrypter);
 
@@ -113,6 +113,16 @@ export class Server {
       request,
       info,
     );
+
+    await richRequest.session.$setup();
+
+    if (!richRequest.session.get<string>('@entropy/csrf_token')) {
+      await richRequest.session.set(
+        '@entropy/csrf_token',
+        this.encrypter.generateUuid(true),
+      );
+    }
+
     const response = await this.router.respond(richRequest);
 
     const { status } = response;

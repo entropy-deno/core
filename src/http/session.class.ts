@@ -8,6 +8,10 @@ export class Session {
   constructor(private readonly id: string | null) {}
 
   private async readData(): Promise<void> {
+    if (this.isLoaded) {
+      return;
+    }
+
     try {
       const sessionData = JSON.parse(
         await Deno.readTextFile(`${this.storagePath}/${this.id}.json`),
@@ -16,6 +20,8 @@ export class Session {
       for (const [key, value] of Object.entries(sessionData)) {
         this.variables.set(key, value);
       }
+
+      this.isLoaded = true;
     } catch (error) {
       if (!(error instanceof Deno.errors.NotFound)) {
         throw error;
@@ -40,6 +46,10 @@ export class Session {
     );
   }
 
+  public async $setup(): Promise<void> {
+    await this.writeDataToFile();
+  }
+
   public all(): Record<string, unknown> {
     return { ...this.variables };
   }
@@ -62,13 +72,7 @@ export class Session {
     this.variables.clear();
   }
 
-  public async get<TValue>(key: string): Promise<TValue | null> {
-    if (!this.isLoaded) {
-      await this.readData();
-
-      this.isLoaded = true;
-    }
-
+  public get<TValue>(key: string): TValue | null {
     return this.variables.get(key) as TValue ?? null;
   }
 
