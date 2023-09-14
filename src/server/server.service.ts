@@ -176,12 +176,28 @@ export class Server {
         );
       });
 
+      const authorizationMethod = channel.prototype.authorize as () =>
+        | boolean
+        | Promise<boolean>;
+
       socket.onopen = () => {
         channelInstance.activeSockets.set(socketId, socket);
       };
 
-      socket.onmessage = ({ data }) => {
+      socket.onmessage = async ({ data }) => {
         for (const channelListenerMethod of channelListenerMethods) {
+          if ('authorize' in channelInstance) {
+            const isAuthorized = authorizationMethod.call(channelInstance);
+
+            if (
+              isAuthorized instanceof Promise
+                ? !await isAuthorized
+                : !isAuthorized
+            ) {
+              continue;
+            }
+          }
+
           const channelMethod = channel.prototype[channelListenerMethod] as (
             payload: string,
           ) => unknown;
