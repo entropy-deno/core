@@ -85,7 +85,7 @@ export class Server {
     }
 
     if (VERSION.includes('alpha') || VERSION.includes('beta')) {
-      this.logger.warn('Using pre-release version of Entropy');
+      this.logger.warn('Using a pre-release version of Entropy');
     }
   }
 
@@ -170,7 +170,7 @@ export class Server {
           property[0] !== '_' &&
           typeof channel.prototype[property] === 'function' &&
           !!Reflector.getMetadata<string>(
-            'subscribeEvent',
+            'subscribeToEvent',
             channel.prototype[property],
           )
         );

@@ -5,7 +5,7 @@ export function Cookies(cookies: Record<string, string>): MethodDecorator {
     Reflector.defineMetadata<Record<string, string>>(
       'cookies',
       cookies,
-      descriptor.value as ((...args: unknown[]) => unknown),
+      descriptor.value as object,
     );
 
     return descriptor;

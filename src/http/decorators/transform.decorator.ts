@@ -9,7 +9,7 @@ export function Transform(
     Reflector.defineMetadata<Record<string, Constructor<Pipe>>>(
       'paramPipes',
       paramPipes,
-      descriptor.value as ((...args: unknown[]) => unknown),
+      descriptor.value as object,
     );
 
     return descriptor;

@@ -7,7 +7,7 @@ export function Use(middleware: Constructor<Middleware>[]): MethodDecorator {
     Reflector.defineMetadata<Constructor<Middleware>[]>(
       'middleware',
       middleware,
-      descriptor.value as ((...args: unknown[]) => unknown),
+      descriptor.value as object,
     );
 
     return descriptor;

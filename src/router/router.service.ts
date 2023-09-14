@@ -421,7 +421,7 @@ export class Router {
             path,
             ...options,
           },
-          descriptor.value as ((...args: unknown[]) => unknown),
+          descriptor.value as object,
         );
 
         return descriptor;

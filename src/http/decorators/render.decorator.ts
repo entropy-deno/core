@@ -5,7 +5,7 @@ export function Render(view: string): MethodDecorator {
     Reflector.defineMetadata<string>(
       'view',
       view,
-      descriptor.value as ((...args: unknown[]) => unknown),
+      descriptor.value as object,
     );
 
     return descriptor;

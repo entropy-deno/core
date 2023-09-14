@@ -5,7 +5,7 @@ export function Headers(headers: Record<string, string>): MethodDecorator {
     Reflector.defineMetadata<Record<string, string>>(
       'headers',
       headers,
-      descriptor.value as ((...args: unknown[]) => unknown),
+      descriptor.value as object,
     );
 
     return descriptor;

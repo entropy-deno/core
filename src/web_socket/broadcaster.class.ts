@@ -8,13 +8,11 @@ export abstract class Broadcaster {
     channel?: string,
   ): void {
     for (const socket of this.activeSockets.values()) {
-      const channelName = Reflector.getMetadata<string>(
-        'name',
-        this.constructor,
-      );
-
       if (!channel) {
-        channel = channelName;
+        channel = Reflector.getMetadata<string>(
+          'name',
+          this.constructor,
+        );
       }
 
       const path = `${channel?.[0] === '/' ? '' : '/'}${channel}`;

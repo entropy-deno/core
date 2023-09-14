@@ -3,9 +3,9 @@ import { Reflector } from '../../utils/reflector.class.ts';
 export function Subscribe(event: string): MethodDecorator {
   return (_target, _methodName, descriptor) => {
     Reflector.defineMetadata<string>(
-      'subscribeEvent',
+      'subscribeToEvent',
       event,
-      descriptor.value as ((...args: unknown[]) => unknown),
+      descriptor.value as object,
     );
 
     return descriptor;

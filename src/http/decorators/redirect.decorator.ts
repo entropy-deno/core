@@ -6,7 +6,7 @@ export function Redirect(destination: RedirectDestination): MethodDecorator {
     Reflector.defineMetadata<RedirectDestination>(
       'redirectDestination',
       destination,
-      descriptor.value as ((...args: unknown[]) => unknown),
+      descriptor.value as object,
     );
 
     return descriptor;

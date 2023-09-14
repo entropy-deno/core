@@ -8,7 +8,7 @@ export function Validate(
     Reflector.defineMetadata<typeof rules>(
       'validationRules',
       rules,
-      descriptor.value as ((...args: unknown[]) => unknown),
+      descriptor.value as object,
     );
 
     return descriptor;
