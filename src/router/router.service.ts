@@ -193,7 +193,7 @@ export class Router {
     });
 
     if (!('session_id' in request.cookies)) {
-      cookies.session_id = this.encrypter.generateUuid(true);
+      cookies.session_id = this.encrypter.generateUuid({ clean: true });
     }
 
     for (const [cookie, cookieValue] of Object.entries(cookies)) {

@@ -119,7 +119,7 @@ export class Server {
     if (!richRequest.session.get<string>('@entropy/csrf_token')) {
       await richRequest.session.set(
         '@entropy/csrf_token',
-        this.encrypter.generateUuid(true),
+        this.encrypter.generateUuid({ clean: true }),
       );
     }
 

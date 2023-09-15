@@ -5,6 +5,10 @@ import {
 import { Configurator } from '../configurator/configurator.service.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 
+interface UuidOptions {
+  clean?: boolean;
+}
+
 export class Encrypter {
   private readonly configurator = inject(Configurator);
 
@@ -42,7 +46,7 @@ export class Encrypter {
     return result;
   }
 
-  public generateUuid(clean = false): string {
+  public generateUuid({ clean = false }: UuidOptions = {}): string {
     const uuid = crypto.randomUUID();
 
     return clean ? uuid.replaceAll('-', '') : uuid;
