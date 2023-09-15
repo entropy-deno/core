@@ -29,7 +29,7 @@ export class Session {
     }
   }
 
-  private async writeDataToFile(): Promise<void> {
+  private async saveData(): Promise<void> {
     try {
       await Deno.mkdir(this.storagePath, {
         recursive: true,
@@ -42,16 +42,17 @@ export class Session {
 
     await Deno.writeTextFile(
       `${this.storagePath}/${this.id}.json`,
-      JSON.stringify({ ...this.variables }),
+      JSON.stringify(Object.fromEntries(this.variables)),
     );
   }
 
   public async $setup(): Promise<void> {
-    await this.writeDataToFile();
+    await this.saveData();
+    await this.readData();
   }
 
   public all(): Record<string, unknown> {
-    return { ...this.variables };
+    return Object.fromEntries(this.variables);
   }
 
   public delete(key: string): void {
@@ -80,9 +81,13 @@ export class Session {
     return this.variables.has(key);
   }
 
-  public async set<TValue>(key: string, value: TValue): Promise<void> {
-    this.variables.set(key, value);
+  public async save(): Promise<void> {
+    if (this.isLoaded) {
+      await this.saveData();
+    }
+  }
 
-    await this.writeDataToFile();
+  public set<TValue>(key: string, value: TValue): void {
+    this.variables.set(key, value);
   }
 }
