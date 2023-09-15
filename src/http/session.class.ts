@@ -52,7 +52,11 @@ export class Session {
   }
 
   public all(): Record<string, unknown> {
-    return Object.fromEntries(this.variables);
+    return Object.fromEntries(
+      [...this.variables.entries()].filter(([key]) =>
+        !key.startsWith('@entropy')
+      ),
+    );
   }
 
   public delete(key: string): void {
