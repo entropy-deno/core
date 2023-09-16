@@ -114,15 +114,6 @@ export class Server {
       info,
     );
 
-    await richRequest.session.$setup();
-
-    if (!richRequest.session.has('@entropy/csrf_token')) {
-      richRequest.session.set(
-        '@entropy/csrf_token',
-        this.encrypter.generateUuid({ clean: true }),
-      );
-    }
-
     const response = await this.router.respond(richRequest);
 
     const { status } = response;

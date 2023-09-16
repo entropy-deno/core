@@ -69,7 +69,12 @@ export class HttpRequest {
   }
 
   public async isFormRequest(): Promise<boolean> {
-    return ![HttpMethod.Get, HttpMethod.Head].includes(await this.method());
+    return ![
+      HttpMethod.Get,
+      HttpMethod.Head,
+      HttpMethod.PropFind,
+      HttpMethod.Search,
+    ].includes(await this.method());
   }
 
   public isSecure(): boolean {

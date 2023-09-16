@@ -4,6 +4,7 @@ import { Constructor } from '../utils/interfaces/constructor.interface.ts';
 import { Controller } from '../http/controller.class.ts';
 import { Encrypter } from '../encrypter/encrypter.service.ts';
 import { EnumValuesUnion } from '../utils/types/enum_values_union.type.ts';
+import { env } from '../configurator/functions/env.function.ts';
 import { ErrorHandler } from '../error_handler/error_handler.service.ts';
 import { errorPage } from '../error_handler/pages/error.page.ts';
 import { HttpError } from '../http/http_error.class.ts';
@@ -563,6 +564,31 @@ export class Router {
 
   public async respond(request: HttpRequest): Promise<Response> {
     try {
+      await request.session.$setup();
+
+      if (!request.session.has('@entropy/csrf_token')) {
+        request.session.set(
+          '@entropy/csrf_token',
+          this.encrypter.generateUuid({ clean: true }),
+        );
+      }
+
+      if (await request.isFormRequest() && !env<boolean>('TESTING')) {
+        const csrfToken = request.session.get<string>('@entropy/csrf_token');
+
+        if (
+          !csrfToken ||
+          ![
+            request.header('csrf-token'),
+            request.header('xsrf-token'),
+            request.header('x-csrf-token'),
+            request.header('x-xsrf-token'),
+          ].includes(csrfToken)
+        ) {
+          throw new HttpError(HttpStatus.InvalidToken);
+        }
+      }
+
       const requestMethod = await request.method();
 
       for (
