@@ -450,21 +450,25 @@ export class Router {
   }
 
   public registerController(controller: Constructor<Controller>): void {
+    const controllerInstance = inject(controller);
+
     const controllerProperties = Object.getOwnPropertyNames(
-      controller.prototype,
+      Object.getPrototypeOf(controllerInstance),
     );
 
     const controllerRouteMethods = controllerProperties.filter((property) => {
       return (
         property !== 'constructor' &&
         property[0] !== '_' &&
-        typeof controller.prototype[property] === 'function'
+        typeof Object.getPrototypeOf(controllerInstance)[property] ===
+          'function'
       );
     });
 
     for (const controllerRouteMethod of controllerRouteMethods) {
-      const controllerInstance = inject(controller);
-      const controllerMethod = controller.prototype[controllerRouteMethod] as (
+      const controllerMethod = Object.getPrototypeOf(
+        controllerInstance,
+      )[controllerRouteMethod] as (
         ...args: unknown[]
       ) => unknown;
 
@@ -506,9 +510,11 @@ export class Router {
         Exclude<Route, 'action'>
       >('route', controllerMethod)!;
 
-      const basePath =
-        Reflector.getMetadata<RoutePath>('basePath', controller.prototype) ??
-          '/';
+      const basePath = Reflector.getMetadata<RoutePath>(
+        'basePath',
+        Object.getPrototypeOf(controllerInstance),
+      ) ??
+        '/';
 
       const resolvedPath = this.resolveRoutePath(basePath, path);
 

@@ -163,23 +163,27 @@ export class Server {
       const channelInstance = inject(channel);
       const socketId = this.encrypter.generateUuid();
 
-      const channelProperties = Object.getOwnPropertyNames(channel.prototype);
+      const channelProperties = Object.getOwnPropertyNames(
+        Object.getPrototypeOf(channelInstance),
+      );
 
       const channelListenerMethods = channelProperties.filter((property) => {
         return (
           !['constructor', 'broadcast'].includes(property) &&
           property[0] !== '_' &&
-          typeof channel.prototype[property] === 'function' &&
+          typeof Object.getPrototypeOf(channelInstance)[property] ===
+            'function' &&
           !!Reflector.getMetadata<string>(
             'subscribeToEvent',
-            channel.prototype[property],
+            Object.getPrototypeOf(channelInstance)[property],
           )
         );
       });
 
-      const authorizationMethod = channel.prototype.authorize as () =>
-        | boolean
-        | Promise<boolean>;
+      const authorizationMethod = Object.getPrototypeOf(channelInstance)
+        .authorize as () =>
+          | boolean
+          | Promise<boolean>;
 
       socket.onopen = () => {
         channelInstance.activeSockets.set(socketId, socket);
@@ -199,13 +203,15 @@ export class Server {
             }
           }
 
-          const channelMethod = channel.prototype[channelListenerMethod] as (
+          const channelMethod = Object.getPrototypeOf(
+            channelInstance,
+          )[channelListenerMethod] as (
             payload: string,
           ) => unknown;
 
           const channelName = Reflector.getMetadata<string>(
             'name',
-            channel.prototype,
+            Object.getPrototypeOf(channelInstance),
           );
 
           if (JSON.parse(data).channel === channelName) {
