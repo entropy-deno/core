@@ -1,4 +1,9 @@
+import { inject } from '../injector/functions/inject.function.ts';
+import { Configurator } from '../configurator/configurator.service.ts';
+
 export class Session {
+  private readonly configurator = inject(Configurator);
+
   private isLoaded = false;
 
   private readonly variables = new Map<string, unknown>();
@@ -8,7 +13,7 @@ export class Session {
   constructor(private readonly id: string | null) {}
 
   private async readData(): Promise<void> {
-    if (this.isLoaded) {
+    if (this.isLoaded || this.configurator.entries.isDenoDeploy) {
       return;
     }
 
@@ -30,6 +35,10 @@ export class Session {
   }
 
   private async saveData(): Promise<void> {
+    if (this.configurator.entries.isDenoDeploy) {
+      return;
+    }
+
     try {
       await Deno.mkdir(this.storagePath, {
         recursive: true,
