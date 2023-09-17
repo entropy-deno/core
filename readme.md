@@ -40,7 +40,7 @@ Entropy is a modern and declarative backend development framework for Deno. It
 makes it easy to create fast and secure web applications with awesome developer
 experience.
 
-> Entropy is currently in the `alpha` stage. Although it is already suitable for
+> Entropy is currently in the `beta` stage. Although it is already suitable for
 > creating apps, you may still encounter some bugs and breaking changes.
 
 ## Requirements
