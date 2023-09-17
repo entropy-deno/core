@@ -3,7 +3,7 @@ export class Session {
 
   private readonly variables = new Map<string, unknown>();
 
-  private readonly storagePath = 'storage/sessions';
+  private readonly storagePath = '.entropy/sessions';
 
   constructor(private readonly id: string | null) {}
 
