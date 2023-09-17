@@ -18,6 +18,7 @@ import { TemplateCompiler } from '../templates/template_compiler.service.ts';
 import { url } from '../router/functions/url.function.ts';
 import { Utils } from '../utils/utils.class.ts';
 import { Validator } from '../validator/validator.service.ts';
+import { Module } from './interfaces/module.interface.ts';
 
 enum WebClientAlias {
   darwin = 'open',
@@ -236,7 +237,14 @@ export class Server {
       this.configurator.entries.templateDirectives,
     );
 
-    for (const module of this.options.modules ?? []) {
+    for (
+      const module of [
+        ...(this.options.modules ?? []),
+        ...(this.options.plugins?.map((plugin) => plugin.modules).filter((
+          module,
+        ) => module !== undefined) ?? []),
+      ] as Constructor<Module>[]
+    ) {
       const instance = inject(module);
 
       this.router.registerControllers(instance.controllers ?? []);

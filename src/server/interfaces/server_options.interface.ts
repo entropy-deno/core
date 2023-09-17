@@ -10,6 +10,6 @@ export interface ServerOptions {
   channels?: Constructor<Broadcaster>[];
   config?: DeepPartial<AppConfig>;
   controllers?: Constructor<Controller>[];
-  modules?: Constructor<Partial<Module>>[];
+  modules?: Constructor<Module>[];
   plugins?: Plugin[];
 }

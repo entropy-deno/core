@@ -6,7 +6,7 @@ import { Module } from '../interfaces/module.interface.ts';
 export interface Plugin {
   channels?: Constructor<Broadcaster>[];
   controllers?: Constructor<Controller>[];
-  modules?: Constructor<Partial<Module>>[];
+  modules?: Constructor<Module>[];
   name: string;
   onInit?: () => void | Promise<void>;
 }
