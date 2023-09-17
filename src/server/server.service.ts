@@ -228,19 +228,30 @@ export class Server {
     return response;
   }
 
-  private setup(): void {
+  private async setup(): Promise<void> {
     this.router.registerControllers(this.options.controllers ?? []);
+    this.webSocketChannels.push(...this.options.channels ?? []);
     this.validator.registerRules(this.configurator.entries.validatorRules);
     this.templateCompiler.registerDirectives(
       this.configurator.entries.templateDirectives,
     );
-    this.webSocketChannels.push(...this.options.channels ?? []);
 
     for (const module of this.options.modules ?? []) {
       const instance = inject(module);
 
       this.router.registerControllers(instance.controllers ?? []);
       this.webSocketChannels.push(...instance.channels ?? []);
+    }
+
+    for (const plugin of this.options.plugins ?? []) {
+      const initCallbackResult = plugin.onInit?.();
+
+      if (initCallbackResult instanceof Promise) {
+        await initCallbackResult;
+      }
+
+      this.router.registerControllers(plugin.controllers ?? []);
+      this.webSocketChannels.push(...plugin.channels ?? []);
     }
   }
 
@@ -326,7 +337,7 @@ export class Server {
     }
 
     try {
-      this.setup();
+      await this.setup();
 
       const tlsCert = this.configurator.entries.tls.cert ??
         (this.configurator.entries.tls.certFile
