@@ -765,7 +765,9 @@ export class Router {
 
         return await this.createAbortResponse(
           request,
-          (error as HttpError).statusCode,
+          error instanceof HttpError
+            ? error.statusCode
+            : HttpStatus.InternalServerError,
         );
       }
 
