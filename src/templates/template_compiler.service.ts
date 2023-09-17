@@ -39,6 +39,14 @@ export class TemplateCompiler {
   constructor() {
     this.directives = [
       {
+        name: 'csrf',
+        type: 'single',
+        render: () => {
+          return `<input type="hidden" name="_csrf" value="${this.currentRequest
+            ?.session.get<string>('@entropy/csrf_token')}">`;
+        },
+      },
+      {
         name: 'dev',
         type: 'block',
         render: (content: string) => {

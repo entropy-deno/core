@@ -585,6 +585,7 @@ export class Router {
         if (
           !csrfToken ||
           ![
+            request.input('_csrf'),
             request.header('csrf-token'),
             request.header('xsrf-token'),
             request.header('x-csrf-token'),
