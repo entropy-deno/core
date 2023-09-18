@@ -80,14 +80,18 @@ export class TemplateCompiler {
 
               switch (file.split('.').pop()) {
                 case 'css':
-                  result += `<style nonce="${this.currentRequest?.nonce ?? ''}">${
+                  result += `<style nonce="${
+                    this.currentRequest?.nonce ?? ''
+                  }">${
                     minify ? content.replaceAll(/\n|\t|(\r\n)/g, '') : content
                   }</style>`;
 
                   break;
 
                 case 'js':
-                  result += `<script nonce="${this.currentRequest?.nonce ?? ''}">${
+                  result += `<script nonce="${
+                    this.currentRequest?.nonce ?? ''
+                  }">${
                     minify ? content.replaceAll(/\n|\t|(\r\n)/g, '') : content
                   }</script>`;
 

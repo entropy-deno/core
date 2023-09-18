@@ -202,7 +202,7 @@ export class Router {
     for (const [cookie, cookieValue] of Object.entries(cookies)) {
       response.headers.append(
         'set-cookie',
-        `${cookie}=${cookieValue}; secure; max-age=${
+        `${cookie}=${cookieValue}; SameSite=Lax; Max-Age=${
           this.configurator.entries.cookies.maxAge * 24 * 3600
         }`,
       );
