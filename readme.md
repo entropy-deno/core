@@ -10,7 +10,7 @@
   <h4>
     <a href="https://entropy.deno.dev" target="_blank">Website</a>
     <span> · </span>
-    <a href="https://entropy.deno.dev/docs/introducing-entropy" target="_blank">Docs</a>
+    <a href="https://entropy.deno.dev/docs" target="_blank">Docs</a>
     <span> · </span>
     <a href="https://github.com/entropy-deno/core" target="_blank">Repository</a>
     <span> · </span>
@@ -68,8 +68,7 @@ dom.rajkowski@gmail.com. In case of security vulnerability, please contact
 
 ## Information
 
-- Documentation:
-  [entropy.deno.dev](https://entropy.deno.dev/docs/introducing-entropy)
+- Documentation: [entropy.deno.dev](https://entropy.deno.dev/docs)
 - GitHub repository:
   [github.com/entropy-deno/core](https://github.com/entropy-deno/core)
 - Author: [Dominik Rajkowski](https://github.com/dominiq007)
