@@ -1,5 +1,6 @@
 import { Constructor } from '../../utils/interfaces/constructor.interface.ts';
 import { Controller } from '../../http/controller.class.ts';
+import { HttpMethod } from '../../http/enums/http_method.enum.ts';
 import { HttpRequest } from '../../http/http_request.class.ts';
 import { inject } from '../../injector/functions/inject.function.ts';
 import { RoutePath } from '../../router/types/route_path.type.ts';
@@ -11,10 +12,14 @@ const router = inject(Router);
 export async function fetchRoute(
   path: RoutePath,
   controller: Constructor<Controller>,
+  method = HttpMethod.Get,
 ): Promise<string> {
   router.registerController(controller);
 
-  const request = new Request(url(path));
+  const request = new Request(url(path), {
+    method,
+  });
+
   const httpRequest = new HttpRequest(request);
   const response = await router.respond(httpRequest);
 
