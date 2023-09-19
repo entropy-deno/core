@@ -56,14 +56,20 @@ export class Configurator {
     }
 
     if (!/^[a-z]{2}(-[A-Z]{2})?$/.test(this.configuration.defaultLocale)) {
-      throw new Error(`App locale must follow the format 'xx' or 'xx-XX'`);
+      throw new Error(`App locale must follow the format 'aa' or 'aa-AA'`);
+    }
+
+    if (this.configuration.encryption.key.length < 16) {
+      throw new Error(
+        'Encryption key length must be greater than or equal to 16',
+      );
     }
 
     if (
       this.configuration.envFile &&
       !/^\.[a-z_\.\-]*?$/.test(this.configuration.envFile)
     ) {
-      throw new Error('Invalid dotenv file name');
+      throw new Error('Invalid .env file name');
     }
   }
 

@@ -3,8 +3,6 @@ import { Encrypter } from './encrypter.service.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 
 Deno.test('encrypter module', async (test) => {
-  Deno.env.set('ENCRYPTION_KEY', 'test');
-
   const encrypter = inject(Encrypter);
 
   await test.step('encrypter properly hashes a string', async () => {

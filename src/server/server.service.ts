@@ -322,6 +322,13 @@ export class Server {
 
     Deno.env.set('PRODUCTION', flags.dev ? 'false' : 'true');
 
+    if (
+      this.configurator.getEnv<boolean>('TESTING') &&
+      !this.configurator.entries.encryption.key
+    ) {
+      this.configurator.entries.encryption.key = crypto.randomUUID();
+    }
+
     if (!this.configurator.entries.isDenoDeploy) {
       this.checkSystemRequirements();
 

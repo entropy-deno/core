@@ -4,7 +4,6 @@ import { Constructor } from '../utils/interfaces/constructor.interface.ts';
 import { Controller } from '../http/controller.class.ts';
 import { Encrypter } from '../encrypter/encrypter.service.ts';
 import { EnumValuesUnion } from '../utils/types/enum_values_union.type.ts';
-import { env } from '../configurator/functions/env.function.ts';
 import { ErrorHandler } from '../error_handler/error_handler.service.ts';
 import { errorPage } from '../error_handler/pages/error.page.ts';
 import { HttpError } from '../http/http_error.class.ts';
@@ -579,7 +578,10 @@ export class Router {
         );
       }
 
-      if (await request.isFormRequest() && !env<boolean>('TESTING')) {
+      if (
+        await request.isFormRequest() &&
+        !this.configurator.getEnv<boolean>('TESTING')
+      ) {
         const csrfToken = request.session.get<string>('@entropy/csrf_token');
 
         if (
