@@ -6,6 +6,12 @@ import { inject } from '../../injector/functions/inject.function.ts';
 import { RoutePath } from '../../router/types/route_path.type.ts';
 import { Router } from '../../router/router.service.ts';
 import { url } from '../../router/functions/url.function.ts';
+import { HttpStatus } from '../../http/enums/http_status.enum.ts';
+
+interface ResponseData {
+  statusCode: HttpStatus;
+  body: string;
+}
 
 const router = inject(Router);
 
@@ -13,7 +19,7 @@ export async function fetchRoute(
   path: RoutePath,
   controller: Constructor<Controller>,
   method = HttpMethod.Get,
-): Promise<string> {
+): Promise<ResponseData> {
   router.registerController(controller);
 
   const request = new Request(url(path), {
@@ -23,5 +29,8 @@ export async function fetchRoute(
   const httpRequest = new HttpRequest(request);
   const response = await router.respond(httpRequest);
 
-  return await response.text();
+  return {
+    body: await response.text(),
+    statusCode: response.status,
+  };
 }
