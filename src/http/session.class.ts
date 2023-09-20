@@ -104,7 +104,7 @@ export class Session implements AsyncDisposable {
     this.variables.set(key, value);
   }
 
-  async [Symbol.asyncDispose](): Promise<void> {
+  public async [Symbol.asyncDispose](): Promise<void> {
     await this.save();
   }
 }

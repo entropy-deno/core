@@ -473,7 +473,7 @@ export class Server implements Disposable {
     }
   }
 
-  [Symbol.dispose](): void {
+  public [Symbol.dispose](): void {
     this.logger.info('Server terminated');
   }
 }
