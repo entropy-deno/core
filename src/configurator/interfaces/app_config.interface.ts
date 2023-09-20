@@ -35,6 +35,9 @@ export interface AppConfig {
     sitemapExcludeUrls: RoutePath[];
     sitemapUrls: RoutePath[];
   };
+  session: {
+    lifetime: number;
+  };
   templateDirectives: TemplateDirective[];
   tls: {
     cert: string | false;

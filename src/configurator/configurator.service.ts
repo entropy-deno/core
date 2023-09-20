@@ -38,6 +38,9 @@ export class Configurator {
       sitemapExcludeUrls: [],
       sitemapUrls: [],
     },
+    session: {
+      lifetime: this.getEnv<number>('SESSION_LIFETIME') ?? 30,
+    },
     templateDirectives: [],
     tls: {
       cert: this.getEnv<string>('TLS_CERT') ?? false,

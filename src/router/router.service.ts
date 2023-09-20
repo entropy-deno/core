@@ -193,7 +193,14 @@ export class Router {
     });
 
     if (!('session_id' in request.cookies)) {
-      cookies.session_id = this.encrypter.generateUuid({ clean: true });
+      response.headers.append(
+        'set-cookie',
+        `session_id=${
+          this.encrypter.generateUuid({ clean: true })
+        }; SameSite=Lax; Max-Age=${
+          this.configurator.entries.session.lifetime * 24 * 3600
+        }`,
+      );
     }
 
     await request.session.save();
