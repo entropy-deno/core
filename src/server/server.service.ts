@@ -26,7 +26,7 @@ enum WebClientAlias {
   windows = 'explorer',
 }
 
-export class Server {
+export class Server implements Disposable {
   private readonly configurator = inject(Configurator);
 
   private readonly devServerCheckKey = '@entropy/dev_server';
@@ -471,5 +471,9 @@ export class Server {
     } catch (error) {
       this.errorHandler.handle(error as Error);
     }
+  }
+
+  [Symbol.dispose](): void {
+    this.logger.info('Server terminated');
   }
 }

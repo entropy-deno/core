@@ -42,8 +42,10 @@ export class TemplateCompiler {
         name: 'csrf',
         type: 'single',
         render: () => {
-          return `<input type="hidden" name="_csrf" value="${this.currentRequest
-            ?.session.get<string>('@entropy/csrf_token')}">`;
+          return `<input type="hidden" name="_csrf" value="${
+            this.currentRequest
+              ?.session.get<string>('@entropy/csrf_token')
+          }">`;
         },
       },
       {

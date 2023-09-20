@@ -196,7 +196,7 @@ export class Router {
       cookies.session_id = this.encrypter.generateUuid({ clean: true });
     }
 
-    request.session.save();
+    await request.session.save();
 
     for (const [cookie, cookieValue] of Object.entries(cookies)) {
       response.headers.append(

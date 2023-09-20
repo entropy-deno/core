@@ -1,7 +1,7 @@
 import { inject } from '../injector/functions/inject.function.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
 
-export class Session {
+export class Session implements AsyncDisposable {
   private readonly configurator = inject(Configurator);
 
   private isLoaded = false;
@@ -102,5 +102,9 @@ export class Session {
 
   public set<TValue>(key: string, value: TValue): void {
     this.variables.set(key, value);
+  }
+
+  async [Symbol.asyncDispose](): Promise<void> {
+    await this.save();
   }
 }
