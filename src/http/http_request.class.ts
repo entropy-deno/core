@@ -1,4 +1,4 @@
-import { getCookies } from 'https://deno.land/std@0.201.0/http/cookie.ts';
+import { getCookies } from 'https://deno.land/std@0.202.0/http/cookie.ts';
 import { Encrypter } from '../encrypter/encrypter.service.ts';
 import { HttpMethod } from './enums/http_method.enum.ts';
 import { inject } from '../injector/functions/inject.function.ts';
