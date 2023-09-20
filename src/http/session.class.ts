@@ -13,7 +13,10 @@ export class Session implements AsyncDisposable {
   constructor(private readonly id: string | null) {}
 
   private async readData(): Promise<void> {
-    if (this.isLoaded || this.configurator.entries.isDenoDeploy) {
+    if (
+      this.isLoaded || this.configurator.entries.isDenoDeploy ||
+      this.configurator.getEnv('TESTING')
+    ) {
       return;
     }
 
@@ -35,7 +38,10 @@ export class Session implements AsyncDisposable {
   }
 
   private async saveData(): Promise<void> {
-    if (this.configurator.entries.isDenoDeploy) {
+    if (
+      this.configurator.entries.isDenoDeploy ||
+      this.configurator.getEnv('TESTING')
+    ) {
       return;
     }
 
