@@ -18,7 +18,7 @@
   </h4>
   <br>
   <a href="https://deno.land/x/entropy" target="_blank">
-    <img src="https://shield.deno.dev/deno/%5E1.37.0" alt="Required lowest Deno version">
+    <img src="https://shield.deno.dev/deno/%5E1.37.0" alt="Required Deno version">
     &nbsp;
     <img src="https://shield.deno.dev/x/entropy" alt="Latest Entropy version">
   </a>
