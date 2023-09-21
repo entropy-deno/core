@@ -360,6 +360,8 @@ export class Router {
 
       default: {
         if (body instanceof ReadableStream || body instanceof Uint8Array) {
+          contentType = 'application/octet-stream';
+
           break;
         }
 
