@@ -28,9 +28,7 @@ export class Logger {
       return;
     }
 
-    const maxMessageLength = Deno.consoleSize().columns - badge.length -
-      (additionalInfo?.length ? additionalInfo.length + 1 : 0) - 2;
-
+    const maxMessageLength = Deno.consoleSize().columns - badge.length - 2;
     const plainMessage = message.replaceAll('%c', '');
     const exceedsSpace = plainMessage.length > maxMessageLength;
     const trimmedMessage = exceedsSpace
@@ -39,7 +37,6 @@ export class Logger {
 
     const dotsLength = exceedsSpace ? 0 : Deno.consoleSize().columns -
       plainMessage.length -
-      (additionalInfo?.length ?? 0) -
       badge.length - this.endPadding;
 
     const output = `%c${badge} %c${trimmedMessage}${exceedsSpace ? '...' : ''}${
