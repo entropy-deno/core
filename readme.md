@@ -61,10 +61,10 @@ sudo deno upgrade
 
 ## Security
 
-If you discovered any bug please open new issue / pull request in the
+If you discovered any bug, please open new issue / pull request in the
 [repository](https://github.com/entropy-deno/core) or email me:
 dom.rajkowski@gmail.com. In case of security vulnerability, please contact
-[me](https://github.com/dominiq007) privately.
+[me](https://github.com/dominiq007) directly.
 
 ## Information
 
@@ -75,5 +75,5 @@ dom.rajkowski@gmail.com. In case of security vulnerability, please contact
 
 ## License
 
-Entropy is an open-source framework licensed under the
+Entropy framework is open-source and it is licensed under the
 [MIT License](https://github.com/entropy-deno/core/blob/main/LICENSE).
