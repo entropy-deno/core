@@ -32,16 +32,6 @@ export abstract class Controller {
       file = `${file}.html`;
     }
 
-    try {
-      return new View(file, variables, options);
-    } catch (error) {
-      if (!(error instanceof Deno.errors.NotFound)) {
-        throw error;
-      }
-
-      throw new Error(
-        `View '${file}' does not exist`,
-      );
-    }
+    return new View(file, variables, options);
   }
 }

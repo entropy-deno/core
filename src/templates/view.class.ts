@@ -8,6 +8,16 @@ export class View {
   ) {}
 
   public async template(): Promise<string> {
-    return await Deno.readTextFile(this.file);
+    try {
+      return await Deno.readTextFile(this.file);
+    } catch (error) {
+      if (!(error instanceof Deno.errors.NotFound)) {
+        throw error;
+      }
+
+      throw new Error(
+        `View '${this.file}' does not exist`,
+      );
+    }
   }
 }
