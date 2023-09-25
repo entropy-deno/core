@@ -184,7 +184,7 @@ export class Router {
     );
 
     const response = new Response(parsedBody, {
-      status: statusCode,
+      status: parsedBody === null ? HttpStatus.NoContent : statusCode,
       headers: {
         'content-type': `${contentType}; charset=utf-8`,
         ...securityHeaders,
@@ -307,7 +307,7 @@ export class Router {
   private async parseResponseBody(
     request: HttpRequest,
     body: unknown,
-  ): Promise<{ body: string | ReadableStream; contentType: string }> {
+  ): Promise<{ body: string | null | ReadableStream; contentType: string }> {
     let contentType = 'text/html';
 
     if (body instanceof Promise) {
@@ -315,12 +315,17 @@ export class Router {
     }
 
     switch (true) {
-      case ['bigint', 'boolean', 'number', 'string', 'symbol', 'undefined']
+      case ['bigint', 'boolean', 'number', 'string', 'symbol']
         .includes(
           typeof body,
-        ) ||
-        body === null: {
+        ): {
         body = String(body);
+
+        break;
+      }
+
+      case typeof body === 'undefined': {
+        body = null;
 
         break;
       }
@@ -370,7 +375,7 @@ export class Router {
     }
 
     return {
-      body: body as string | ReadableStream,
+      body: body as string | null | ReadableStream,
       contentType,
     };
   }
