@@ -708,6 +708,12 @@ export class Router {
             const paramGroups = urlPattern.exec(request.url)?.pathname.groups ??
               {};
 
+            for (const [paramName, paramValue] of Object.entries(paramGroups)) {
+              if (paramValue === '') {
+                paramGroups[paramName] = undefined;
+              }
+            }
+
             if (paramPipes) {
               for (const [paramName, pipe] of Object.entries(paramPipes)) {
                 const transformed = inject(pipe).transform(
