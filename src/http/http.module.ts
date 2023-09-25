@@ -2,6 +2,7 @@ export * from './controller.class.ts';
 export * from './decorators/base_path.decorator.ts';
 export * from './decorators/cookies.decorator.ts';
 export * from './decorators/headers.decorator.ts';
+export * from './decorators/inject_request.decorator.ts';
 export * from './decorators/redirect.decorator.ts';
 export * from './decorators/render.decorator.ts';
 export * from './decorators/status_code.decorator.ts';
