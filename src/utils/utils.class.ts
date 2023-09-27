@@ -1,5 +1,5 @@
-import { fromFileUrl } from 'https://deno.land/std@0.202.0/path/mod.ts';
-import { resolve as resolvePath } from 'https://deno.land/std@0.202.0/path/mod.ts';
+import { fromFileUrl } from 'https://deno.land/std@0.203.0/path/mod.ts';
+import { resolve as resolvePath } from 'https://deno.land/std@0.203.0/path/mod.ts';
 
 export abstract class Utils {
   public static callerFile() {
