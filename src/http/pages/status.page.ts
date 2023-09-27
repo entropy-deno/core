@@ -11,7 +11,7 @@ export const statusPage = `<!doctype html>
     <link rel="preconnect" href="https://fonts.googleapis.com" [nonceProp]>
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Urbanist:wght@700&display=swap"
       [nonceProp]
     >
 
@@ -27,14 +27,14 @@ export const statusPage = `<!doctype html>
 
         :root {
           --bg: #030712;
-          --font-sans: 'Noto Sans', sans-serif;
+          --font-sans: 'Urbanist', sans-serif;
           --text: #f3f4f6;
           --theme: #4f46e5;
         }
 
         body {
           font-family: var(--font-sans);
-          font-size: 15px;
+          font-size: 16px;
           background: var(--bg);
           color: var(--text);
           display: grid;
@@ -49,14 +49,14 @@ export const statusPage = `<!doctype html>
 
         .header {
           line-height: 54px;
-          font-weight: 600;
-          letter-spacing: -1.2px;
+          font-weight: 700;
+          letter-spacing: -1px;
           text-align: center;
         }
 
         .header--small {
-          font-size: 30px !important;
-          letter-spacing: -1px;
+          font-size: 32px !important;
+          letter-spacing: -0.5px;
         }
 
         .text-theme {

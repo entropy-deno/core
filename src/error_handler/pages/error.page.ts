@@ -11,7 +11,7 @@ export const errorPage = `<!doctype html>
     <link rel="preconnect" href="https://fonts.googleapis.com" [nonceProp]>
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;700&family=Roboto+Mono&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;700&family=Roboto+Mono&display=swap"
       [nonceProp]
     >
 
@@ -29,7 +29,7 @@ export const errorPage = `<!doctype html>
           --bg: #030712;
           --bg-block: #111827;
           --font-mono: 'Roboto Mono', monospace;
-          --font-sans: 'Noto Sans', sans-serif;
+          --font-sans: 'Urbanist', sans-serif;
           --red: #f43f5e;
           --text: #f3f4f6;
           --text-gray: #b2b2b2;
@@ -38,7 +38,7 @@ export const errorPage = `<!doctype html>
 
         body {
           font-family: var(--font-sans);
-          font-size: 15px;
+          font-size: 16px;
           background: var(--bg);
           color: var(--text);
           display: grid;
@@ -80,8 +80,8 @@ export const errorPage = `<!doctype html>
         .header {
           font-size: 32px;
           line-height: 54px;
-          font-weight: 500;
-          letter-spacing: -1.2px;
+          font-weight: 700;
+          letter-spacing: -1px;
         }
 
         .trace {
