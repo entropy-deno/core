@@ -355,7 +355,7 @@ export class TemplateCompiler {
     for (
       const [wholeMatch, variableName, , iterableValue, , block] of matches
     ) {
-      let iterable = await this.renderNatively<unknown[]>(
+      let iterable = await this.renderNatively<unknown[] | number>(
         `return ${iterableValue};`,
       );
 
