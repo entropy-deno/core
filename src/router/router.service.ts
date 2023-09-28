@@ -514,6 +514,7 @@ export class Router {
         injectRequest,
         methods,
         middleware,
+        name,
         path,
         paramPipes,
         redirectTo,
@@ -555,6 +556,10 @@ export class Router {
           'middleware',
           controllerMethod,
         ) ?? middleware,
+        name: Reflector.getMetadata<string>(
+          'name',
+          controllerMethod,
+        ) ?? name,
         paramPipes: Reflector.getMetadata<
           Record<string, Constructor<Pipe>>
         >('paramPipes', controllerMethod) ?? paramPipes,
