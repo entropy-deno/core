@@ -827,10 +827,10 @@ export class Router {
   public routeUrl(route?: RoutePath | { name: string }): Url {
     let namedRoutePath = '';
 
-    if (typeof route === 'string') {
-      for (const route of this.routes) {
-        if (route.name === route.name) {
-          namedRoutePath = route.path;
+    if (typeof route !== 'string') {
+      for (const registeredRoute of this.routes) {
+        if (registeredRoute.name === route?.name) {
+          namedRoutePath = registeredRoute.path;
         }
       }
     }
