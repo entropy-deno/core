@@ -36,9 +36,9 @@
 
 ## Introducing Entropy
 
-Entropy is a modern and declarative backend development framework for Deno. It
-makes it easy to create fast and secure web applications with awesome developer
-experience.
+Entropy is a modern and declarative backend development framework for
+[Deno](https://deno.com). It makes it easy to create fast and secure web
+applications with awesome developer experience.
 
 > Entropy is currently in the `beta` stage. Although it is already suitable for
 > creating apps, you may still encounter some bugs and breaking changes.
@@ -71,7 +71,10 @@ dom.rajkowski@gmail.com. In case of security vulnerability, please contact
 - Documentation: [entropy.deno.dev](https://entropy.deno.dev/docs)
 - GitHub repository:
   [github.com/entropy-deno/core](https://github.com/entropy-deno/core)
+- GitHub organization:
+  [github.com/entropy-deno](https://github.com/entropy-deno)
 - Author: [Dominik Rajkowski](https://github.com/dominiq007)
+- License: [MIT License](https://github.com/entropy-deno/core/blob/main/LICENSE)
 
 ## License
 
