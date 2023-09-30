@@ -29,7 +29,7 @@ export const statusPage = `<!doctype html>
           --bg: #030712;
           --font-sans: 'Urbanist', sans-serif;
           --text: #f3f4f6;
-          --theme: #4f46e5;
+          --theme-light: #726bf0;
         }
 
         body {
@@ -48,6 +48,7 @@ export const statusPage = `<!doctype html>
         }
 
         .header {
+          font-size: 34px;
           line-height: 54px;
           font-weight: 700;
           letter-spacing: -1px;
@@ -55,17 +56,17 @@ export const statusPage = `<!doctype html>
         }
 
         .header--small {
-          font-size: 32px !important;
+          font-size: 32px;
           letter-spacing: -0.5px;
         }
 
         .text-theme {
-          color: var(--theme);
+          color: var(--theme-light);
         }
 
         @media (min-width: 800px) {
           .header--small {
-            font-size: 34px;
+            font-size: 48px;
           }
         }
       [/raw]
