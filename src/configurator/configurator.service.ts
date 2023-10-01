@@ -21,7 +21,6 @@ export class Configurator {
       exposedHeaders: [],
       maxAge: 0,
     },
-    defaultLocale: 'en',
     encryption: {
       key: this.getEnv<string>('ENCRYPTION_KEY') ?? crypto.randomUUID(),
     },
@@ -30,6 +29,10 @@ export class Configurator {
     isDenoDeploy: !!this.getEnv<string>('DENO_DEPLOYMENT_ID') ?? false,
     isProduction: (this.getEnv<boolean>('PRODUCTION') ?? false) ||
       (!!this.getEnv<string>('DENO_DEPLOYMENT_ID') ?? false),
+    locales: {
+      default: 'en',
+      supported: ['en'],
+    },
     logger: true,
     port: this.getEnv<number>('PORT') ?? 5050,
     seo: {
@@ -58,7 +61,7 @@ export class Configurator {
       throw new Error('Cookie max age must be greater than 0');
     }
 
-    if (!/^[a-z]{2}(-[A-Z]{2})?$/.test(this.configuration.defaultLocale)) {
+    if (!/^[a-z]{2}(-[A-Z]{2})?$/.test(this.configuration.locales.default)) {
       throw new Error(`App locale must follow the format 'aa' or 'aa-AA'`);
     }
 

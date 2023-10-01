@@ -19,7 +19,6 @@ export interface AppConfig {
     exposedHeaders: string[];
     maxAge: number;
   };
-  defaultLocale: string;
   encryption: {
     key: string;
   };
@@ -27,6 +26,10 @@ export interface AppConfig {
   host: string;
   isDenoDeploy: boolean;
   isProduction: boolean;
+  locales: {
+    default: string;
+    supported: string[];
+  };
   logger: boolean;
   port: number;
   seo: {

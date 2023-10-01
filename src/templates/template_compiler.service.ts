@@ -7,7 +7,6 @@ import { env } from '../configurator/functions/env.function.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { HttpRequest } from '../http/http_request.class.ts';
 import { TemplateDirective } from './interfaces/template_directive.interface.ts';
-import { translate } from '../localizator/functions/translate.function.ts';
 import { Utils } from '../utils/utils.class.ts';
 
 export class TemplateCompiler {
@@ -16,12 +15,10 @@ export class TemplateCompiler {
   private directives: TemplateDirective[] = [];
 
   private readonly functions = {
-    '__': translate,
     '$env': env,
     '$escape': Utils.escape,
     '$inject': inject,
     '$range': Utils.range,
-    '$translate': translate,
   };
 
   private currentRawContent: string[] = [];
@@ -291,8 +288,12 @@ export class TemplateCompiler {
     code: string,
     variables: Record<string, unknown> = {},
   ): Promise<TValue> {
-    const globalVariables = {
+    const globalData = {
+      __: (text: string, quantity = 1) =>
+        this.currentRequest?.translate(text, quantity) ?? text,
       $request: this.currentRequest,
+      $translate: (text: string, quantity = 1) =>
+        this.currentRequest?.translate(text, quantity) ?? text,
       ...Object.keys(constants).reduce((result, key) => ({
         ...result,
         [`$${key}`]: constants[key as keyof typeof constants],
@@ -302,13 +303,13 @@ export class TemplateCompiler {
     };
 
     const header = [
-      ...Object.keys(globalVariables),
+      ...Object.keys(globalData),
       ...Object.keys(variables),
       `return (async () => {${code}})();`,
     ];
 
     return await new Function(...header)(
-      ...Object.values(globalVariables),
+      ...Object.values(globalData),
     ) as TValue;
   }
 

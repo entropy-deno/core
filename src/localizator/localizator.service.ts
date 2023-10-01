@@ -4,31 +4,55 @@ import { inject } from '../injector/functions/inject.function.ts';
 export class Localizator {
   private readonly configurator = inject(Configurator);
 
-  private currentLocale = 'en';
+  private defaultLocale = 'en';
 
-  private translations = new Map<string, string | string[]>();
+  private translations = new Map<string, Map<string, string | string[]>>();
 
   private async loadTranslations(): Promise<void> {
-    try {
-      const locales = JSON.parse(
-        await Deno.readTextFile(`locales/${this.currentLocale}.json`),
-      );
-
-      for (const [key, value] of Object.entries<string | string[]>(locales)) {
-        this.translations.set(key, value);
+    for (const locale of this.configurator.entries.locales.supported) {
+      if (locale === this.defaultLocale) {
+        continue;
       }
-    } catch (error) {
-      if (!(error instanceof Deno.errors.NotFound)) {
-        throw error;
+
+      try {
+        const locales = JSON.parse(
+          await Deno.readTextFile(`locales/${locale}.json`),
+        );
+
+        for (const [key, value] of Object.entries<string | string[]>(locales)) {
+          if (!this.translations.has(locale)) {
+            this.translations.set(locale, new Map());
+          }
+
+          this.translations.get(locale)!.set(key, value);
+        }
+      } catch (error) {
+        if (!(error instanceof Deno.errors.NotFound)) {
+          throw error;
+        }
+
+        throw new Error(
+          `Locale '${locale}' has no corresponding translation file`,
+        );
       }
     }
   }
 
-  public all(): Record<string, string | string[]> {
-    return Object.fromEntries(this.translations);
+  public all(locale: string): Record<string, string | string[]> {
+    return Object.fromEntries(
+      locale === this.defaultLocale
+        ? new Map()
+        : this.translations.get(locale) ?? new Map(),
+    );
   }
 
-  public get(text: string, quantity = 1): string {
+  public async setup(): Promise<void> {
+    this.defaultLocale = this.configurator.entries.locales.default;
+
+    await this.loadTranslations();
+  }
+
+  public translate(locale: string, text: string, quantity = 1): string {
     if (quantity > 1) {
       const key = [...this.translations.keys()].find((key) => {
         return key.startsWith(`${text}|`);
@@ -40,25 +64,9 @@ export class Localizator {
         );
       }
 
-      return this.translations.get(key)?.[0] ?? text;
+      return this.translations.get(locale)?.get(key)?.[0] ?? text;
     }
 
-    return (this.translations.get(text) as string) ?? text;
-  }
-
-  public async setRequestLocale(locale: string): Promise<void> {
-    if (this.currentLocale === locale) {
-      return;
-    }
-
-    this.currentLocale = locale;
-
-    await this.loadTranslations();
-  }
-
-  public async setup(): Promise<void> {
-    this.currentLocale = this.configurator.entries.defaultLocale;
-
-    await this.loadTranslations();
+    return (this.translations.get(locale)?.get(text) as string) ?? text;
   }
 }

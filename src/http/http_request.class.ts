@@ -2,12 +2,15 @@ import { getCookies } from 'https://deno.land/std@0.203.0/http/cookie.ts';
 import { Encrypter } from '../encrypter/encrypter.service.ts';
 import { HttpMethod } from './enums/http_method.enum.ts';
 import { inject } from '../injector/functions/inject.function.ts';
+import { Localizator } from '../localizator/localizator.service.ts';
 import { Session } from './session.class.ts';
 
 export class HttpRequest {
   private readonly encrypter = inject(Encrypter);
 
   private readonly cspNonce = this.encrypter.generateRandomString(24);
+
+  private readonly localizator = inject(Localizator);
 
   private sessionObject: Session | null = null;
 
@@ -77,11 +80,11 @@ export class HttpRequest {
     ].includes(await this.method());
   }
 
-  public isSecure(): boolean {
+  public get isSecure(): boolean {
     return ['https', 'wss'].includes(this.protocol);
   }
 
-  public locale(): string | string[] {
+  public get locale(): string {
     return this.header('accept-language')?.slice(0, 2) ?? 'en';
   }
 
@@ -157,6 +160,10 @@ export class HttpRequest {
     }
 
     return this.sessionObject;
+  }
+
+  public translate(text: string, quantity = 1): string {
+    return this.localizator.translate(this.locale, text, quantity);
   }
 
   public get url(): string {
