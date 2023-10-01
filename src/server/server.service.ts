@@ -122,25 +122,29 @@ export class Server implements Disposable {
     let statusColor: 'blue' | 'green' | 'orange' | 'red' = 'blue';
 
     switch (true) {
-      case status >= 100 && status < 200:
+      case status >= 100 && status < 200: {
         statusColor = 'blue';
 
         break;
+      }
 
-      case status >= 200 && status < 400:
+      case status >= 200 && status < 400: {
         statusColor = 'green';
 
         break;
+      }
 
-      case status >= 400 && status < 500:
+      case status >= 400 && status < 500: {
         statusColor = 'orange';
 
         break;
+      }
 
-      case status >= 500 && status < 600:
+      case status >= 500 && status < 600: {
         statusColor = 'red';
 
         break;
+      }
     }
 
     const responseTime = (performance.now() - performanceTimerStart).toFixed(1);

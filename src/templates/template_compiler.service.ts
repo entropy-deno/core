@@ -59,13 +59,9 @@ export class TemplateCompiler {
         name: 'embed',
         type: 'single',
         render: async (files: string | string[], minify = false) => {
-          if (!Array.isArray(files)) {
-            files = [files];
-          }
-
           let result = '';
 
-          for (const file of files) {
+          for (const file of Array.isArray(files) ? files : [files]) {
             if (
               !file.endsWith('.css') && !file.endsWith('.js') &&
               !file.endsWith('.svg')
@@ -81,7 +77,7 @@ export class TemplateCompiler {
               const content = await Deno.readTextFile(path);
 
               switch (file.split('.').pop()) {
-                case 'css':
+                case 'css': {
                   result += `<style nonce="${
                     this.currentRequest?.nonce ?? ''
                   }">${
@@ -89,8 +85,9 @@ export class TemplateCompiler {
                   }</style>`;
 
                   break;
+                }
 
-                case 'js':
+                case 'js': {
                   result += `<script nonce="${
                     this.currentRequest?.nonce ?? ''
                   }">${
@@ -98,13 +95,15 @@ export class TemplateCompiler {
                   }</script>`;
 
                   break;
+                }
 
-                case 'svg':
+                case 'svg': {
                   result += `${
                     minify ? content.replaceAll(/\n|\t|(\r\n)/g, '') : content
                   }`;
 
                   break;
+                }
               }
             } catch (error) {
               if (!(error instanceof Deno.errors.NotFound)) {
