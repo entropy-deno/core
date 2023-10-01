@@ -58,16 +58,14 @@ export const statusPage = `<!doctype html>
         .header--small {
           font-size: 32px;
           letter-spacing: -0.5px;
+
+          @media (min-width: 800px) {
+            font-size: 48px;
+          }
         }
 
         .text-theme {
           color: var(--theme-light);
-        }
-
-        @media (min-width: 800px) {
-          .header--small {
-            font-size: 48px;
-          }
         }
       [/raw]
     </style>

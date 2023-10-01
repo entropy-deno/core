@@ -103,10 +103,10 @@ export const errorPage = `<!doctype html>
           border-radius: 10px;
           background: var(--bg);
           max-width: 400px;
-        }
 
-        .trace__entry:first-of-type {
-          background: var(--theme);
+          &:first-of-type {
+            background: var(--theme);
+          }
         }
 
         .trace__entry-file {
@@ -130,10 +130,10 @@ export const errorPage = `<!doctype html>
           transition: opacity 0.2s ease;
           align-self: flex-end;
           margin-top: 72px;
-        }
 
-        .button:hover {
-          opacity: 0.9;
+          &:hover {
+            opacity: 0.9;
+          }
         }
       [/raw]
     </style>
