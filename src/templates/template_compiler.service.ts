@@ -143,9 +143,9 @@ export class TemplateCompiler {
       {
         name: 'json',
         type: 'single',
-        render: (json: unknown, prettyPrint = false) => {
+        render: (json: unknown, prettyPrint = false, indent = 2) => {
           try {
-            return JSON.stringify(json, undefined, prettyPrint ? 2 : 0);
+            return JSON.stringify(json, undefined, prettyPrint ? indent : 0);
           } catch {
             throw new Error(`Invalid JSON data '${String(json).slice(0, 32)}'`);
           }
