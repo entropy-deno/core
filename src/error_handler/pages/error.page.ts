@@ -8,15 +8,15 @@ export const errorPage = `<!doctype html>
 
     <title>Error: {{ error.message }}</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" [nonceProp]>
+    <link rel="preconnect" href="https://fonts.googleapis.com" @nonceProp>
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;700&family=Roboto+Mono&display=swap"
-      [nonceProp]
+      @nonceProp
     >
 
-    <style [nonceProp]>
-      [raw]
+    <style @nonceProp>
+      @raw
         *,
         *::before,
         *::after {
@@ -135,7 +135,7 @@ export const errorPage = `<!doctype html>
             opacity: 0.9;
           }
         }
-      [/raw]
+      @/raw
     </style>
   </head>
 
@@ -155,7 +155,7 @@ export const errorPage = `<!doctype html>
       <section class="trace">
         <h2 class="trace__header">Thrown in:</h2>
 
-        [each (entry in stackTrace ?? [])]
+        @each (entry in stackTrace ?? [])
           <div class="trace__entry">
             <p class="trace__entry-caller">
               {{ entry.split(' ')[0] }}
@@ -171,13 +171,13 @@ export const errorPage = `<!doctype html>
               }}
             </p>
           </div>
-        [/each]
+        @/each
       </section>
 
       <button class="button" id="reload">Reload</button>
     </main>
 
-    <script [nonceProp]>
+    <script @nonceProp>
       const reloadButton = document.getElementById('reload');
 
       reloadButton.addEventListener('click', () => {

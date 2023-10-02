@@ -8,15 +8,15 @@ export const statusPage = `<!doctype html>
 
     <title>{{ message }} • {{ statusCode }}</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" [nonceProp]>
+    <link rel="preconnect" href="https://fonts.googleapis.com" @nonceProp>
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Urbanist:wght@700&display=swap"
-      [nonceProp]
+      @nonceProp
     >
 
-    <style [nonceProp]>
-      [raw]
+    <style @nonceProp>
+      @raw
         *,
         *::before,
         *::after {
@@ -67,7 +67,7 @@ export const statusPage = `<!doctype html>
         .text-theme {
           color: var(--theme-light);
         }
-      [/raw]
+      @/raw
     </style>
   </head>
 

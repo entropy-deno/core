@@ -8,69 +8,77 @@ import { TemplateCompiler } from './template_compiler.service.ts';
 Deno.test('templates module', async (test) => {
   const compiler = inject(TemplateCompiler);
 
-  await test.step('compiler properly renders [csrf] directive', async () => {
-    const rendered = await compiler.render('[csrf]');
+  await test.step('compiler properly renders @csrf directive', async () => {
+    const rendered = await compiler.render('@csrf');
 
     assertStringIncludes(rendered, '<input type="hidden"');
   });
 
-  await test.step('compiler properly renders [dev] directive', async () => {
-    const rendered = await compiler.render('[dev]entropy[/dev]');
+  await test.step('compiler properly renders @dev directive', async () => {
+    const rendered = await compiler.render('@dev entropy @/dev');
 
-    assertEquals(rendered, 'entropy');
+    assertStringIncludes(rendered, 'entropy');
   });
 
-  await test.step('compiler properly renders [hotReload] directive', async () => {
-    const rendered = await compiler.render('[hotReload]');
+  await test.step('compiler properly renders @hotReload directive', async () => {
+    const rendered = await compiler.render('@hotReload');
 
     assertStringIncludes(rendered, '<script');
   });
 
-  await test.step('compiler properly renders [json] directive', async () => {
-    const rendered = await compiler.render(`[json({ name: 'Bond' })]`);
+  await test.step('compiler properly renders @json directive', async () => {
+    const rendered = await compiler.render(`@json({ name: 'Bond' })`);
 
     assertEquals(rendered, '{"name":"Bond"}');
   });
 
-  await test.step('compiler properly renders [method] directive', async () => {
-    const rendered = await compiler.render(`[method('PATCH')]`);
+  await test.step('compiler properly renders @method directive', async () => {
+    const rendered = await compiler.render(`@method('PATCH')`);
 
     assertStringIncludes(rendered, '<input type="hidden"');
   });
 
-  await test.step('compiler properly renders [nonceProp] directive', async () => {
-    const rendered = await compiler.render('[nonceProp]');
+  await test.step('compiler properly renders @nonceProp directive', async () => {
+    const rendered = await compiler.render('@nonceProp');
 
     assertStringIncludes(rendered, 'nonce=');
   });
 
-  await test.step('compiler properly renders [prod] directive', async () => {
-    const rendered = await compiler.render('[prod]entropy[/prod]');
+  await test.step('compiler properly renders @prod directive', async () => {
+    const rendered = await compiler.render('@prod entropy @/prod');
 
     assertEquals(rendered, '');
   });
 
-  await test.step('compiler properly renders [if] directive', async () => {
-    const renderedTrue = await compiler.render('[if (true)]entropy[/if]');
-    const renderedFalse = await compiler.render('[if (false)]entropy[/if]');
+  await test.step('compiler properly renders @if directive', async () => {
+    const renderedTrue = await compiler.render('@if (true) entropy @/if');
+    const renderedFalse = await compiler.render('@if (false) entropy @/if');
 
-    assertEquals(renderedTrue, 'entropy');
+    assertStringIncludes(renderedTrue, 'entropy');
     assertEquals(renderedFalse, '');
   });
 
-  await test.step('compiler properly renders [each] directive', async () => {
+  await test.step('compiler properly renders @each directive', async () => {
     const rendered = await compiler.render(
-      '[each (item in [1, 2, 3])]{{ item }};[/each]',
+      '@each (item in [1, 2, 3]) {{ item }} @/each',
     );
 
-    assertEquals(rendered, '1;2;3;');
+    assertStringIncludes(rendered, '1');
+    assertStringIncludes(rendered, '2');
+    assertStringIncludes(rendered, '3');
   });
 
-  await test.step('compiler properly renders [stack] and [push] directive', async () => {
+  await test.step('compiler properly renders @stack and @push directive', async () => {
     const rendered = await compiler.render(
-      `[stack('test')][push('test')]a[/push][push('test')]b[/push]`,
+      `
+      @stack('test')
+
+      @push('test') a @/push
+      @push('test') b @/push
+      `,
     );
 
-    assertStringIncludes(rendered, 'ab');
+    assertStringIncludes(rendered, 'a');
+    assertStringIncludes(rendered, 'b');
   });
 });

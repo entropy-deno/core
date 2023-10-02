@@ -162,17 +162,17 @@ export class TemplateCompiler {
         },
       },
       {
-        name: 'nonce',
-        type: 'single',
-        render: () => {
-          return this.currentRequest?.nonce ?? '';
-        },
-      },
-      {
         name: 'nonceProp',
         type: 'single',
         render: () => {
           return `nonce="${this.currentRequest?.nonce ?? ''}"`;
+        },
+      },
+      {
+        name: 'nonce',
+        type: 'single',
+        render: () => {
+          return this.currentRequest?.nonce ?? '';
         },
       },
       {
@@ -264,7 +264,7 @@ export class TemplateCompiler {
               this.currentRequest,
             );
 
-            return compiledLayout.replaceAll('[slot]', content);
+            return compiledLayout.replaceAll('@slot', content);
           } catch {
             throw new Error(
               `View layout '${layout}' does not exist`,
@@ -349,12 +349,10 @@ export class TemplateCompiler {
 
   private async parseEachDirectives(): Promise<void> {
     const matches = this.currentTemplate.matchAll(
-      /\[each *?\((.*?) (in|of) (.*)\)\](\n|\r\n)?((.*?|\s*?)*?)\[\/each\]/gm,
+      /@each\s*\((.*?)\s*(?:in|of)\s*(.*)\)\s+((?:.|\s)*?)@\/each/gm,
     ) ?? [];
 
-    for (
-      const [wholeMatch, variableName, , iterableValue, , block] of matches
-    ) {
+    for (const [wholeMatch, variableName, iterableValue, block] of matches) {
       let iterable = await this.renderNatively<unknown[] | number>(
         `return ${iterableValue};`,
       );
@@ -366,7 +364,7 @@ export class TemplateCompiler {
       let result = '';
       let iterator = 0;
 
-      const [blockContent, , elseContent] = block.split(/\[(else|empty)\]/);
+      const [blockContent, , elseContent] = block.split(/@(else|empty)/);
 
       if (!Object.keys(iterable).length) {
         this.currentTemplate = this.currentTemplate.replace(
@@ -412,17 +410,16 @@ export class TemplateCompiler {
   }
 
   private async parseIfDirectives(): Promise<void> {
-    const matches = this.currentTemplate.matchAll(
-      /\[if ?(.*?)\](\n|\r\n*?)?((.|\n|\r\n)*?)\[\/if\]/gm,
-    ) ??
-      [];
+    const matches =
+      this.currentTemplate.matchAll(/@if\s*\((.*)\)\s+((?:.|\s)*?)@\/if/gm) ??
+        [];
 
-    for (const [wholeMatch, conditionString, , content] of matches) {
+    for (const [wholeMatch, conditionString, content] of matches) {
       const condition = await this.renderNatively(
         `return ${conditionString};`,
       );
 
-      const [ifContent, elseContent] = content.split('[else]');
+      const [ifContent, elseContent] = content.split('@else');
 
       if (condition) {
         this.currentTemplate = this.currentTemplate.replace(
@@ -441,14 +438,12 @@ export class TemplateCompiler {
   }
 
   private parseRawDirectives(): void {
-    const matches = this.currentTemplate.matchAll(
-      /\[raw\](\n|\r\n)?((.*?|\s*?)*?)\[\/raw\]/gm,
-    ) ??
-      [];
+    const matches =
+      this.currentTemplate.matchAll(/@raw\s+((?:.|\s)*?)@\/raw/gm) ?? [];
 
     let count = 0;
 
-    for (const [wholeMatch, , content] of matches) {
+    for (const [wholeMatch, content] of matches) {
       this.currentTemplate = this.currentTemplate.replace(
         wholeMatch,
         `$_raw${count}`,
@@ -462,10 +457,10 @@ export class TemplateCompiler {
 
   private async parseSwitchDirectives(): Promise<void> {
     const matches = this.currentTemplate.matchAll(
-      /\[switch ?(.*?)\](\n|\r\n*?)?((.|\n|\r\n)*?)\[\/switch\]/gm,
+      /@switch\s*\((.*)\)\s+((?:.|\s)*?)@\/switch/gm,
     ) ?? [];
 
-    for (const [wholeMatch, conditionString, , casesString] of matches) {
+    for (const [wholeMatch, conditionString, casesString] of matches) {
       const condition = await this.renderNatively(
         `return ${conditionString};`,
       );
@@ -475,11 +470,11 @@ export class TemplateCompiler {
       let defaultCaseValue: string | null = null;
 
       const caseMatches = casesString.matchAll(
-        /\[(case|default) ?(.*?)\](\n|\r\n*?)?((.|\n|\r\n)*?)\[\/(case|default)\]/gm,
+        /@(case|default)\s*\((.*)\)\s+((?:.|\s)*?)@\/(case|default)/gm,
       );
 
       for (
-        const [, caseType, caseConditionString, , caseContent] of caseMatches
+        const [, caseType, caseConditionString, caseContent] of caseMatches
       ) {
         if (caseType === 'default') {
           if (defaultCaseValue) {
@@ -493,7 +488,7 @@ export class TemplateCompiler {
           continue;
         }
 
-        const caseRegex = /\[case ?(.*?)\]/g;
+        const caseRegex = /@case ?(.*?)/g;
         const cleanCaseContent = caseContent.replaceAll(caseRegex, '');
 
         cases.set(
@@ -574,7 +569,7 @@ export class TemplateCompiler {
     this.currentOptions = options;
     this.currentRawContent = [];
     this.currentRequest = request;
-    this.currentTemplate = template;
+    this.currentTemplate = template.replaceAll('\r\n', '\n');
     this.currentVariables = variables;
 
     this.parseRawDirectives();
@@ -587,9 +582,9 @@ export class TemplateCompiler {
 
     for (const directive of this.directives) {
       const pattern = directive.type === 'single'
-        ? new RegExp(`\\[${directive.name} *?(\\((.*?)\\))?\\]`, 'g')
+        ? new RegExp(`@${directive.name}\s*(\\((.*?)\\))?`, 'g')
         : new RegExp(
-          `\\[${directive.name} *?(\\((.*?)\\))?\\](\n|\r\n*?)?((.|\n|\r\n)*?)\\[\\/${directive.name}\\]`,
+          `@${directive.name}\\s*(\\((.*?)\\))?\\s+((?:.|\\s)*?)@\\/${directive.name}`,
           'gm',
         );
 
@@ -597,7 +592,7 @@ export class TemplateCompiler {
         this.currentTemplate.matchAll(directive.pattern ?? pattern) ??
           [];
 
-      for (const [expression, hasArguments, args, , blockContent] of matches) {
+      for (const [expression, hasArguments, args, blockContent] of matches) {
         const resolvedArguments = hasArguments
           ? await this.renderNatively<unknown[]>(`return ${`[${args}]`};`)
           : [];
