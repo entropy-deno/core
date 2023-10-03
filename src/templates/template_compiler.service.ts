@@ -560,6 +560,21 @@ export class TemplateCompiler {
     }
   }
 
+  private validateSyntax(): void {
+    for (
+      const directive of [
+        ...this.directives,
+        { name: 'each' },
+        { name: 'if' },
+        { name: 'switch' },
+      ]
+    ) {
+      if (this.currentTemplate.includes(`@${directive.name}`)) {
+        throw new Error(`Invalid template @${directive.name} directive syntax`);
+      }
+    }
+  }
+
   public async $compile(
     template: string,
     variables: Record<string, unknown> = {},
@@ -611,6 +626,7 @@ export class TemplateCompiler {
       }
     }
 
+    this.validateSyntax();
     this.restoreRawContent();
 
     return this.currentTemplate;
