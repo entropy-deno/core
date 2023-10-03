@@ -66,6 +66,7 @@ export const errorPage = `<!doctype html>
 
         .info__badge {
           font-size: 15px;
+          font-weight: 500;
           background: var(--red);
           padding: 6px 12px;
           border-radius: 8px;
@@ -87,13 +88,13 @@ export const errorPage = `<!doctype html>
         .trace {
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          gap: 10px;
           margin: 30px 0;
         }
 
         .trace__header {
           margin-bottom: 8px;
-          font-size: 18px;
+          font-size: 16px;
           opacity: 0.7;
           font-weight: 400;
         }
@@ -121,7 +122,9 @@ export const errorPage = `<!doctype html>
           color: var(--text);
           padding: 12px 16px;
           border-radius: 12px;
-          display: block;
+          display: flex;
+          align-items: center;
+          gap: 4px;
           text-decoration: none;
           font: inherit;
           margin-top: 12px;
@@ -133,6 +136,11 @@ export const errorPage = `<!doctype html>
 
           &:hover {
             opacity: 0.9;
+          }
+
+          & svg {
+            width: 18px;
+            height: 18px;
           }
         }
       @/raw
@@ -174,7 +182,16 @@ export const errorPage = `<!doctype html>
         @/each
       </section>
 
-      <button class="button" id="reload">Reload</button>
+      <button class="button" id="reload">
+        Reload
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
+          />
+        </svg>
+      </button>
     </main>
 
     <script @nonceProp>
