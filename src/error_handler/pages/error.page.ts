@@ -82,7 +82,7 @@ export const errorPage = `<!doctype html>
           font-size: 32px;
           line-height: 54px;
           font-weight: 700;
-          letter-spacing: -1px;
+          letter-spacing: -0.5px;
         }
 
         .trace {

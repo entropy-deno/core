@@ -229,7 +229,7 @@ export class TemplateCompiler {
             return compiledPartial;
           } catch {
             throw new Error(
-              `View partial '${partial}' does not exist`,
+              `View partial '${partial.split('/').pop()}' does not exist`,
             );
           }
         },
@@ -267,7 +267,7 @@ export class TemplateCompiler {
             return compiledLayout.replaceAll('@slot', content);
           } catch {
             throw new Error(
-              `View layout '${layout}' does not exist`,
+              `View layout '${layout.split('/').pop()}' does not exist`,
             );
           }
         },
