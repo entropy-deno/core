@@ -16,7 +16,9 @@ export class View {
       }
 
       throw new Error(
-        `View '${this.file}' does not exist`,
+        `View '${
+          this.file.split('.atom.html')[0].split('/').pop()
+        }' does not exist`,
       );
     }
   }

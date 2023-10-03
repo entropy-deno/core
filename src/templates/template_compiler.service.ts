@@ -108,7 +108,7 @@ export class TemplateCompiler {
               }
 
               throw new Error(
-                `File for embedding '${file}' does not exist`,
+                `Static embedded file '${file}' does not exist`,
               );
             }
           }
