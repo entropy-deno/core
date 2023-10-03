@@ -28,8 +28,8 @@ export abstract class Controller {
 
     file = Utils.resolveViewFile(caller, file);
 
-    if (!file.endsWith('.html')) {
-      file = `${file}.html`;
+    if (!file.endsWith('.atom.html')) {
+      file = `${file}.atom.html`;
     }
 
     return new View(file, variables, options);

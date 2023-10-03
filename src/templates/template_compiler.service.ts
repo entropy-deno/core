@@ -209,7 +209,7 @@ export class TemplateCompiler {
               this.currentOptions.file && partial[0] === '.'
                 ? `${this.currentOptions.file}/..`
                 : 'views'
-            }/${partial}.html`,
+            }/${partial}.atom.html`,
           );
 
           try {
@@ -247,7 +247,7 @@ export class TemplateCompiler {
               this.currentOptions.file && layout[0] === '.'
                 ? `${this.currentOptions.file}/..`
                 : 'views'
-            }/${layout}.html`,
+            }/${layout}.atom.html`,
           );
 
           try {

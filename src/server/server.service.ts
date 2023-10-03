@@ -452,7 +452,7 @@ export class Server implements Disposable {
                 const path = event.paths[0];
 
                 switch (true) {
-                  case (path.includes('src') && path.includes('.html')) ||
+                  case (path.includes('src') && path.includes('.atom.html')) ||
                     path.includes('views'):
                     this.logger.log('View reload request...', {
                       badge: 'Hot reload',

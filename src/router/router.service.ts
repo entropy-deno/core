@@ -661,7 +661,9 @@ export class Router {
             }
 
             if (view) {
-              const file = view.endsWith('.html') ? view : `${view}.html`;
+              const file = view.endsWith('.atom.html')
+                ? view
+                : `${view}.atom.html`;
 
               try {
                 return await this.createResponse(
