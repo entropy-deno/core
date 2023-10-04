@@ -474,8 +474,12 @@ export class TemplateCompiler {
       );
 
       for (
-        const [, caseType, caseConditionString, caseContent] of caseMatches
+        const [, caseType, caseConditionString, caseContent, closingCaseType] of caseMatches
       ) {
+        if (caseType !== closingCaseType) {
+          throw new Error('@switch directive case block not closed');
+        }
+
         if (caseType === 'default') {
           if (defaultCaseValue) {
             throw new Error(
