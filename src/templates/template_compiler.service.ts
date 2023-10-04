@@ -483,7 +483,7 @@ export class TemplateCompiler {
         if (caseType === 'default') {
           if (defaultCaseValue) {
             throw new Error(
-              '[switch] directive can only have one default case',
+              '@switch directive can only have one default case',
             );
           }
 
