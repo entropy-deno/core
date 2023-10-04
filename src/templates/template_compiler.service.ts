@@ -470,7 +470,7 @@ export class TemplateCompiler {
       let defaultCaseValue: string | null = null;
 
       const caseMatches = casesString.matchAll(
-        /@(case|default)\s*\((.*)\)\s+((?:.|\s)*?)@\/(case|default)/gm,
+        /@(case|default)\s*\((.*)\)\:?\s+((?:.|\s)*?)@\/(case|default)/gm,
       );
 
       for (
