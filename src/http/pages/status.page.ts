@@ -48,7 +48,6 @@ export const statusPage = `<!doctype html>
         }
 
         .header {
-          font-size: 34px;
           line-height: 54px;
           font-weight: 700;
           letter-spacing: -1px;
@@ -58,10 +57,6 @@ export const statusPage = `<!doctype html>
         .header--small {
           font-size: 32px;
           letter-spacing: -0.5px;
-
-          @media (min-width: 800px) {
-            font-size: 48px;
-          }
         }
 
         .text-theme {
