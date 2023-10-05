@@ -227,7 +227,11 @@ export class TemplateCompiler {
             );
 
             return compiledPartial;
-          } catch {
+          } catch (error) {
+            if (!(error instanceof Deno.errors.NotFound)) {
+              throw error;
+            }
+
             throw new Error(
               `View partial '${partial.split('/').pop()}' does not exist`,
             );
@@ -265,7 +269,11 @@ export class TemplateCompiler {
             );
 
             return compiledLayout.replaceAll('@slot', content);
-          } catch {
+          } catch (error) {
+            if (!(error instanceof Deno.errors.NotFound)) {
+              throw error;
+            }
+
             throw new Error(
               `View layout '${layout.split('/').pop()}' does not exist`,
             );
