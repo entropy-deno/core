@@ -474,7 +474,8 @@ export class TemplateCompiler {
       );
 
       for (
-        const [, caseType, caseConditionString, caseContent, closingCaseType] of caseMatches
+        const [, caseType, caseConditionString, caseContent, closingCaseType]
+          of caseMatches
       ) {
         if (caseType !== closingCaseType) {
           throw new Error('@switch directive case block not closed');
@@ -655,6 +656,17 @@ export class TemplateCompiler {
   }
 
   public registerDirective(directive: TemplateDirective): void {
+    for (const registeredDirective of this.directives) {
+      if (
+        registeredDirective.name === directive.name ||
+        ['each', 'if', 'switch'].includes(directive.name)
+      ) {
+        throw new Error(
+          `Template directive '${directive.name}' already exists`,
+        );
+      }
+    }
+
     this.directives.push(directive);
   }
 
