@@ -278,6 +278,14 @@ export class Validator {
   }
 
   public registerRule(rule: ValidationRule): void {
+    for (const registeredRule of this.rules) {
+      if (registeredRule.name === rule.name) {
+        throw new Error(
+          `Validator rule '${rule.name}' already exists`,
+        );
+      }
+    }
+
     this.rules.push(rule);
   }
 
