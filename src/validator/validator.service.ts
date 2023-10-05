@@ -332,7 +332,7 @@ export class Validator {
 
           errors[fieldName].push(
             this.localizator
-              .get(ruleObject.errorMessage)
+              .translate(request.locale, ruleObject.errorMessage)
               .replaceAll(':field', fieldName)
               .replaceAll(
                 ':value',
