@@ -37,11 +37,13 @@ Deno.test('templates module', async (test) => {
   });
 
   await test.step('compiler properly renders @if directive', async () => {
-    const renderedTrue = await compiler.render('@if (true) entropy @/if');
-    const renderedFalse = await compiler.render('@if (false) entropy @/if');
+    const renderedTrue = await compiler.render('@if (true) yes @/if');
+    const renderedFalse = await compiler.render('@if (false) yes @/if');
+    const renderedElse = await compiler.render('@if (false) yes @else no @/if');
 
-    assertStringIncludes(renderedTrue, 'entropy');
+    assertStringIncludes(renderedTrue, 'yes');
     assertEquals(renderedFalse, '');
+    assertStringIncludes(renderedElse, 'no');
   });
 
   await test.step('compiler properly renders @json directive', async () => {
@@ -102,5 +104,23 @@ Deno.test('templates module', async (test) => {
     );
 
     assertStringIncludes(rendered, '2');
+  });
+
+  await test.step('compiler exposes $env function', async () => {
+    const rendered = await compiler.render(`{{ $env('TESTING') }}`);
+
+    assertEquals(rendered, 'true');
+  });
+
+  await test.step('compiler exposes $escape function', async () => {
+    const rendered = await compiler.render(`{{# $escape('<div></div>') }}`);
+
+    assertEquals(rendered, '&lt;div&gt;&lt;/div&gt;');
+  });
+
+  await test.step('compiler exposes $range function', async () => {
+    const rendered = await compiler.render(`{{ $range(2, 6).length }}`);
+
+    assertEquals(rendered, '5');
   });
 });
