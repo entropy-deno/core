@@ -233,6 +233,17 @@ export class Server implements Disposable {
     return response;
   }
 
+  private registerModules(modules: Constructor<Module>[]): void {
+    for (const module of modules) {
+      const instance = inject(module);
+
+      this.router.registerControllers(instance.controllers ?? []);
+      this.webSocketChannels.push(...instance.channels ?? []);
+
+      this.registerModules(instance.submodules ?? []);
+    }
+  }
+
   private async setup(): Promise<void> {
     this.router.registerControllers(this.options.controllers ?? []);
     this.webSocketChannels.push(...this.options.channels ?? []);
@@ -241,19 +252,12 @@ export class Server implements Disposable {
       this.configurator.entries.templateDirectives,
     );
 
-    for (
-      const module of [
-        ...(this.options.modules ?? []),
-        ...(this.options.plugins?.map((plugin) => plugin.modules).filter((
-          module,
-        ) => module !== undefined) ?? []),
-      ] as Constructor<Module>[]
-    ) {
-      const instance = inject(module);
-
-      this.router.registerControllers(instance.controllers ?? []);
-      this.webSocketChannels.push(...instance.channels ?? []);
-    }
+    this.registerModules([
+      ...(this.options.modules ?? []),
+      ...(this.options.plugins?.map((plugin) => plugin.modules).filter((
+        module,
+      ) => module !== undefined) ?? []),
+    ] as Constructor<Module>[]);
 
     for (const plugin of this.options.plugins ?? []) {
       const initCallbackResult = plugin.onInit?.();
