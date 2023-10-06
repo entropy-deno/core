@@ -1,4 +1,9 @@
+import { Configurator } from '../configurator/configurator.service.ts';
+import { inject } from '../injector/functions/inject.function.ts';
+
 export class Session {
+  private readonly configurator = inject(Configurator);
+
   private kv: Deno.Kv | null = null;
 
   private kvStorageKey: string[] = [];
@@ -52,6 +57,8 @@ export class Session {
   }
 
   public async set(key: string, value: unknown): Promise<void> {
-    await this.kv?.set([...this.kvStorageKey, key], value);
+    await this.kv?.set([...this.kvStorageKey, key], value, {
+      expireIn: this.configurator.entries.session.lifetime * 24 * 3600 * 1000,
+    });
   }
 }
