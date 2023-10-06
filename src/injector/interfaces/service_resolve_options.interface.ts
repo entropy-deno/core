@@ -1,3 +1,3 @@
 export interface ServiceResolveOptions {
-  singleton: boolean;
+  singleton?: boolean;
 }

@@ -28,7 +28,7 @@ export abstract class Injector {
 
   public static resolve<TService>(
     service: Constructor<TService>,
-    options: Partial<ServiceResolveOptions> = {},
+    options: ServiceResolveOptions = {},
   ): TService {
     if ((options.singleton ?? true) && this.has(service)) {
       return this.cachedInstances.get(service) as TService;
