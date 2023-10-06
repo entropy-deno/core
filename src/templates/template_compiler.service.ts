@@ -356,7 +356,7 @@ export class TemplateCompiler {
 
   private async parseEachDirectives(): Promise<void> {
     const matches = this.currentTemplate.matchAll(
-      /@each\s*\((.*?)\s*(?:in|of)\s*(.*)\)\s+((?:.|\s)*?)@\/each/gm,
+      /@each\s*\((.*?)\s+(?:in|of)\s+(.*)\)\s+((?:.|\s)*?)@\/each/gm,
     ) ?? [];
 
     for (const [wholeMatch, variableName, iterableValue, block] of matches) {
