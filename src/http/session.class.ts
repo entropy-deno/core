@@ -1,116 +1,57 @@
-import { inject } from '../injector/functions/inject.function.ts';
-import { Configurator } from '../configurator/configurator.service.ts';
+export class Session {
+  private kv: Deno.Kv | null = null;
 
-export class Session implements AsyncDisposable {
-  private readonly configurator = inject(Configurator);
-
-  private isLoaded = false;
-
-  private readonly variables = new Map<string, unknown>();
-
-  private readonly storagePath = '.entropy/sessions';
+  private kvStorageKey: string[] = [];
 
   constructor(private readonly id: string | null) {}
 
-  private async readData(): Promise<void> {
-    if (
-      this.isLoaded || this.configurator.entries.isDenoDeploy ||
-      this.configurator.getEnv('TESTING')
-    ) {
-      return;
-    }
-
-    try {
-      const sessionData = JSON.parse(
-        await Deno.readTextFile(`${this.storagePath}/${this.id}.json`),
-      );
-
-      for (const [key, value] of Object.entries(sessionData)) {
-        this.variables.set(key, value);
-      }
-
-      this.isLoaded = true;
-    } catch (error) {
-      if (!(error instanceof Deno.errors.NotFound)) {
-        throw error;
-      }
-    }
-  }
-
-  private async saveData(): Promise<void> {
-    if (
-      this.configurator.entries.isDenoDeploy ||
-      this.configurator.getEnv('TESTING')
-    ) {
-      return;
-    }
-
-    try {
-      await Deno.mkdir(this.storagePath, {
-        recursive: true,
-      });
-    } catch (error) {
-      if (!(error instanceof Deno.errors.AlreadyExists)) {
-        throw error;
-      }
-    }
-
-    await Deno.writeTextFile(
-      `${this.storagePath}/${this.id}.json`,
-      JSON.stringify(Object.fromEntries(this.variables)),
-    );
-  }
-
   public async $setup(): Promise<void> {
-    await this.saveData();
-    await this.readData();
+    if (!this.id) {
+      return;
+    }
+
+    this.kv = await Deno.openKv();
+    this.kvStorageKey = ['@entropy', 'sessions', this.id];
   }
 
-  public all(): Record<string, unknown> {
-    return Object.fromEntries(
-      [...this.variables.entries()].filter(([key]) =>
-        !key.startsWith('@entropy')
-      ),
-    );
+  public async all(): Promise<Record<string, unknown>> {
+    const entries = this.kv?.list({
+      prefix: this.kvStorageKey,
+    });
+
+    if (!entries) {
+      return {};
+    }
+
+    const all: Record<string, unknown> = {};
+
+    for await (const entry of entries) {
+      all[[...entry.key].pop() as string] = entry.value;
+    }
+
+    return all;
   }
 
-  public delete(key: string): void {
-    this.variables.delete(key);
+  public async delete(key: string): Promise<void> {
+    await this.kv?.delete([...this.kvStorageKey, key]);
   }
 
   public async destroy(): Promise<void> {
-    try {
-      await Deno.remove(`${this.storagePath}/${this.id}.json`);
-    } catch (error) {
-      if (!(error instanceof Deno.errors.NotFound)) {
-        throw error;
-      }
-    }
-
-    this.isLoaded = false;
-
-    this.variables.clear();
+    await this.kv?.delete(this.kvStorageKey);
   }
 
-  public get<TValue>(key: string): TValue | null {
-    return this.variables.get(key) as TValue ?? null;
+  public async get<TValue>(key: string): Promise<TValue | null> {
+    return (await this.kv?.get<Record<string, TValue>>([
+      ...this.kvStorageKey,
+      key,
+    ]))?.value as TValue ?? null;
   }
 
-  public has(key: string): boolean {
-    return this.variables.has(key);
+  public async has(key: string): Promise<boolean> {
+    return ![null, undefined].includes(await this.get(key));
   }
 
-  public async save(): Promise<void> {
-    if (this.isLoaded) {
-      await this.saveData();
-    }
-  }
-
-  public set<TValue>(key: string, value: TValue): void {
-    this.variables.set(key, value);
-  }
-
-  public async [Symbol.asyncDispose](): Promise<void> {
-    await this.save();
+  public async set(key: string, value: unknown): Promise<void> {
+    await this.kv?.set([...this.kvStorageKey, key], value);
   }
 }

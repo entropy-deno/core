@@ -203,8 +203,6 @@ export class Router {
       );
     }
 
-    await request.session.save();
-
     for (const [cookie, cookieValue] of Object.entries(cookies)) {
       response.headers.append(
         'set-cookie',
@@ -595,8 +593,8 @@ export class Router {
     try {
       await request.session.$setup();
 
-      if (!request.session.has('@entropy/csrf_token')) {
-        request.session.set(
+      if (!await request.session.has('@entropy/csrf_token')) {
+        await request.session.set(
           '@entropy/csrf_token',
           this.encrypter.generateUuid({ clean: true }),
         );
@@ -606,7 +604,9 @@ export class Router {
         await request.isFormRequest() &&
         !this.configurator.getEnv<boolean>('TESTING')
       ) {
-        const csrfToken = request.session.get<string>('@entropy/csrf_token');
+        const csrfToken = await request.session.get<string>(
+          '@entropy/csrf_token',
+        );
 
         if (
           !csrfToken ||

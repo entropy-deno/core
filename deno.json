@@ -6,6 +6,7 @@
       "dom",
       "dom.asynciterable",
       "dom.iterable",
+      "deno.unstable",
       "esnext"
     ],
     "strict": true
