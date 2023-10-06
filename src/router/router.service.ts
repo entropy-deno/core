@@ -264,15 +264,17 @@ export class Router {
       ) && !this.configurator.entries.seo.sitemapExcludeUrls.includes(path);
     });
 
+    const indent = '  ';
+
     const xml = [
       '<?xml version="1.0" encoding="UTF-8"?>',
       '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
       ...urls.map((url) =>
-        `<url><loc>${request.origin}${url}</loc><lastmod>${
+        `${indent}<url><loc>${request.origin}${url}</loc><lastmod>${
           new Date().toISOString().split('T')[0]
         }</lastmod></url>`
       ),
-      '</urlset>',
+      '</urlset>\n',
     ];
 
     return await this.createResponse(request, xml.join('\n'), {
