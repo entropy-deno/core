@@ -1,6 +1,6 @@
 import {
-  decode as base64Decode,
-  encode as base64Encode,
+  decodeBase64,
+  encodeBase64,
 } from 'https://deno.land/std@0.203.0/encoding/base64.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
 import { inject } from '../injector/functions/inject.function.ts';
@@ -21,11 +21,11 @@ export class Encrypter {
   }
 
   public base64Decode(encoded: string): string {
-    return this.decoder.decode(base64Decode(encoded));
+    return this.decoder.decode(decodeBase64(encoded));
   }
 
   public base64Encode(plainText: string | ArrayBuffer): string {
-    return base64Encode(plainText);
+    return encodeBase64(plainText);
   }
 
   public generateRandomString(length = 32): string {
