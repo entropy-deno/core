@@ -30,7 +30,7 @@ export class Encrypter {
 
   public generateRandomString(length = 32): string {
     if (length % 2 !== 0) {
-      throw new Error('Random string length must be even');
+      throw new Error('Provided random string length is not even');
     }
 
     const buffer = new Uint8Array(length / 2);
