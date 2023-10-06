@@ -274,7 +274,7 @@ export class TemplateCompiler {
             }
 
             throw new Error(
-              `View layout '${file}' does not exist`,
+              `View layout '${layout.split('/').pop()}' does not exist`,
             );
           }
         },
