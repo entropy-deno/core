@@ -17,38 +17,41 @@ export abstract class Utils {
   }
 
   public static deepMerge<
-    T = Record<string, unknown>,
-    U = Record<string, unknown>,
+    TTarget extends object = Record<string, unknown>,
+    TObject = Record<string, unknown>,
   >(
-    target: T,
-    ...elements: U[]
-  ): T {
+    target: TTarget,
+    ...elements: TObject[]
+  ): TTarget {
     if (!elements.length) {
       return target;
     }
 
-    const source = elements.shift();
+    const source = elements.shift() ?? {};
 
     for (const key in source) {
       if (
-        (source[key] && typeof source[key] === 'object' &&
-          !Array.isArray(source[key]))
+        (source[key as keyof typeof source] &&
+          typeof source[key as keyof typeof source] === 'object' &&
+          !Array.isArray(source[key as keyof typeof source]))
       ) {
-        if (!target[key as keyof T]) {
+        if (!target[key as keyof TTarget]) {
           Object.assign(target as object, {
             [key]: {},
           });
         }
 
         this.deepMerge(
-          target[key as keyof T] as T,
-          source[key] as U,
+          target[key as keyof TTarget] as TTarget,
+          source[key as keyof typeof source] as TObject,
         );
-      } else {
-        Object.assign(target as object, {
-          [key]: source[key],
-        });
+
+        continue;
       }
+
+      Object.assign(target, {
+        [key]: source[key as keyof typeof source],
+      });
     }
 
     return this.deepMerge(target, ...elements);
@@ -66,7 +69,7 @@ export abstract class Utils {
           '\'': '&#39;',
         };
 
-        return entities[char as '&' | '<' | '>' | '"' | `'`];
+        return entities[char as keyof typeof entities];
       },
     );
   }
