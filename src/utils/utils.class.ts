@@ -1,4 +1,12 @@
 import { fromFileUrl } from 'https://deno.land/std@0.203.0/path/mod.ts';
+import {
+  camelCase,
+  constantCase,
+  paramCase,
+  pascalCase,
+  snakeCase,
+  titleCase,
+} from 'https://deno.land/x/case@2.2.0/mod.ts';
 import { resolve as resolvePath } from 'https://deno.land/std@0.203.0/path/mod.ts';
 
 export abstract class Utils {
@@ -14,6 +22,30 @@ export abstract class Utils {
     }
 
     return fromFileUrl(import.meta.url);
+  }
+
+  public static caseCamel(text: string): string {
+    return camelCase(text);
+  }
+
+  public static caseConstant(text: string): string {
+    return constantCase(text);
+  }
+
+  public static caseParam(text: string): string {
+    return paramCase(text);
+  }
+
+  public static casePascal(text: string): string {
+    return pascalCase(text);
+  }
+
+  public static caseSnake(text: string): string {
+    return snakeCase(text);
+  }
+
+  public static caseTitle(text: string): string {
+    return titleCase(text);
   }
 
   public static deepMerge<
