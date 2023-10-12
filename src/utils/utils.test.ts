@@ -32,8 +32,8 @@ Deno.test('utils module', async (test) => {
     });
   });
 
-  await test.step('implements properly the escape() function', () => {
-    assertEquals(Utils.escape(`&<>"'`), '&amp;&lt;&gt;&quot;&#39;');
+  await test.step('implements properly the escapeEntities() function', () => {
+    assertEquals(Utils.escapeEntities(`&<>"'`), '&amp;&lt;&gt;&quot;&#39;');
   });
 
   await test.step('implements properly the range() function', () => {

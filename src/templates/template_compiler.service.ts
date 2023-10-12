@@ -16,7 +16,7 @@ export class TemplateCompiler {
 
   private readonly functions = {
     '$env': env,
-    '$escape': Utils.escape,
+    '$escape': Utils.escapeEntities,
     '$inject': inject,
     '$range': Utils.range,
   };

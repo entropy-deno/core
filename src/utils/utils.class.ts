@@ -57,7 +57,7 @@ export abstract class Utils {
     return this.deepMerge(target, ...elements);
   }
 
-  public static escape(html: string) {
+  public static escapeEntities(html: string) {
     return html.replace(
       /[&<>'"]/g,
       (char) => {
