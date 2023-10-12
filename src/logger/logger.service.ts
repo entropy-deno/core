@@ -21,10 +21,22 @@ export class Logger {
 
   private write(
     type: LogType,
-    message: string,
+    message: string | string[],
     { additionalInfo, badge = 'Log', colors = [] }: LogOptions,
   ): void {
     if (!this.configurator.entries.logger) {
+      return;
+    }
+
+    if (Array.isArray(message)) {
+      for (const text of message) {
+        this.write(type, text, {
+          additionalInfo,
+          badge,
+          colors,
+        });
+      }
+
       return;
     }
 
@@ -86,21 +98,21 @@ export class Logger {
   }
 
   public error(
-    message: string,
+    message: string | string[],
     { additionalInfo, badge = 'Error', colors = [] }: LogOptions = {},
   ): void {
     this.write(LogType.Error, message, { additionalInfo, badge, colors });
   }
 
   public info(
-    message: string,
+    message: string | string[],
     { additionalInfo, badge = 'Info', colors = [] }: LogOptions = {},
   ): void {
     this.write(LogType.Info, message, { additionalInfo, badge, colors });
   }
 
   public log(
-    message: string,
+    message: string | string[],
     { additionalInfo, badge = 'Log', colors = [] }: LogOptions = {},
   ): void {
     this.write(LogType.Log, message, { additionalInfo, badge, colors });
@@ -111,7 +123,7 @@ export class Logger {
   }
 
   public warn(
-    message: string,
+    message: string | string[],
     { additionalInfo, badge = 'Warning', colors = [] }: LogOptions = {},
   ): void {
     this.write(LogType.Warning, message, { additionalInfo, badge, colors });
