@@ -1,7 +1,7 @@
 import {
   assertEquals,
   assertStringIncludes,
-} from 'https://deno.land/std@0.203.0/assert/mod.ts';
+} from 'https://deno.land/std@0.204.0/assert/mod.ts';
 import { Utils } from './utils.class.ts';
 
 Deno.test('utils module', async (test) => {

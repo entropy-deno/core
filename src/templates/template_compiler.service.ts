@@ -1,4 +1,4 @@
-import { resolve as resolvePath } from 'https://deno.land/std@0.203.0/path/mod.ts';
+import { resolve as resolvePath } from 'https://deno.land/std@0.204.0/path/mod.ts';
 import * as constants from '../constants.ts';
 import { HttpMethod } from '../http/enums/http_method.enum.ts';
 import { TemplateCompilerOptions } from './interfaces/template_compiler_options.interface.ts';
