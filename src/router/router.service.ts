@@ -732,6 +732,10 @@ export class Router {
 
             if (paramPipes) {
               for (const [paramName, pipe] of Object.entries(paramPipes)) {
+                if (!(paramName in paramGroups) || !paramGroups[paramName]) {
+                  continue;
+                }
+
                 const transformed = inject(pipe).transform(
                   paramGroups[paramName] ?? '',
                 );
