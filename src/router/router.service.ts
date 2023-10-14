@@ -19,6 +19,7 @@ import { Reflector } from '../utils/reflector.class.ts';
 import { Route } from './interfaces/route.interface.ts';
 import { RouteOptions } from './interfaces/route_options.interface.ts';
 import { RoutePath } from './types/route_path.type.ts';
+import { RouteStore } from './route_store.service.ts';
 import { statusPage } from '../http/pages/status.page.ts';
 import { TemplateCompiler } from '../templates/template_compiler.service.ts';
 import { Url } from './types/url.type.ts';
@@ -56,7 +57,7 @@ export class Router {
 
   private readonly errorHandler = inject(ErrorHandler);
 
-  private readonly routes: Route[] = [];
+  private readonly routeStore = inject(RouteStore);
 
   private readonly templateCompiler = inject(TemplateCompiler);
 
@@ -256,7 +257,7 @@ export class Router {
     ];
 
     const urls = [
-      ...this.routes.map(({ path }) => path),
+      ...this.routeStore.routes.map(({ path }) => path),
       ...this.configurator.entries.seo.sitemapUrls,
     ].filter((path) => {
       return directUrlInvalidChars.every((char) =>
@@ -396,13 +397,13 @@ export class Router {
     if (typeof destination === 'string') {
       return Response.redirect(
         destination[0] === '/'
-          ? this.routeUrl(destination as RoutePath)
+          ? this.routeStore.url(destination as RoutePath)
           : destination,
         statusCode,
       );
     }
 
-    for (const { name, path } of this.routes) {
+    for (const { name, path } of this.routeStore.routes) {
       if (name === destination.name) {
         let resolvedPath = path;
 
@@ -641,7 +642,7 @@ export class Router {
           statusCode,
           validationRules,
           view,
-        } of this.routes
+        } of this.routeStore.routes
       ) {
         if (!methods.includes(requestMethod)) {
           continue;
@@ -838,25 +839,13 @@ export class Router {
     }
   }
 
-  public routeUrl(route?: RoutePath | { name: string }): Url {
-    let namedRoutePath = '';
-
-    if (typeof route !== 'string') {
-      for (const registeredRoute of this.routes) {
-        if (registeredRoute.name === route?.name) {
-          namedRoutePath = registeredRoute.path;
-        }
-      }
-    }
-
+  public baseUrl(): Url {
     return `${
       this.configurator.entries.tls.enabled ? 'https' : 'http'
     }://${this.configurator.entries.host}${
       this.configurator.entries.isProduction
         ? ''
         : `:${this.configurator.entries.port}`
-    }${!route || typeof route === 'string' && route[0] === '/' ? '' : '/'}${
-      typeof route === 'string' || !route ? route ?? '' : namedRoutePath
     }`;
   }
 
@@ -1011,7 +1000,7 @@ export class Router {
     action: (...args: unknown[]) => Promise<unknown>,
     options: RouteOptions = {},
   ): void {
-    this.routes.push({
+    this.routeStore.routes.push({
       action,
       methods,
       path,

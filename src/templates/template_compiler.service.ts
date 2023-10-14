@@ -7,6 +7,7 @@ import { env } from '../configurator/functions/env.function.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { HttpRequest } from '../http/http_request.class.ts';
 import { TemplateDirective } from './interfaces/template_directive.interface.ts';
+import { url } from '../router/functions/url.function.ts';
 import { Utils } from '../utils/utils.class.ts';
 
 export class TemplateCompiler {
@@ -19,6 +20,7 @@ export class TemplateCompiler {
     '$escape': Utils.escapeEntities,
     '$inject': inject,
     '$range': Utils.range,
+    '$url': url,
   };
 
   private currentRawContent: string[] = [];

@@ -15,7 +15,6 @@ import { Reflector } from '../utils/reflector.class.ts';
 import { Router } from '../router/router.service.ts';
 import { ServerOptions } from './interfaces/server_options.interface.ts';
 import { TemplateCompiler } from '../templates/template_compiler.service.ts';
-import { url } from '../router/functions/url.function.ts';
 import { Utils } from '../utils/utils.class.ts';
 import { Validator } from '../validator/validator.service.ts';
 import { Module } from './interfaces/module.interface.ts';
@@ -296,7 +295,7 @@ export class Server implements Disposable {
             ] ??
               'open'
           }`,
-          [url()],
+          [this.router.baseUrl()],
         );
       } finally {
         localStorage.setItem(this.devServerCheckKey, 'on');
@@ -396,7 +395,7 @@ export class Server implements Disposable {
                 `HTTP server is running on ${
                   this.configurator.entries.isProduction
                     ? `port %c${this.configurator.entries.port}`
-                    : `%c${url()}`
+                    : `%c${this.router.baseUrl()}`
                 } %c[${Deno.build.os === 'darwin' ? '⌃C' : 'Ctrl+C'} to quit]`,
                 {
                   badge: 'Server',
