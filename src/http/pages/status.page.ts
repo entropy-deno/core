@@ -26,10 +26,10 @@ export const statusPage = `<!doctype html>
         }
 
         :root {
-          --bg: #030712;
+          --bg: #111827;
           --font-sans: 'Urbanist', sans-serif;
           --text: #f3f4f6;
-          --theme-light: #726bf0;
+          --theme: #38bdf8;
         }
 
         body {
@@ -60,7 +60,7 @@ export const statusPage = `<!doctype html>
         }
 
         .text-theme {
-          color: var(--theme-light);
+          color: var(--theme);
         }
       @/raw
     </style>
