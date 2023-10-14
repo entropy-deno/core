@@ -26,14 +26,15 @@ export const errorPage = `<!doctype html>
         }
 
         :root {
-          --bg: #030712;
-          --bg-block: #111827;
+          --bg: #111827;
+          --bg-block: #161f33;
           --font-mono: 'Roboto Mono', monospace;
           --font-sans: 'Urbanist', sans-serif;
           --red: #f43f5e;
           --text: #f3f4f6;
           --text-gray: #b2b2b2;
-          --theme: #4f46e5;
+          --text-dark: #052133;
+          --theme: #38bdf8;
         }
 
         body {
@@ -62,13 +63,13 @@ export const errorPage = `<!doctype html>
           align-items: center;
           gap: 20px;
           margin-bottom: 20px;
+          font-weight: 500;
         }
 
         .info__badge {
           font-size: 15px;
-          font-weight: 500;
           background: var(--red);
-          padding: 6px 12px;
+          padding: 6px 10px;
           border-radius: 8px;
           align-self: flex-start;
         }
@@ -104,9 +105,11 @@ export const errorPage = `<!doctype html>
           border-radius: 10px;
           background: var(--bg);
           max-width: 400px;
+          font-weight: 500;
 
           &:first-of-type {
             background: var(--theme);
+            color: var(--text-dark);
           }
         }
 
@@ -119,7 +122,7 @@ export const errorPage = `<!doctype html>
         .button {
           background: var(--theme);
           border: none;
-          color: var(--text);
+          color: var(--text-dark);
           padding: 12px 16px;
           border-radius: 12px;
           display: flex;
