@@ -13,7 +13,7 @@ import { HttpStatus } from '../http/enums/http_status.enum.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { Json } from '../http/json.class.ts';
 import { Middleware } from '../http/interfaces/middleware.interface.ts';
-import { Pipe } from '../http/interfaces/pipe.interface.ts';
+import { Pipe } from '../pipes/interfaces/pipe.interface.ts';
 import { RedirectDestination } from './types/redirect_destination.type.ts';
 import { Reflector } from '../utils/reflector.class.ts';
 import { Route } from './interfaces/route.interface.ts';

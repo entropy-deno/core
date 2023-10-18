@@ -1,4 +1,4 @@
-import { Pipe } from '../interfaces/pipe.interface.ts';
+import { Pipe } from './interfaces/pipe.interface.ts';
 
 export class FloatPipe implements Pipe<number> {
   public transform(value: string): number {

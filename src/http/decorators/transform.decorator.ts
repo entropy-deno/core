@@ -1,5 +1,5 @@
 import { Constructor } from '../../utils/interfaces/constructor.interface.ts';
-import { Pipe } from '../interfaces/pipe.interface.ts';
+import { Pipe } from '../../pipes/interfaces/pipe.interface.ts';
 import { Reflector } from '../../utils/reflector.class.ts';
 
 export function Transform(
