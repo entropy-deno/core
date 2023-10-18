@@ -3,6 +3,7 @@ import { Encrypter } from '../encrypter/encrypter.service.ts';
 import { HttpMethod } from './enums/http_method.enum.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { Localizator } from '../localizator/localizator.service.ts';
+import { RoutePath } from '../router/types/route_path.type.ts';
 import { Session } from './session.class.ts';
 
 export class HttpRequest {
@@ -12,6 +13,8 @@ export class HttpRequest {
 
   private readonly localizator = inject(Localizator);
 
+  private matchedPattern: RoutePath | null = null;
+
   private sessionObject: Session | null = null;
 
   constructor(
@@ -19,6 +22,10 @@ export class HttpRequest {
     private readonly info?: Deno.ServeHandlerInfo,
   ) {
     this.request = request;
+  }
+
+  public $setMatchedPattern(pattern: RoutePath) {
+    this.matchedPattern = pattern;
   }
 
   public get cache(): RequestCache {
@@ -114,8 +121,28 @@ export class HttpRequest {
     return new URL(this.request.url).origin;
   }
 
+  public get params(): Record<string, string | undefined> {
+    const urlPattern = new URLPattern({
+      pathname: this.matchedPattern ?? '',
+    });
+
+    const paramGroups = urlPattern.exec(this.url)?.pathname.groups ?? {};
+
+    for (const [paramName, paramValue] of Object.entries(paramGroups)) {
+      if (paramValue === '') {
+        paramGroups[paramName] = undefined;
+      }
+    }
+
+    return { ...paramGroups } as Record<string, string | undefined>;
+  }
+
   public get path(): string {
     return new URL(this.request.url).pathname;
+  }
+
+  public get pattern(): string | null {
+    return this.matchedPattern;
   }
 
   public get port(): number {
