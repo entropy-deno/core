@@ -118,6 +118,13 @@ export class TemplateCompiler {
         },
       },
       {
+        name: 'escape',
+        type: 'block',
+        render: (content: string) => {
+          return Utils.escapeEntities(content);
+        },
+      },
+      {
         name: 'hotReload',
         type: 'single',
         render: () => {
