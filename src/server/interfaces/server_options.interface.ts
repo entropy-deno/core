@@ -1,3 +1,4 @@
+import { AnonymousRoute } from '../types/anonymous_route.type.ts';
 import { AppConfig } from '../../configurator/interfaces/app_config.interface.ts';
 import { Broadcaster } from '../../web_socket/broadcaster.class.ts';
 import { Constructor } from '../../utils/interfaces/constructor.interface.ts';
@@ -12,4 +13,5 @@ export interface ServerOptions {
   controllers?: Constructor<Controller>[];
   modules?: Constructor<Module>[];
   plugins?: Plugin[];
+  routes?: AnonymousRoute[];
 }

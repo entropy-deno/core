@@ -240,6 +240,10 @@ export class Server implements Disposable {
       this.webSocketChannels.push(...instance.channels ?? []);
 
       this.registerModules(instance.submodules ?? []);
+
+      for (const route of instance.routes ?? []) {
+        this.router.registerRoute(...route);
+      }
     }
   }
 
@@ -250,6 +254,10 @@ export class Server implements Disposable {
     this.templateCompiler.registerDirectives(
       this.configurator.entries.templateDirectives,
     );
+
+    for (const route of this.options.routes ?? []) {
+      this.router.registerRoute(...route);
+    }
 
     this.registerModules([
       ...(this.options.modules ?? []),
@@ -267,6 +275,10 @@ export class Server implements Disposable {
 
       this.router.registerControllers(plugin.controllers ?? []);
       this.webSocketChannels.push(...plugin.channels ?? []);
+
+      for (const route of plugin.routes ?? []) {
+        this.router.registerRoute(...route);
+      }
     }
   }
 
