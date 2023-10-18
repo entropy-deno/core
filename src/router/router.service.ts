@@ -595,7 +595,7 @@ export class Router {
 
   public async respond(request: HttpRequest): Promise<Response> {
     try {
-      await request.session.$setup();
+      await request.session.setup();
 
       if (!await request.session.has('@entropy/csrf_token')) {
         await request.session.set(

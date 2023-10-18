@@ -10,15 +10,6 @@ export class Session {
 
   constructor(private readonly id: string | null) {}
 
-  public async $setup(): Promise<void> {
-    if (!this.id) {
-      return;
-    }
-
-    this.kv = await Deno.openKv();
-    this.kvStorageKey = ['@entropy', 'sessions', this.id];
-  }
-
   public async all(): Promise<Record<string, unknown>> {
     const entries = this.kv?.list({
       prefix: this.kvStorageKey,
@@ -60,5 +51,14 @@ export class Session {
     await this.kv?.set([...this.kvStorageKey, key], value, {
       expireIn: this.configurator.entries.session.lifetime * 24 * 3600 * 1000,
     });
+  }
+
+  public async setup(): Promise<void> {
+    if (!this.id) {
+      return;
+    }
+
+    this.kv = await Deno.openKv();
+    this.kvStorageKey = ['@entropy', 'sessions', this.id];
   }
 }
