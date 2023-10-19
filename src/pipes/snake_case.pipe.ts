@@ -2,6 +2,8 @@ import { Pipe } from './interfaces/pipe.interface.ts';
 import { Utils } from '../utils/utils.class.ts';
 
 export class SnakeCasePipe implements Pipe {
+  public readonly alias = 'snake';
+
   public transform(value: string) {
     return Utils.caseSnake(value);
   }
