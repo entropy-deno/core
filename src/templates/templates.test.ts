@@ -123,4 +123,16 @@ Deno.test('templates module', async (test) => {
 
     assertEquals(rendered, '5');
   });
+
+  await test.step('compiler ignores raw interpolations', async () => {
+    const rendered = await compiler.render('{{@ message }}');
+
+    assertEquals(rendered, '{{ message }}');
+  });
+
+  await test.step('compiler interpolates data with pipes correctly', async () => {
+    const rendered = await compiler.render(`{{ 'test' | upper }}`);
+
+    assertEquals(rendered, 'TEST');
+  });
 });
