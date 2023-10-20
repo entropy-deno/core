@@ -331,10 +331,15 @@ export class TemplateCompiler {
 
   private async parseDataInterpolations(): Promise<void> {
     const matches =
-      this.currentTemplate.matchAll(/\{\{(#|@?)((.|\s)*?)\}\}/gm) ?? [];
+      this.currentTemplate.matchAll(/\{\{\s*(#|@?)(.*?)\}\}/sgm) ?? [];
 
     for (const [wholeMatch, modifier, matchValue] of matches) {
       if (modifier === '@') {
+        this.currentTemplate = this.currentTemplate.replace(
+          wholeMatch,
+          wholeMatch.replace(/\{\{\s*@/, '{{'),
+        );
+
         continue;
       }
 
