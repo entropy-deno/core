@@ -51,6 +51,17 @@ export class Logger {
       plainMessage.length -
       badge.length - this.endPadding;
 
+    if (dotsLength < 0) {
+      this.clear();
+
+      console.log(
+        '%cConsole size is too low to render some logs',
+        'color: red; font-weight: bold',
+      );
+
+      return;
+    }
+
     const output = `%c${badge} %c${trimmedMessage}${exceedsSpace ? '...' : ''}${
       additionalInfo && !exceedsSpace
         ? ` %c${
@@ -95,6 +106,10 @@ export class Logger {
 
         break;
     }
+  }
+
+  public clear(): void {
+    console.clear();
   }
 
   public error(
