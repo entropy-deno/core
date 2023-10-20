@@ -137,6 +137,10 @@ export class Logger {
     console.log(...messages);
   }
 
+  public table(data: unknown): void {
+    console.table(data);
+  }
+
   public warn(
     message: string | string[],
     { additionalInfo, badge = 'Warning', colors = [] }: LogOptions = {},
