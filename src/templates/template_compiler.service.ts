@@ -1,14 +1,17 @@
 import { resolve as resolvePath } from 'https://deno.land/std@0.204.0/path/mod.ts';
 import * as constants from '../constants.ts';
+import * as pipes from '../pipes/pipes.module.ts';
 import { HttpMethod } from '../http/enums/http_method.enum.ts';
 import { TemplateCompilerOptions } from './interfaces/template_compiler_options.interface.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
+import { Constructor } from '../utils/interfaces/constructor.interface.ts';
 import { env } from '../configurator/functions/env.function.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { HttpRequest } from '../http/http_request.class.ts';
 import { TemplateDirective } from './interfaces/template_directive.interface.ts';
 import { url } from '../router/functions/url.function.ts';
 import { Utils } from '../utils/utils.class.ts';
+import { Pipe } from '../pipes/interfaces/pipe.interface.ts';
 
 export class TemplateCompiler {
   private readonly configurator = inject(Configurator);
@@ -32,6 +35,16 @@ export class TemplateCompiler {
   private currentTemplate = '';
 
   private currentVariables: Record<string, unknown> = {};
+
+  private pipes: Record<string, (...args: unknown[]) => unknown> = Object
+    .entries(pipes).reduce((result, [_key, pipe]) => {
+      const instance = inject(pipe as Constructor<Pipe>);
+
+      return {
+        ...result,
+        [instance.alias!]: instance.transform,
+      };
+    }, {});
 
   public currentOptions: TemplateCompilerOptions = {};
 
@@ -330,10 +343,11 @@ export class TemplateCompiler {
   }
 
   private async parseDataInterpolations(): Promise<void> {
-    const matches =
-      this.currentTemplate.matchAll(/\{\{\s*(#|@?)(.*?)\}\}/sgm) ?? [];
+    const matches = this.currentTemplate.matchAll(
+      /\{\{\s*(#|@?)(.*?)(\|\s*[\w\s|]*)?\}\}/sgm,
+    ) ?? [];
 
-    for (const [wholeMatch, modifier, matchValue] of matches) {
+    for (const [wholeMatch, modifier, matchValue, pipesString] of matches) {
       if (modifier === '@') {
         this.currentTemplate = this.currentTemplate.replace(
           wholeMatch,
@@ -345,7 +359,7 @@ export class TemplateCompiler {
 
       const value = matchValue.trim();
 
-      const renderedExpression = await this.renderNatively(
+      let renderedExpression = await this.renderNatively(
         `
         let expression = typeof (${value}) === 'object'
           ? JSON.stringify(${value})
@@ -360,6 +374,21 @@ export class TemplateCompiler {
           : $escape(expression);
         `,
       );
+
+      if (pipesString) {
+        const pipes = pipesString.slice(1).split('|').map((pipe) =>
+          pipe.trim()
+        );
+
+        for (const pipe of pipes) {
+          if (!this.pipes[pipe]) {
+            throw new Error(`View pipe '${pipe}' does not exist`);
+          }
+
+          renderedExpression = this.pipes[pipe]?.(renderedExpression) ??
+            renderedExpression;
+        }
+      }
 
       this.currentTemplate = this.currentTemplate.replace(
         wholeMatch,
