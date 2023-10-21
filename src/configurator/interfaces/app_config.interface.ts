@@ -3,6 +3,10 @@ import { TemplateDirective } from '../../templates/interfaces/template_directive
 import { ValidationRule } from '../../validator/interfaces/validation_rule.interface.ts';
 
 export interface AppConfig {
+  cache: {
+    enabled: boolean;
+    maxAge: number;
+  };
   contentSecurityPolicy: {
     allowInlineScripts: boolean;
     allowInlineStyles: boolean;

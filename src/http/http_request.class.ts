@@ -91,6 +91,16 @@ export class HttpRequest {
     return ['https', 'wss'].includes(this.protocol);
   }
 
+  public async isStaticFileRequest(): Promise<boolean> {
+    try {
+      await Deno.stat(`public${this.path}`);
+
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   public get locale(): string {
     return this.header('accept-language')?.slice(0, 2) ?? 'en';
   }

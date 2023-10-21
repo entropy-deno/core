@@ -188,6 +188,10 @@ export class Router {
       status: parsedBody === null ? HttpStatus.NoContent : statusCode,
       headers: {
         'content-type': `${contentType}; charset=utf-8`,
+        'cache-control': this.configurator.entries.cache.enabled &&
+            await request.isStaticFileRequest()
+          ? `max-age=${this.configurator.entries.cache.maxAge * 24 * 3600}`
+          : 'no-cache',
         ...securityHeaders,
         ...headers,
       },

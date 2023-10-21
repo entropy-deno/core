@@ -5,6 +5,10 @@ import { Utils } from '../utils/utils.class.ts';
 
 export class Configurator {
   private configuration: AppConfig = {
+    cache: {
+      enabled: true,
+      maxAge: 0,
+    },
     contentSecurityPolicy: {
       allowInlineScripts: false,
       allowInlineStyles: true,
