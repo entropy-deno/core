@@ -344,7 +344,7 @@ export class TemplateCompiler {
 
   private async parseDataInterpolations(): Promise<void> {
     const matches = this.currentTemplate.matchAll(
-      /\{\{\s*(#|@?)(.*?)(\|\s*[\w\s|]*)?\}\}/sgm,
+      /\{\{\s*(#|@?)(.*?)(\|\s*[\w\s|]*)?\}\}/gsm,
     ) ?? [];
 
     for (const [wholeMatch, modifier, matchValue, pipesString] of matches) {
@@ -399,69 +399,73 @@ export class TemplateCompiler {
 
   private async parseEachDirectives(): Promise<void> {
     const matches = this.currentTemplate.matchAll(
-      /@each\s*\((.*?)\s+(?:in|of)\s+(.*)\)\s+((?:.|\s)*?)@\/each/gm,
+      /@each\s*\((.*?)\s+(?:in|of)\s+(.*?)\)(.*?)@\/each/gsm,
     ) ?? [];
 
-    for (const [wholeMatch, variableName, iterableValue, block] of matches) {
-      let iterable = await this.renderNatively<unknown[] | number>(
-        `return ${iterableValue};`,
-      );
-
-      if (typeof iterable === 'number') {
-        iterable = Utils.range(iterable);
-      }
-
-      let result = '';
-      let iterator = 0;
-
-      const [blockContent, , elseContent] = block.split(/@(else|empty)/);
-
-      if (!Object.keys(iterable).length) {
-        this.currentTemplate = this.currentTemplate.replace(
-          wholeMatch,
-          elseContent ?? '',
+    try {
+      for (const [wholeMatch, variableName, iterableValue, block] of matches) {
+        let iterable = await this.renderNatively<unknown[] | number>(
+          `return ${iterableValue};`,
         );
-      }
 
-      for (const [key, item] of Object.entries(iterable)) {
-        if (Object.hasOwn(iterable, key)) {
-          const index = JSON.parse(`"${key}"`);
+        if (typeof iterable === 'number') {
+          iterable = Utils.range(iterable);
+        }
 
-          const scopeVariables = {
-            [variableName]: item,
-            $even: index % 2 === 0,
-            $first: index === 0,
-            $index: iterator,
-            $key: index,
-            $last: index === Object.keys(iterable).length - 1,
-            $odd: index % 2 === 1,
-          };
+        let result = '';
+        let iterator = 0;
 
-          iterator += 1;
+        const [blockContent, , elseContent] = block.split(/@(else|empty)/);
 
-          const compiler = inject(TemplateCompiler, {
-            singleton: false,
-          });
-
-          result += await compiler.$compile(
-            blockContent,
-            {
-              ...this.currentVariables,
-              ...scopeVariables,
-            },
-            {},
-            this.currentRequest,
+        if (!Object.keys(iterable).length) {
+          this.currentTemplate = this.currentTemplate.replace(
+            wholeMatch,
+            elseContent ?? '',
           );
         }
-      }
 
-      this.currentTemplate = this.currentTemplate.replace(wholeMatch, result);
+        for (const [key, item] of Object.entries(iterable)) {
+          if (Object.hasOwn(iterable, key)) {
+            const index = JSON.parse(`"${key}"`);
+
+            const scopeVariables = {
+              [variableName]: item,
+              $even: index % 2 === 0,
+              $first: index === 0,
+              $index: iterator,
+              $key: index,
+              $last: index === Object.keys(iterable).length - 1,
+              $odd: index % 2 === 1,
+            };
+
+            iterator += 1;
+
+            const compiler = inject(TemplateCompiler, {
+              singleton: false,
+            });
+
+            result += await compiler.$compile(
+              blockContent,
+              {
+                ...this.currentVariables,
+                ...scopeVariables,
+              },
+              {},
+              this.currentRequest,
+            );
+          }
+        }
+
+        this.currentTemplate = this.currentTemplate.replace(wholeMatch, result);
+      }
+    } catch {
+      throw new Error('Invalid @each directive syntax');
     }
   }
 
   private async parseIfDirectives(): Promise<void> {
     const matches =
-      this.currentTemplate.matchAll(/@if\s*\((.*)\)\s+((?:.|\s)*?)@\/if/gm) ??
+      this.currentTemplate.matchAll(/@if\s*\((.*?)\)(.*?)@\/if/gsm) ??
         [];
 
     for (const [wholeMatch, conditionString, content] of matches) {
@@ -488,8 +492,8 @@ export class TemplateCompiler {
   }
 
   private parseRawDirectives(): void {
-    const matches =
-      this.currentTemplate.matchAll(/@raw\s+((?:.|\s)*?)@\/raw/gm) ?? [];
+    const matches = this.currentTemplate.matchAll(/@raw\s+(.*?)@\/raw/gsm) ??
+      [];
 
     let count = 0;
 
@@ -507,7 +511,7 @@ export class TemplateCompiler {
 
   private async parseSwitchDirectives(): Promise<void> {
     const matches = this.currentTemplate.matchAll(
-      /@switch\s*\((.*)\)\s+((?:.|\s)*?)@\/switch/gm,
+      /@switch\s*\((.*?)\)(.*?)@\/switch/gsm,
     ) ?? [];
 
     for (const [wholeMatch, conditionString, casesString] of matches) {
@@ -520,7 +524,7 @@ export class TemplateCompiler {
       let defaultCaseValue: string | null = null;
 
       const caseMatches = casesString.matchAll(
-        /@(case|default)\s*\((.*)\)\:?\s+((?:.|\s)*?)@\/(case|default)/gm,
+        /@(case|default)\s*\((.*?)\)(.*?)@\/(case|default)/gsm,
       );
 
       for (
@@ -620,7 +624,10 @@ export class TemplateCompiler {
       const directive of [
         ...this.directives,
         { name: 'each' },
+        { name: 'else' },
+        { name: 'empty' },
         { name: 'if' },
+        { name: 'slot' },
         { name: 'switch' },
       ]
     ) {
@@ -654,8 +661,8 @@ export class TemplateCompiler {
       const pattern = directive.type === 'single'
         ? new RegExp(`@${directive.name}\s*(\\((.*?)\\))?`, 'g')
         : new RegExp(
-          `@${directive.name}\\s*(\\((.*?)\\))?\\s+((?:.|\\s)*?)@\\/${directive.name}`,
-          'gm',
+          `@${directive.name}\\s*(\\((.*?)\\))?(.*?)@\\/${directive.name}`,
+          'gsm',
         );
 
       const matches =
@@ -709,7 +716,9 @@ export class TemplateCompiler {
     for (const registeredDirective of this.directives) {
       if (
         registeredDirective.name === directive.name ||
-        ['each', 'if', 'switch'].includes(directive.name)
+        ['each', 'else', 'empty', 'if', 'slot', 'switch'].includes(
+          directive.name,
+        )
       ) {
         throw new Error(
           `Template directive '${directive.name}' already exists`,

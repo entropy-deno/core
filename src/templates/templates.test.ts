@@ -30,7 +30,7 @@ Deno.test('templates module', async (test) => {
     assertStringIncludes(rendered, '3');
 
     const renderedWithDestructuring = await compiler.render(
-      `@each ({ name, surname } in [{ 'James', 'Bond' }]) {{ name }} {{ surname }} @/each`,
+      `@each ({ name, surname } in [{ name: 'James', surname: 'Bond' }]) {{ name }} {{ surname }} @/each`,
     );
 
     assertStringIncludes(renderedWithDestructuring, 'James Bond');
