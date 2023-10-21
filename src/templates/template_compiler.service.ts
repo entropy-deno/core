@@ -51,6 +51,91 @@ export class TemplateCompiler {
   constructor() {
     this.directives = [
       {
+        name: 'if',
+        type: 'block',
+        render: (content: string, condition: unknown) => {
+          const [ifContent, elseContent] = content.split('@else');
+
+          if (condition) {
+            return ifContent;
+          }
+
+          return elseContent ?? '';
+        },
+      },
+      {
+        name: 'switch',
+        type: 'block',
+        render: async (content: string, condition: unknown) => {
+          const cases = new Map<unknown, string>();
+
+          let defaultCaseValue: string | null = null;
+
+          const caseMatches = content.matchAll(
+            /@(case|default)\s*\((.*?)\)(.*?)@\/(case|default)/gsm,
+          );
+
+          for (
+            const [
+              ,
+              caseType,
+              caseConditionString,
+              caseContent,
+              closingCaseType,
+            ] of caseMatches
+          ) {
+            if (caseType !== closingCaseType) {
+              throw new Error('@switch directive case block not closed');
+            }
+
+            if (caseType === 'default') {
+              if (defaultCaseValue) {
+                throw new Error(
+                  '@switch directive can only have one default case',
+                );
+              }
+
+              defaultCaseValue = caseContent;
+
+              continue;
+            }
+
+            const caseRegex = /@case ?(.*?)/g;
+            const cleanCaseContent = caseContent.replaceAll(caseRegex, '');
+
+            cases.set(
+              await this.renderNatively(
+                `return ${caseConditionString};`,
+              ),
+              cleanCaseContent,
+            );
+
+            const parallelCaseMatches = caseContent.matchAll(caseRegex);
+
+            for (const [, parallelCaseConditionString] of parallelCaseMatches) {
+              cases.set(
+                await this.renderNatively(
+                  `return ${parallelCaseConditionString};`,
+                ),
+                cleanCaseContent,
+              );
+            }
+          }
+
+          for (const [key, value] of cases) {
+            if (key === condition) {
+              return value;
+            }
+          }
+
+          if (defaultCaseValue) {
+            return defaultCaseValue;
+          }
+
+          return '';
+        },
+      },
+      {
         name: 'csrf',
         type: 'single',
         render: async () => {
@@ -463,34 +548,6 @@ export class TemplateCompiler {
     }
   }
 
-  private async parseIfDirectives(): Promise<void> {
-    const matches =
-      this.currentTemplate.matchAll(/@if\s*\((.*?)\)(.*?)@\/if/gsm) ??
-        [];
-
-    for (const [wholeMatch, conditionString, content] of matches) {
-      const condition = await this.renderNatively(
-        `return ${conditionString};`,
-      );
-
-      const [ifContent, elseContent] = content.split('@else');
-
-      if (condition) {
-        this.currentTemplate = this.currentTemplate.replace(
-          wholeMatch,
-          ifContent,
-        );
-
-        continue;
-      }
-
-      this.currentTemplate = this.currentTemplate.replace(
-        wholeMatch,
-        elseContent ?? '',
-      );
-    }
-  }
-
   private parseRawDirectives(): void {
     const matches = this.currentTemplate.matchAll(/@raw\s+(.*?)@\/raw/gsm) ??
       [];
@@ -506,94 +563,6 @@ export class TemplateCompiler {
       this.currentRawContent.push(content);
 
       count += 1;
-    }
-  }
-
-  private async parseSwitchDirectives(): Promise<void> {
-    const matches = this.currentTemplate.matchAll(
-      /@switch\s*\((.*?)\)(.*?)@\/switch/gsm,
-    ) ?? [];
-
-    for (const [wholeMatch, conditionString, casesString] of matches) {
-      const condition = await this.renderNatively(
-        `return ${conditionString};`,
-      );
-
-      const cases = new Map<unknown, string>();
-
-      let defaultCaseValue: string | null = null;
-
-      const caseMatches = casesString.matchAll(
-        /@(case|default)\s*\((.*?)\)(.*?)@\/(case|default)/gsm,
-      );
-
-      for (
-        const [, caseType, caseConditionString, caseContent, closingCaseType]
-          of caseMatches
-      ) {
-        if (caseType !== closingCaseType) {
-          throw new Error('@switch directive case block not closed');
-        }
-
-        if (caseType === 'default') {
-          if (defaultCaseValue) {
-            throw new Error(
-              '@switch directive can only have one default case',
-            );
-          }
-
-          defaultCaseValue = caseContent;
-
-          continue;
-        }
-
-        const caseRegex = /@case ?(.*?)/g;
-        const cleanCaseContent = caseContent.replaceAll(caseRegex, '');
-
-        cases.set(
-          await this.renderNatively(
-            `return ${caseConditionString};`,
-          ),
-          cleanCaseContent,
-        );
-
-        const parallelCaseMatches = caseContent.matchAll(caseRegex);
-
-        for (const [, parallelCaseConditionString] of parallelCaseMatches) {
-          cases.set(
-            await this.renderNatively(
-              `return ${parallelCaseConditionString};`,
-            ),
-            cleanCaseContent,
-          );
-        }
-      }
-
-      let matchesOneCase = false;
-
-      for (const [key, value] of cases) {
-        if (key === condition) {
-          this.currentTemplate = this.currentTemplate.replace(
-            wholeMatch,
-            value,
-          );
-
-          matchesOneCase = true;
-
-          break;
-        }
-      }
-
-      if (!matchesOneCase && defaultCaseValue) {
-        this.currentTemplate = this.currentTemplate.replace(
-          wholeMatch,
-          defaultCaseValue,
-        );
-
-        return;
-      }
-
-      this.currentTemplate = this.currentTemplate.replace(wholeMatch, '');
     }
   }
 
@@ -653,9 +622,6 @@ export class TemplateCompiler {
     this.removeComments();
 
     await this.parseEachDirectives();
-    await this.parseIfDirectives();
-    await this.parseDataInterpolations();
-    await this.parseSwitchDirectives();
 
     for (const directive of this.directives) {
       const pattern = directive.type === 'single'
@@ -687,6 +653,8 @@ export class TemplateCompiler {
         );
       }
     }
+
+    await this.parseDataInterpolations();
 
     this.validateSyntax();
     this.restoreRawContent();
