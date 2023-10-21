@@ -28,6 +28,12 @@ Deno.test('templates module', async (test) => {
     assertStringIncludes(rendered, '1');
     assertStringIncludes(rendered, '2');
     assertStringIncludes(rendered, '3');
+
+    const renderedWithDestructuring = await compiler.render(
+      `@each ({ name, surname } in [{ 'James', 'Bond' }]) {{ name }} {{ surname }} @/each`,
+    );
+
+    assertStringIncludes(renderedWithDestructuring, 'James Bond');
   });
 
   await test.step('compiler properly renders @hotReload directive', async () => {
