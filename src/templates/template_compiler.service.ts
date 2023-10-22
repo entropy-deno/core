@@ -28,16 +28,6 @@ export class TemplateCompiler {
     '$url': url,
   };
 
-  private currentRawContent: string[] = [];
-
-  private currentRequest: HttpRequest | undefined = undefined;
-
-  private currentStacks = new Map<string, string[]>();
-
-  private currentTemplate = '';
-
-  private currentVariables: Record<string, unknown> = {};
-
   private pipes: Record<string, (...args: unknown[]) => unknown> = Object
     .entries(pipes).reduce((result, [_key, pipe]) => {
       const instance = inject(pipe as Constructor<Pipe>);
@@ -48,7 +38,17 @@ export class TemplateCompiler {
       };
     }, {});
 
-  public currentOptions: TemplateCompilerOptions = {};
+  private rawContent: string[] = [];
+
+  private request: HttpRequest | undefined = undefined;
+
+  private stacks = new Map<string, string[]>();
+
+  private template = '';
+
+  private variables: Record<string, unknown> = {};
+
+  public options: TemplateCompilerOptions = {};
 
   constructor() {
     this.directives = [
@@ -142,7 +142,7 @@ export class TemplateCompiler {
         type: 'single',
         render: async () => {
           return `<input type="hidden" name="_csrf" value="${await this
-            .currentRequest
+            .request
             ?.session.get<string>('@entropy/csrf_token')}">`;
         },
       },
@@ -176,9 +176,7 @@ export class TemplateCompiler {
 
               switch (file.split('.').pop()) {
                 case 'css': {
-                  result += `<style nonce="${
-                    this.currentRequest?.nonce ?? ''
-                  }">${
+                  result += `<style nonce="${this.request?.nonce ?? ''}">${
                     minify ? content.replaceAll(/\n|\t|(\r\n)/g, '') : content
                   }</style>`;
 
@@ -186,9 +184,7 @@ export class TemplateCompiler {
                 }
 
                 case 'js': {
-                  result += `<script nonce="${
-                    this.currentRequest?.nonce ?? ''
-                  }">${
+                  result += `<script nonce="${this.request?.nonce ?? ''}">${
                     minify ? content.replaceAll(/\n|\t|(\r\n)/g, '') : content
                   }</script>`;
 
@@ -229,7 +225,7 @@ export class TemplateCompiler {
         type: 'single',
         render: () => {
           return this.configurator.entries.isProduction ? '' : `
-            <script nonce="${this.currentRequest?.nonce ?? ''}">
+            <script nonce="${this.request?.nonce ?? ''}">
               const ws = new WebSocket('${
             this.configurator.entries.tls.enabled ? 'wss' : 'ws'
           }://${this.configurator.entries.host}:${this.configurator.entries.port}');
@@ -273,14 +269,14 @@ export class TemplateCompiler {
         name: 'nonceProp',
         type: 'single',
         render: () => {
-          return `nonce="${this.currentRequest?.nonce ?? ''}"`;
+          return `nonce="${this.request?.nonce ?? ''}"`;
         },
       },
       {
         name: 'nonce',
         type: 'single',
         render: () => {
-          return this.currentRequest?.nonce ?? '';
+          return this.request?.nonce ?? '';
         },
       },
       {
@@ -294,10 +290,10 @@ export class TemplateCompiler {
         name: 'push',
         type: 'block',
         render: (content: string, stack: string) => {
-          this.currentStacks.set(
+          this.stacks.set(
             stack,
-            this.currentStacks.has(stack)
-              ? [...this.currentStacks.get(stack)!, content]
+            this.stacks.has(stack)
+              ? [...this.stacks.get(stack)!, content]
               : [content],
           );
 
@@ -314,8 +310,8 @@ export class TemplateCompiler {
 
           const file = resolvePath(
             `${
-              this.currentOptions.file && partial[0] === '.'
-                ? `${this.currentOptions.file}/..`
+              this.options.file && partial[0] === '.'
+                ? `${this.options.file}/..`
                 : 'views'
             }/${partial}.atom.html`,
           );
@@ -323,13 +319,14 @@ export class TemplateCompiler {
           try {
             const compiler = inject(TemplateCompiler);
 
-            compiler.currentOptions.file = file;
+            compiler.options.file = file;
 
-            const compiledPartial = await compiler.$compile(
+            const compiledPartial = await compiler.render(
               await Deno.readTextFile(file),
-              this.currentVariables,
+              this.variables,
               {},
-              this.currentRequest,
+              this.request,
+              true,
             );
 
             return compiledPartial;
@@ -354,8 +351,8 @@ export class TemplateCompiler {
 
           const file = resolvePath(
             `${
-              this.currentOptions.file && layout[0] === '.'
-                ? `${this.currentOptions.file}/..`
+              this.options.file && layout[0] === '.'
+                ? `${this.options.file}/..`
                 : 'views'
             }/${layout}.atom.html`,
           );
@@ -363,13 +360,14 @@ export class TemplateCompiler {
           try {
             const compiler = inject(TemplateCompiler);
 
-            compiler.currentOptions.file = file;
+            compiler.options.file = file;
 
-            const compiledLayout = await compiler.$compile(
+            const compiledLayout = await compiler.render(
               await Deno.readTextFile(file),
-              this.currentVariables,
+              this.variables,
               {},
-              this.currentRequest,
+              this.request,
+              true,
             );
 
             return compiledLayout.replaceAll('@slot', content);
@@ -388,7 +386,7 @@ export class TemplateCompiler {
         name: 'stack',
         type: 'single',
         render: (stackName: string) => {
-          const stackedContent = this.currentStacks.get(stackName) ?? [];
+          const stackedContent = this.stacks.get(stackName) ?? [];
 
           return stackedContent.join('');
         },
@@ -402,15 +400,15 @@ export class TemplateCompiler {
   ): Promise<TValue> {
     const globalData = {
       __: (text: string, quantity = 1) =>
-        this.currentRequest?.translate(text, quantity) ?? text,
-      $request: this.currentRequest,
+        this.request?.translate(text, quantity) ?? text,
+      $request: this.request,
       $translate: (text: string, quantity = 1) =>
-        this.currentRequest?.translate(text, quantity) ?? text,
+        this.request?.translate(text, quantity) ?? text,
       ...Object.keys(constants).reduce((result, key) => ({
         ...result,
         [`$${key}`]: constants[key as keyof typeof constants],
       }), {}),
-      ...this.currentVariables,
+      ...this.variables,
       ...this.functions,
     };
 
@@ -426,13 +424,13 @@ export class TemplateCompiler {
   }
 
   private async parseDataInterpolations(): Promise<void> {
-    const matches = this.currentTemplate.matchAll(
+    const matches = this.template.matchAll(
       /\{\{\s*(#|@?)(.*?)(\|\s*[\w\s|]*)?\}\}/gsm,
     ) ?? [];
 
     for (const [wholeMatch, modifier, matchValue, pipesString] of matches) {
       if (modifier === '@') {
-        this.currentTemplate = this.currentTemplate.replace(
+        this.template = this.template.replace(
           wholeMatch,
           wholeMatch.replace(/\{\{\s*@/, '{{'),
         );
@@ -473,7 +471,7 @@ export class TemplateCompiler {
         }
       }
 
-      this.currentTemplate = this.currentTemplate.replace(
+      this.template = this.template.replace(
         wholeMatch,
         String(renderedExpression),
       );
@@ -481,7 +479,7 @@ export class TemplateCompiler {
   }
 
   private async parseEachDirectives(): Promise<void> {
-    const matches = this.currentTemplate.matchAll(
+    const matches = this.template.matchAll(
       /@each\s*\((.*?)\s+(?:in|of)\s+(.*?)\)(.*?)@\/each/gsm,
     ) ?? [];
 
@@ -501,7 +499,7 @@ export class TemplateCompiler {
         const [blockContent, , elseContent] = block.split(/@(else|empty)/);
 
         if (!Object.keys(iterable).length) {
-          this.currentTemplate = this.currentTemplate.replace(
+          this.template = this.template.replace(
             wholeMatch,
             elseContent ?? '',
           );
@@ -525,19 +523,20 @@ export class TemplateCompiler {
 
             const compiler = inject(TemplateCompiler);
 
-            result += await compiler.$compile(
+            result += await compiler.render(
               blockContent,
               {
-                ...this.currentVariables,
+                ...this.variables,
                 ...scopeVariables,
               },
               {},
-              this.currentRequest,
+              this.request,
+              true,
             );
           }
         }
 
-        this.currentTemplate = this.currentTemplate.replace(wholeMatch, result);
+        this.template = this.template.replace(wholeMatch, result);
       }
     } catch {
       throw new Error('Invalid @each directive syntax');
@@ -545,41 +544,41 @@ export class TemplateCompiler {
   }
 
   private parseRawDirectives(): void {
-    const matches = this.currentTemplate.matchAll(/@raw\s+(.*?)@\/raw/gsm) ??
+    const matches = this.template.matchAll(/@raw\s+(.*?)@\/raw/gsm) ??
       [];
 
     let count = 0;
 
     for (const [wholeMatch, content] of matches) {
-      this.currentTemplate = this.currentTemplate.replace(
+      this.template = this.template.replace(
         wholeMatch,
         `$_raw${count}`,
       );
 
-      this.currentRawContent.push(content);
+      this.rawContent.push(content);
 
       count += 1;
     }
   }
 
   private removeComments(): void {
-    const matches = this.currentTemplate.matchAll(/\{\{(@?)--(.*?)--\}\}/g) ??
+    const matches = this.template.matchAll(/\{\{(@?)--(.*?)--\}\}/g) ??
       [];
 
     for (const [wholeMatch] of matches) {
-      this.currentTemplate = this.currentTemplate.replace(wholeMatch, '');
+      this.template = this.template.replace(wholeMatch, '');
     }
   }
 
   private restoreRawContent(): void {
-    const matches = this.currentTemplate.matchAll(/\$_raw([0-9]+)/g) ?? [];
+    const matches = this.template.matchAll(/\$_raw([0-9]+)/g) ?? [];
 
     for (const [wholeMatch, segmentIndex] of matches) {
       const index = parseInt(segmentIndex);
 
-      this.currentTemplate = this.currentTemplate.replace(
+      this.template = this.template.replace(
         wholeMatch,
-        this.currentRawContent[index],
+        this.rawContent[index],
       );
     }
   }
@@ -594,23 +593,23 @@ export class TemplateCompiler {
         { name: 'slot' },
       ]
     ) {
-      if (this.currentTemplate.includes(`@${directive.name}`)) {
+      if (this.template.includes(`@${directive.name}`)) {
         throw new Error(`Invalid template @${directive.name} directive syntax`);
       }
     }
   }
 
-  public async $compile(
+  public async render(
     template: string,
     variables: Record<string, unknown> = {},
     options: TemplateCompilerOptions = {},
     request?: HttpRequest,
+    recursiveCall = false,
   ): Promise<string> {
-    this.currentOptions = options;
-    this.currentRawContent = [];
-    this.currentRequest = request;
-    this.currentTemplate = template.replaceAll('\r\n', '\n');
-    this.currentVariables = variables;
+    this.options = options;
+    this.request = request;
+    this.template = template.replaceAll('\r\n', '\n');
+    this.variables = variables;
 
     this.parseRawDirectives();
     this.removeComments();
@@ -621,13 +620,12 @@ export class TemplateCompiler {
       const pattern = directive.type === 'single'
         ? new RegExp(`@${directive.name}\s*(\\((.*?)\\))?`, 'g')
         : new RegExp(
-          `@${directive.name}\\s*(\\((.*?)\\))?(.*?)@\\/${directive.name}`,
+          `@${directive.name}\\s*(\\(([^\\n]*)\\))?(.*?)@\\/${directive.name}`,
           'gsm',
         );
 
-      const matches =
-        this.currentTemplate.matchAll(directive.pattern ?? pattern) ??
-          [];
+      const matches = this.template.matchAll(directive.pattern ?? pattern) ??
+        [];
 
       for (const [expression, hasArguments, args, blockContent] of matches) {
         const resolvedArguments = hasArguments
@@ -641,7 +639,7 @@ export class TemplateCompiler {
             ...resolvedArguments,
           );
 
-        this.currentTemplate = this.currentTemplate.replace(
+        this.template = this.template.replace(
           expression,
           result instanceof Promise ? await result : result,
         );
@@ -650,28 +648,13 @@ export class TemplateCompiler {
 
     await this.parseDataInterpolations();
 
-    this.validateSyntax();
     this.restoreRawContent();
 
-    return this.currentTemplate;
-  }
+    if (!recursiveCall) {
+      this.validateSyntax();
+    }
 
-  public async render(
-    template: string,
-    variables: Record<string, unknown> = {},
-    options: TemplateCompilerOptions = {},
-    request?: HttpRequest,
-  ): Promise<string> {
-    const compiledTemplate = await this.$compile(
-      template,
-      variables,
-      options,
-      request,
-    );
-
-    this.currentStacks.clear();
-
-    return compiledTemplate;
+    return this.template;
   }
 
   public registerDirective(directive: TemplateDirective): void {
