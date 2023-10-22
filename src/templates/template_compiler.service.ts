@@ -480,7 +480,7 @@ export class TemplateCompiler {
 
   private async parseEachDirectives(): Promise<void> {
     const matches = this.template.matchAll(
-      /@each\s*\((.*?)\s+(?:in|of)\s+(.*?)\)(.*?)@\/each/gsm,
+      /@each\s*\((.*?)\s+(?:in|of)\s+(.*)\)(.*?)@\/each/gsm,
     ) ?? [];
 
     try {
