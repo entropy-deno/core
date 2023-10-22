@@ -87,7 +87,7 @@ export class TemplateCompiler {
             ] of caseMatches
           ) {
             if (caseType !== closingCaseType) {
-              throw new Error('@switch directive case block not closed');
+              throw new Error('Not closed @switch directive case');
             }
 
             if (caseType === 'default') {
@@ -587,6 +587,8 @@ export class TemplateCompiler {
     for (
       const directive of [
         ...this.directives,
+        { name: 'case' },
+        { name: 'default' },
         { name: 'each' },
         { name: 'else' },
         { name: 'empty' },
@@ -661,7 +663,7 @@ export class TemplateCompiler {
     for (const registeredDirective of this.directives) {
       if (
         registeredDirective.name === directive.name ||
-        ['each', 'else', 'empty', 'slot'].includes(
+        ['case', 'default', 'each', 'else', 'empty', 'slot'].includes(
           directive.name,
         )
       ) {
