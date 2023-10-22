@@ -595,9 +595,7 @@ export class TemplateCompiler {
         { name: 'each' },
         { name: 'else' },
         { name: 'empty' },
-        { name: 'if' },
         { name: 'slot' },
-        { name: 'switch' },
       ]
     ) {
       if (this.currentTemplate.includes(`@${directive.name}`)) {
@@ -684,7 +682,7 @@ export class TemplateCompiler {
     for (const registeredDirective of this.directives) {
       if (
         registeredDirective.name === directive.name ||
-        ['each', 'else', 'empty', 'if', 'slot', 'switch'].includes(
+        ['each', 'else', 'empty', 'slot'].includes(
           directive.name,
         )
       ) {
