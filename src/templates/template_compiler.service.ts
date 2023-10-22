@@ -344,7 +344,7 @@ export class TemplateCompiler {
       {
         name: 'layout',
         type: 'block',
-        render: async (content: string, layout: string) => {
+        render: async (content: string, layout: string, slot?: string) => {
           if (!layout) {
             throw new Error('View layout name not provided');
           }
@@ -370,7 +370,10 @@ export class TemplateCompiler {
               true,
             );
 
-            return compiledLayout.replaceAll('@slot', content);
+            return compiledLayout.replaceAll(
+              slot ? `@slot('${slot}')` : '@slot',
+              content,
+            );
           } catch (error) {
             if (!(error instanceof Deno.errors.NotFound)) {
               throw error;
