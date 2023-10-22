@@ -399,11 +399,13 @@ export class TemplateCompiler {
     variables: Record<string, unknown> = {},
   ): Promise<TValue> {
     const globalData = {
-      __: (text: string, quantity = 1) =>
-        this.request?.translate(text, quantity) ?? text,
+      __: (text: string, quantity = 1) => {
+        return this.request?.translate(text, quantity) ?? text;
+      },
       $request: this.request,
-      $translate: (text: string, quantity = 1) =>
-        this.request?.translate(text, quantity) ?? text,
+      $translate: (text: string, quantity = 1) => {
+        return this.request?.translate(text, quantity) ?? text;
+      },
       ...Object.keys(constants).reduce((result, key) => ({
         ...result,
         [`$${key}`]: constants[key as keyof typeof constants],
