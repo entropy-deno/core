@@ -1,4 +1,5 @@
 import { Constructor } from '../utils/interfaces/constructor.interface.ts';
+import { Reflector } from '../utils/reflector.class.ts';
 import { ServiceResolveOptions } from './interfaces/service_resolve_options.interface.ts';
 
 export abstract class Injector {
@@ -30,13 +31,16 @@ export abstract class Injector {
     service: Constructor<TService>,
     options: ServiceResolveOptions = {},
   ): TService {
-    if ((options.singleton ?? true) && this.has(service)) {
+    const isSingleton = Reflector.getMetadata<boolean>('singleton', service) ??
+      options.singleton ?? true;
+
+    if (isSingleton && this.has(service)) {
       return this.cachedInstances.get(service) as TService;
     }
 
     const instance = new service();
 
-    if (options.singleton ?? true) {
+    if (isSingleton) {
       this.cachedInstances.set(service, instance);
     }
 

@@ -8,11 +8,13 @@ import { Constructor } from '../utils/interfaces/constructor.interface.ts';
 import { env } from '../configurator/functions/env.function.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { HttpRequest } from '../http/http_request.class.ts';
+import { NonSingleton } from '../injector/decorators/non_singleton.decorator.ts';
 import { TemplateDirective } from './interfaces/template_directive.interface.ts';
 import { url } from '../router/functions/url.function.ts';
 import { Utils } from '../utils/utils.class.ts';
 import { Pipe } from '../pipes/interfaces/pipe.interface.ts';
 
+@NonSingleton()
 export class TemplateCompiler {
   private readonly configurator = inject(Configurator);
 
@@ -319,9 +321,7 @@ export class TemplateCompiler {
           );
 
           try {
-            const compiler = inject(TemplateCompiler, {
-              singleton: false,
-            });
+            const compiler = inject(TemplateCompiler);
 
             compiler.currentOptions.file = file;
 
@@ -361,9 +361,7 @@ export class TemplateCompiler {
           );
 
           try {
-            const compiler = inject(TemplateCompiler, {
-              singleton: false,
-            });
+            const compiler = inject(TemplateCompiler);
 
             compiler.currentOptions.file = file;
 
@@ -525,9 +523,7 @@ export class TemplateCompiler {
 
             iterator += 1;
 
-            const compiler = inject(TemplateCompiler, {
-              singleton: false,
-            });
+            const compiler = inject(TemplateCompiler);
 
             result += await compiler.$compile(
               blockContent,
