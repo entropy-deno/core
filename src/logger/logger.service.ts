@@ -54,10 +54,7 @@ export class Logger {
     if (dotsLength < 0) {
       this.clear();
 
-      console.log(
-        '%cConsole size is too low to render some logs',
-        'color: red; font-weight: bold',
-      );
+      this.error('Console size is too low to render some logs');
 
       return;
     }
@@ -74,13 +71,7 @@ export class Logger {
 
     const params = [
       output,
-      `color: ${
-        type === LogType.Error
-          ? 'red'
-          : type === LogType.Warning
-          ? 'orange'
-          : 'blue'
-      }`,
+      `color: ${type === LogType.Error ? 'red' : 'blue'}`,
       '',
       ...colors.slice(
         0,
@@ -89,34 +80,23 @@ export class Logger {
       ...(additionalInfo && !exceedsSpace ? ['color: gray'] : []),
     ];
 
-    switch (type) {
-      case LogType.Error:
-        console.error(...params);
-
-        break;
-
-      case LogType.Log:
-      case LogType.Info:
-        console.log(...params);
-
-        break;
-
-      case LogType.Warning:
-        console.warn(...params);
-
-        break;
-    }
+    console.log(...params);
   }
 
   public clear(): void {
     console.clear();
   }
 
-  public error(
-    message: string | string[],
-    { additionalInfo, badge = 'Error', colors = [] }: LogOptions = {},
-  ): void {
-    this.write(LogType.Error, message, { additionalInfo, badge, colors });
+  public error(message: string | string[]): void {
+    if (Array.isArray(message)) {
+      for (const text of message) {
+        this.error(text);
+      }
+
+      return;
+    }
+
+    console.error(`%c${message}`, 'color: red; font-weight: bold');
   }
 
   public info(
@@ -141,10 +121,15 @@ export class Logger {
     console.table(data);
   }
 
-  public warn(
-    message: string | string[],
-    { additionalInfo, badge = 'Warning', colors = [] }: LogOptions = {},
-  ): void {
-    this.write(LogType.Warning, message, { additionalInfo, badge, colors });
+  public warn(message: string | string[]): void {
+    if (Array.isArray(message)) {
+      for (const text of message) {
+        this.warn(text);
+      }
+
+      return;
+    }
+
+    console.warn(`%c${message}`, 'color: orange; font-weight: bold');
   }
 }
