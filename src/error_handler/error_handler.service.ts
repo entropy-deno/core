@@ -55,14 +55,11 @@ export class ErrorHandler {
     this.readErrorStack();
 
     this.logger.error(
-      `${error.message} %c[${this.currentFile}${
+      `${error.message} [${this.currentFile}${
         this.currentLine && this.currentFile !== this.defaultFile
           ? `:${this.currentLine}`
           : ''
       }]`,
-      {
-        colors: ['gray'],
-      },
     );
 
     if (die && !this.configurator.entries.isDenoDeploy) {
