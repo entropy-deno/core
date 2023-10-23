@@ -16,6 +16,8 @@ import { Pipe } from '../pipes/interfaces/pipe.interface.ts';
 
 @NonSingleton()
 export class TemplateCompiler {
+  private compiledLayout: string | null = null;
+
   private readonly configurator = inject(Configurator);
 
   private directives: TemplateDirective[] = [];
@@ -27,6 +29,14 @@ export class TemplateCompiler {
     '$range': Utils.range,
     '$url': url,
   };
+
+  private layout: string | null = null;
+
+  private layoutFile: string | null = null;
+
+  private layoutSections = new Map<string, string>();
+
+  private options: TemplateCompilerOptions = {};
 
   private pipes: Record<string, (...args: unknown[]) => unknown> = Object
     .entries(pipes).reduce((result, [_key, pipe]) => {
@@ -47,8 +57,6 @@ export class TemplateCompiler {
   private template = '';
 
   private variables: Record<string, unknown> = {};
-
-  public options: TemplateCompilerOptions = {};
 
   constructor() {
     this.directives = [
@@ -319,12 +327,10 @@ export class TemplateCompiler {
           try {
             const compiler = inject(TemplateCompiler);
 
-            compiler.options.file = file;
-
             const compiledPartial = await compiler.render(
               await Deno.readTextFile(file),
               this.variables,
-              {},
+              { file },
               this.request,
               true,
             );
@@ -343,12 +349,8 @@ export class TemplateCompiler {
       },
       {
         name: 'layout',
-        type: 'block',
-        render: async (content: string, layout: string, slot?: string) => {
-          if (!layout) {
-            throw new Error('View layout name not provided');
-          }
-
+        type: 'single',
+        render: (layout: string) => {
           const file = resolvePath(
             `${
               this.options.file && layout[0] === '.'
@@ -357,32 +359,23 @@ export class TemplateCompiler {
             }/${layout}.atom.html`,
           );
 
-          try {
-            const compiler = inject(TemplateCompiler);
-
-            compiler.options.file = file;
-
-            const compiledLayout = await compiler.render(
-              await Deno.readTextFile(file),
-              this.variables,
-              {},
-              this.request,
-              true,
-            );
-
-            return compiledLayout.replaceAll(
-              slot ? `@slot('${slot}')` : '@slot',
-              content,
-            );
-          } catch (error) {
-            if (!(error instanceof Deno.errors.NotFound)) {
-              throw error;
-            }
-
-            throw new Error(
-              `View layout '${layout.split('/').pop()}' does not exist`,
-            );
+          if (this.layoutFile && this.layoutFile !== file) {
+            throw new Error('Cannot use multiple layouts in one view');
           }
+
+          this.layout = layout;
+          this.layoutFile = file;
+
+          return '';
+        },
+      },
+      {
+        name: 'section',
+        type: 'block',
+        render: (content: string, name: string) => {
+          this.layoutSections.set(name, content);
+
+          return '';
         },
       },
       {
@@ -649,6 +642,43 @@ export class TemplateCompiler {
         this.template = this.template.replace(
           expression,
           result instanceof Promise ? await result : result,
+        );
+      }
+    }
+
+    if (this.layout) {
+      try {
+        const compiler = inject(TemplateCompiler);
+
+        let compiledLayout = await compiler.render(
+          await Deno.readTextFile(this.layoutFile!),
+          this.variables,
+          { file: this.layoutFile! },
+          this.request,
+          true,
+        );
+
+        for (const [slot, content] of this.layoutSections) {
+          compiledLayout = compiledLayout.replaceAll(
+            `@slot('${slot}')`,
+            await compiler.render(
+              content,
+              this.variables,
+              {},
+              this.request,
+              true,
+            ),
+          );
+        }
+
+        this.template = compiledLayout;
+      } catch (error) {
+        if (!(error instanceof Deno.errors.NotFound)) {
+          throw error;
+        }
+
+        throw new Error(
+          `View layout '${this.layout.split('/').pop()}' does not exist`,
         );
       }
     }
