@@ -69,11 +69,11 @@ export class Router {
   ): Promise<Response> {
     const payload = {
       statusCode,
-      message: Utils.getEnumKey(statusCode, HttpStatus).replace(
+      message: Utils.getEnumKey(statusCode, HttpStatus)?.replace(
         /([a-z])([A-Z])/g,
         '$1 $2',
       ) ??
-        'Error',
+        'HTTP Error',
     };
 
     if (request.isAjax) {

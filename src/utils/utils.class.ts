@@ -109,9 +109,8 @@ export abstract class Utils {
   public static getEnumKey<TValue = string | number>(
     value: TValue,
     enumObject: Record<string, unknown>,
-  ): string {
-    return Object.keys(enumObject).find((key) => enumObject[key] === value) ??
-      '';
+  ): string | undefined {
+    return Object.keys(enumObject).find((key) => enumObject[key] === value);
   }
 
   public static range(start: number, end?: number) {
