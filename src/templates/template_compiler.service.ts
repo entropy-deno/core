@@ -50,6 +50,8 @@ export class TemplateCompiler {
 
   private rawContent: string[] = [];
 
+  private rawContentCount = 0;
+
   private request: HttpRequest | undefined = undefined;
 
   private stacks = new Map<string, string[]>();
@@ -60,6 +62,15 @@ export class TemplateCompiler {
 
   constructor() {
     this.directives = [
+      {
+        name: 'raw',
+        type: 'block',
+        render: (content: string) => {
+          this.rawContent.push(content);
+
+          return `$__raw__${this.rawContentCount++}`;
+        },
+      },
       {
         name: 'if',
         type: 'block',
@@ -481,81 +492,59 @@ export class TemplateCompiler {
       /@each\s*\((.*?)\s+(?:in|of)\s+([^\n]*)\)(.*?)@\/each/gsm,
     ) ?? [];
 
-    try {
-      for (const [wholeMatch, variableName, iterableValue, block] of matches) {
-        let iterable = await this.renderNatively<unknown[] | number>(
-          `return ${iterableValue};`,
-        );
-
-        if (typeof iterable === 'number') {
-          iterable = Utils.range(iterable);
-        }
-
-        let result = '';
-        let iterator = 0;
-
-        const [blockContent, , elseContent] = block.split(/@(else|empty)/);
-
-        if (!Object.keys(iterable).length) {
-          this.template = this.template.replace(
-            wholeMatch,
-            elseContent ?? '',
-          );
-        }
-
-        for (const [key, item] of Object.entries(iterable)) {
-          if (Object.hasOwn(iterable, key)) {
-            const index = JSON.parse(`"${key}"`);
-
-            const scopeVariables = {
-              [variableName]: item,
-              $even: index % 2 === 0,
-              $first: index === 0,
-              $index: iterator,
-              $key: index,
-              $last: index === Object.keys(iterable).length - 1,
-              $odd: index % 2 === 1,
-            };
-
-            iterator += 1;
-
-            const compiler = inject(TemplateCompiler);
-
-            result += await compiler.render(
-              blockContent,
-              {
-                ...this.variables,
-                ...scopeVariables,
-              },
-              {},
-              this.request,
-              true,
-            );
-          }
-        }
-
-        this.template = this.template.replace(wholeMatch, result);
-      }
-    } catch {
-      throw new Error('Invalid @each directive syntax');
-    }
-  }
-
-  private parseRawDirectives(): void {
-    const matches = this.template.matchAll(/@raw\s+(.*?)@\/raw/gsm) ??
-      [];
-
-    let count = 0;
-
-    for (const [wholeMatch, content] of matches) {
-      this.template = this.template.replace(
-        wholeMatch,
-        `$_raw${count}`,
+    for (const [wholeMatch, variableName, iterableValue, block] of matches) {
+      let iterable = await this.renderNatively<unknown[] | number>(
+        `return ${iterableValue};`,
       );
 
-      this.rawContent.push(content);
+      if (typeof iterable === 'number') {
+        iterable = Utils.range(iterable);
+      }
 
-      count += 1;
+      let result = '';
+      let iterator = 0;
+
+      const [blockContent, , elseContent] = block.split(/@(else|empty)/);
+
+      if (!Object.keys(iterable).length) {
+        this.template = this.template.replace(
+          wholeMatch,
+          elseContent ?? '',
+        );
+      }
+
+      for (const [key, item] of Object.entries(iterable)) {
+        if (Object.hasOwn(iterable, key)) {
+          const index = JSON.parse(`"${key}"`);
+
+          const scopeVariables = {
+            [variableName]: item,
+            $even: index % 2 === 0,
+            $first: index === 0,
+            $index: iterator,
+            $key: index,
+            $last: index === Object.keys(iterable).length - 1,
+            $odd: index % 2 === 1,
+          };
+
+          iterator += 1;
+
+          const compiler = inject(TemplateCompiler);
+
+          result += await compiler.render(
+            blockContent,
+            {
+              ...this.variables,
+              ...scopeVariables,
+            },
+            {},
+            this.request,
+            true,
+          );
+        }
+      }
+
+      this.template = this.template.replace(wholeMatch, result);
     }
   }
 
@@ -569,7 +558,7 @@ export class TemplateCompiler {
   }
 
   private restoreRawContent(): void {
-    const matches = this.template.matchAll(/\$_raw([0-9]+)/g) ?? [];
+    const matches = this.template.matchAll(/\$__raw__([0-9]+)/g) ?? [];
 
     for (const [wholeMatch, segmentIndex] of matches) {
       const index = parseInt(segmentIndex);
@@ -611,11 +600,6 @@ export class TemplateCompiler {
     this.template = template.replaceAll('\r\n', '\n');
     this.variables = variables;
 
-    this.parseRawDirectives();
-    this.removeComments();
-
-    await this.parseEachDirectives();
-
     for (const directive of this.directives) {
       const pattern = directive.type === 'single'
         ? new RegExp(`@${directive.name}\s*(\\((.*?)\\))?`, 'g')
@@ -632,9 +616,10 @@ export class TemplateCompiler {
           ? await this.renderNatively<unknown[]>(`return ${`[${args}]`};`)
           : [];
 
-        const result = directive.type === 'single'
-          ? directive.render(...resolvedArguments)
-          : directive.render(
+        const result = !directive.type || directive.type === 'single'
+          ? directive.render.call(this, ...resolvedArguments)
+          : directive.render.call(
+            this,
             blockContent,
             ...resolvedArguments,
           );
@@ -643,6 +628,10 @@ export class TemplateCompiler {
           expression,
           result instanceof Promise ? await result : result,
         );
+      }
+
+      if (directive.name === 'raw') {
+        await this.parseEachDirectives();
       }
     }
 
@@ -685,11 +674,13 @@ export class TemplateCompiler {
 
     await this.parseDataInterpolations();
 
-    this.restoreRawContent();
+    this.removeComments();
 
     if (!recursiveCall) {
       this.validateSyntax();
     }
+
+    this.restoreRawContent();
 
     return this.template;
   }

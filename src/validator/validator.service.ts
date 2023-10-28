@@ -320,10 +320,11 @@ export class Validator {
           throw new Error(`Invalid validation rule '${rule}'`);
         }
 
-        const passes = ruleObject.validate.apply(this, [
+        const passes = ruleObject.validate.call(
+          this,
           [fieldValue, ruleValue],
           fieldName,
-        ]);
+        );
 
         if (!(passes instanceof Promise ? await passes : passes)) {
           if (!(fieldName in errors)) {
