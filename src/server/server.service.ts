@@ -74,12 +74,10 @@ export class Server implements Disposable {
       });
 
     if (satisfiesDenoVersion === -1) {
-      this.logger.warn(
-        `Entropy requires Deno version ${MIN_DENO_VERSION} or higher %c[run 'deno upgrade' to update Deno]`,
-        {
-          colors: ['gray'],
-        },
-      );
+      this.logger.warn([
+        `Entropy requires Deno version ${MIN_DENO_VERSION} or higher`,
+        `Run 'deno upgrade' to update Deno executable`,
+      ]);
 
       Deno.exit(1);
     }
