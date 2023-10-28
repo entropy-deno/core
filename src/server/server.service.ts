@@ -92,6 +92,7 @@ export class Server implements Disposable {
     info: Deno.ServeHandlerInfo,
   ): Promise<Response> {
     if (
+      request.headers.get('connection')?.toLowerCase() === 'upgrade' &&
       request.headers.get('upgrade')?.toLowerCase() === 'websocket' &&
       this.configurator.entries.webSocket
     ) {
