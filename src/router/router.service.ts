@@ -87,7 +87,7 @@ export class Router {
 
     return await this.createResponse(
       request,
-      await this.templateCompiler.render(statusPage, payload, {}, request),
+      await this.templateCompiler.render(statusPage, payload, { request }),
       {
         statusCode,
       },
@@ -343,9 +343,9 @@ export class Router {
           (body as View).variables,
           {
             file: (body as View).file,
+            request,
             ...(body as View).options,
           },
-          request,
         );
 
         body = compiledTemplate;
@@ -833,8 +833,7 @@ export class Router {
             error,
             stackTrace,
           },
-          {},
-          request,
+          { request },
         ),
         {
           statusCode: HttpStatus.InternalServerError,

@@ -7,7 +7,6 @@ import { Configurator } from '../configurator/configurator.service.ts';
 import { Constructor } from '../utils/interfaces/constructor.interface.ts';
 import { env } from '../configurator/functions/env.function.ts';
 import { inject } from '../injector/functions/inject.function.ts';
-import { HttpRequest } from '../http/http_request.class.ts';
 import { NonSingleton } from '../injector/decorators/non_singleton.decorator.ts';
 import { TemplateDirective } from './interfaces/template_directive.interface.ts';
 import { url } from '../router/functions/url.function.ts';
@@ -51,8 +50,6 @@ export class TemplateCompiler {
   private rawContent: string[] = [];
 
   private rawContentCount = 0;
-
-  private request: HttpRequest | undefined = undefined;
 
   private stacks = new Map<string, string[]>();
 
@@ -160,7 +157,7 @@ export class TemplateCompiler {
         name: 'csrf',
         type: 'single',
         render: async () => {
-          return `<input type="hidden" name="_csrf" value="${await this
+          return `<input type="hidden" name="_csrf" value="${await this.options
             .request
             ?.session.get<string>('@entropy/csrf_token')}">`;
         },
@@ -195,7 +192,9 @@ export class TemplateCompiler {
 
               switch (file.split('.').pop()) {
                 case 'css': {
-                  result += `<style nonce="${this.request?.nonce ?? ''}">${
+                  result += `<style nonce="${
+                    this.options.request?.nonce ?? ''
+                  }">${
                     minify ? content.replaceAll(/\n|\t|(\r\n)/g, '') : content
                   }</style>`;
 
@@ -203,7 +202,9 @@ export class TemplateCompiler {
                 }
 
                 case 'js': {
-                  result += `<script nonce="${this.request?.nonce ?? ''}">${
+                  result += `<script nonce="${
+                    this.options.request?.nonce ?? ''
+                  }">${
                     minify ? content.replaceAll(/\n|\t|(\r\n)/g, '') : content
                   }</script>`;
 
@@ -244,7 +245,7 @@ export class TemplateCompiler {
         type: 'single',
         render: () => {
           return this.configurator.entries.isProduction ? '' : `
-            <script nonce="${this.request?.nonce ?? ''}">
+            <script nonce="${this.options.request?.nonce ?? ''}">
               const ws = new WebSocket('${
             this.configurator.entries.tls.enabled ? 'wss' : 'ws'
           }://${this.configurator.entries.host}:${this.configurator.entries.port}');
@@ -288,14 +289,14 @@ export class TemplateCompiler {
         name: 'nonceProp',
         type: 'single',
         render: () => {
-          return `nonce="${this.request?.nonce ?? ''}"`;
+          return `nonce="${this.options.request?.nonce ?? ''}"`;
         },
       },
       {
         name: 'nonce',
         type: 'single',
         render: () => {
-          return this.request?.nonce ?? '';
+          return this.options.request?.nonce ?? '';
         },
       },
       {
@@ -341,9 +342,7 @@ export class TemplateCompiler {
             const compiledPartial = await compiler.render(
               await Deno.readTextFile(file),
               this.variables,
-              { file },
-              this.request,
-              true,
+              { file, recursiveCall: true, request: this.options.request },
             );
 
             return compiledPartial;
@@ -407,11 +406,11 @@ export class TemplateCompiler {
   ): Promise<TValue> {
     const globalData = {
       __: (text: string, quantity = 1) => {
-        return this.request?.translate(text, quantity) ?? text;
+        return this.options.request?.translate(text, quantity) ?? text;
       },
-      $request: this.request,
+      $request: this.options.request,
       $translate: (text: string, quantity = 1) => {
-        return this.request?.translate(text, quantity) ?? text;
+        return this.options.request?.translate(text, quantity) ?? text;
       },
       ...Object.keys(constants).reduce((result, key) => ({
         ...result,
@@ -537,9 +536,11 @@ export class TemplateCompiler {
               ...this.variables,
               ...scopeVariables,
             },
-            {},
-            this.request,
-            true,
+            {
+              file: this.options.file,
+              request: this.options.request,
+              recursiveCall: true,
+            },
           );
         }
       }
@@ -591,12 +592,9 @@ export class TemplateCompiler {
   public async render(
     template: string,
     variables: Record<string, unknown> = {},
-    options: TemplateCompilerOptions = {},
-    request?: HttpRequest,
-    recursiveCall = false,
+    options: TemplateCompilerOptions = { recursiveCall: false },
   ): Promise<string> {
     this.options = options;
-    this.request = request;
     this.template = template.replaceAll('\r\n', '\n');
     this.variables = variables;
 
@@ -642,9 +640,11 @@ export class TemplateCompiler {
         let compiledLayout = await compiler.render(
           await Deno.readTextFile(this.layoutFile!),
           this.variables,
-          { file: this.layoutFile! },
-          this.request,
-          true,
+          {
+            file: this.layoutFile!,
+            recursiveCall: true,
+            request: this.options.request,
+          },
         );
 
         for (const [slot, content] of this.layoutSections) {
@@ -653,9 +653,7 @@ export class TemplateCompiler {
             await compiler.render(
               content,
               this.variables,
-              {},
-              this.request,
-              true,
+              { recursiveCall: true, request: this.options.request },
             ),
           );
         }
@@ -676,7 +674,7 @@ export class TemplateCompiler {
 
     this.removeComments();
 
-    if (!recursiveCall) {
+    if (!options.recursiveCall) {
       this.validateSyntax();
     }
 
