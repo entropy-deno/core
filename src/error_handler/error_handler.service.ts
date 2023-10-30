@@ -33,13 +33,17 @@ export class ErrorHandler {
       whereThrown.length,
     );
 
-    const file = thrownAt?.match(/\(file:\/\/(.*?)\)/)?.[1];
+    const file = (this.currentError?.cause as Error | undefined)?.message ??
+      thrownAt?.match(/\(file:\/\/(.*?)\)/)?.[1];
+    const line = file?.match(/(?:.*):(.*):(.*)/)?.[1];
 
     this.currentFile = file
-      ? fromFileUrl(`file://${file}`).split(':')[0]
+      ? fromFileUrl(`file://${file.split(Deno.cwd())[1]}`).split(':')[0]
       : this.defaultFile;
 
-    this.currentLine = Number(file?.match(/(.*):(.*):(.*)/)?.[2] ?? 1);
+    this.currentLine = line
+      ? Number(file?.match(/(?:.*):(.*):(.*)/)?.[1])
+      : null;
 
     if (this.currentFile.includes('src/')) {
       this.currentFile = `src/${this.currentFile.split('src/')[1]}`;

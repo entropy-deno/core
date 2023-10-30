@@ -15,8 +15,6 @@ import { Pipe } from '../pipes/interfaces/pipe.interface.ts';
 
 @NonSingleton()
 export class TemplateCompiler {
-  private compiledLayout: string | null = null;
-
   private readonly configurator = inject(Configurator);
 
   private directives: TemplateDirective[] = [];
@@ -426,9 +424,15 @@ export class TemplateCompiler {
       `return (async () => {${code}})();`,
     ];
 
-    return await new Function(...header)(
-      ...Object.values(globalData),
-    ) as TValue;
+    try {
+      return await new Function(...header)(
+        ...Object.values(globalData),
+      ) as TValue;
+    } catch (error) {
+      throw new Error((error as Error).message, {
+        ...(this.options.file ? { cause: new Error(this.options.file) } : {}),
+      });
+    }
   }
 
   private async parseDataInterpolations(): Promise<void> {
