@@ -507,7 +507,7 @@ export class TemplateCompiler {
       let result = '';
       let iterator = 0;
 
-      const [blockContent, , elseContent] = block.split(/@(else|empty)/);
+      const [blockContent, elseContent] = block.split(/@(?:else|empty)/);
 
       if (!Object.keys(iterable).length) {
         this.template = this.template.replace(
