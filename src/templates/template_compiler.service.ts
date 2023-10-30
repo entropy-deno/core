@@ -101,13 +101,13 @@ export class TemplateCompiler {
             ] of caseMatches
           ) {
             if (caseType !== closingCaseType) {
-              throw new Error('Not closed @switch directive case');
+              throw new Error(`Not closed @${caseType} directive`);
             }
 
             if (caseType === 'default') {
               if (defaultCaseValue) {
                 throw new Error(
-                  '@switch directive can only have one default case',
+                  'Double @switch directive default case defined',
                 );
               }
 
