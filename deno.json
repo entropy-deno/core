@@ -24,8 +24,12 @@
   "lock": false,
   "tasks": {
     "bench": "deno bench -A",
-    "test": "export TESTING=true ; deno test -A --no-check --parallel",
-    "test:cov": "export TESTING=true ; deno test -A --coverage=coverage",
-    "test:watch": "export TESTING=true ; deno test -A --no-check --parallel --watch"
-  }
+    "test": "deno test -A --env=.env.testing --no-check --parallel",
+    "test:cov": "deno test -A --coverage=coverage --env=.env.testing",
+    "test:watch": "deno test -A --env=.env.testing --no-check --parallel --watch"
+  },
+  "unstable": [
+    "cron",
+    "kv"
+  ]
 }
