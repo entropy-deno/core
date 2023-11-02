@@ -1,7 +1,7 @@
 import {
   assertEquals,
   assertStringIncludes,
-} from 'https://deno.land/std@0.204.0/assert/mod.ts';
+} from 'https://deno.land/std@0.205.0/assert/mod.ts';
 import { fetchRoute } from './functions/fetch_route.function.ts';
 import { Controller } from '../http/controller.class.ts';
 import { HttpStatus } from '../http/enums/http_status.enum.ts';
