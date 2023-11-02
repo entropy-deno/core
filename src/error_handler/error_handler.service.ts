@@ -12,7 +12,7 @@ export class ErrorHandler {
 
   private currentLine: number | null = null;
 
-  private readonly defaultFile = 'entropy module';
+  private readonly defaultFilePlaceholder = 'entropy module';
 
   private readonly logger = inject(Logger);
 
@@ -20,7 +20,7 @@ export class ErrorHandler {
     const stack = this.currentError?.stack ?? null;
 
     if (!stack) {
-      this.currentFile = this.defaultFile;
+      this.currentFile = this.defaultFilePlaceholder;
       this.currentLine = null;
 
       return;
@@ -37,15 +37,18 @@ export class ErrorHandler {
       thrownAt?.match(/\(file:\/\/(.*?)\)/)?.[1];
     const line = file?.match(/(?:.*):(.*):(.*)/)?.[1];
 
-    this.currentFile = file
-      ? fromFileUrl(`file://${file.split(Deno.cwd())[1]}`).split(':')[0]
-      : this.defaultFile;
+    if (file) {
+      const path =
+        fromFileUrl(`file://${file.split(Deno.cwd())[1]}`).split(':')[0];
+
+      this.currentFile = path === '/' ? this.defaultFilePlaceholder : path;
+    }
 
     this.currentLine = line
       ? Number(file?.match(/(?:.*):(.*):(.*)/)?.[1])
       : null;
 
-    if (this.currentFile.includes('src/')) {
+    if (this.currentFile?.includes('src/')) {
       this.currentFile = `src/${this.currentFile.split('src/')[1]}`;
     }
   }
@@ -60,7 +63,7 @@ export class ErrorHandler {
 
     this.logger.error(
       `${error.message} [${this.currentFile}${
-        this.currentLine && this.currentFile !== this.defaultFile
+        this.currentLine && this.currentFile !== this.defaultFilePlaceholder
           ? `:${this.currentLine}`
           : ''
       }]`,
