@@ -132,6 +132,10 @@ export class HttpRequest {
     }
   }
 
+  public async json(): Promise<Record<string, unknown>> {
+    return await this.request.json();
+  }
+
   public get locale(): string {
     return this.header('accept-language')?.slice(0, 2) ?? 'en';
   }
