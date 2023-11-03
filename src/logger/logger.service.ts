@@ -3,7 +3,6 @@ import { inject } from '../injector/functions/inject.function.ts';
 
 interface LogOptions {
   additionalInfo?: string;
-  badge?: string;
   colors?: string[];
 }
 
@@ -22,7 +21,7 @@ export class Logger {
   private write(
     type: LogType,
     message: string | string[],
-    { additionalInfo, badge = 'Log', colors = [] }: LogOptions,
+    { additionalInfo, colors = [] }: LogOptions,
   ): void {
     if (!this.configurator.entries.logger) {
       return;
@@ -32,7 +31,6 @@ export class Logger {
       for (const text of message) {
         this.write(type, text, {
           additionalInfo,
-          badge,
           colors,
         });
       }
@@ -40,7 +38,7 @@ export class Logger {
       return;
     }
 
-    const maxMessageLength = Deno.consoleSize().columns - badge.length - 2;
+    const maxMessageLength = Deno.consoleSize().columns - 4;
     const plainMessage = message.replaceAll('%c', '');
     const exceedsSpace = plainMessage.length > maxMessageLength;
     const trimmedMessage = exceedsSpace
@@ -48,8 +46,7 @@ export class Logger {
       : message;
 
     const dotsLength = exceedsSpace ? 0 : Deno.consoleSize().columns -
-      plainMessage.length -
-      badge.length - this.endPadding;
+      plainMessage.length - this.endPadding;
 
     if (dotsLength < 0) {
       this.clear();
@@ -59,24 +56,23 @@ export class Logger {
       return;
     }
 
-    const output = `%c${badge} %c${trimmedMessage}${exceedsSpace ? '...' : ''}${
+    const output = `%c${trimmedMessage}${exceedsSpace ? '...' : ''}${
       additionalInfo && !exceedsSpace
         ? ` %c${
           this.configurator.entries.isDenoDeploy
             ? '• '
-            : (dotsLength ? `${'.'.repeat(dotsLength)} ` : '')
+            : (dotsLength ? `${'.'.repeat(dotsLength - 5)} ` : '')
         }${additionalInfo}`
         : ''
     }`;
 
     const params = [
       output,
-      `color: ${type === LogType.Error ? 'red' : 'blue'}`,
-      '',
+      'font-weight: bold',
       ...colors.slice(
         0,
         trimmedMessage.replace(/(%c|%)$/, '').match(/%c/g)?.length ?? 0,
-      ).map((color) => `color: ${color}`),
+      ).map((color) => `color: ${color}; font-weight: bold`),
       ...(additionalInfo && !exceedsSpace ? ['color: gray'] : []),
     ];
 
@@ -101,16 +97,16 @@ export class Logger {
 
   public info(
     message: string | string[],
-    { additionalInfo, badge = 'Info', colors = [] }: LogOptions = {},
+    { additionalInfo, colors = [] }: LogOptions = {},
   ): void {
-    this.write(LogType.Info, message, { additionalInfo, badge, colors });
+    this.write(LogType.Info, message, { additionalInfo, colors });
   }
 
   public log(
     message: string | string[],
-    { additionalInfo, badge = 'Log', colors = [] }: LogOptions = {},
+    { additionalInfo, colors = [] }: LogOptions = {},
   ): void {
-    this.write(LogType.Log, message, { additionalInfo, badge, colors });
+    this.write(LogType.Log, message, { additionalInfo, colors });
   }
 
   public raw(...messages: string[]): void {

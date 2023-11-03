@@ -151,8 +151,13 @@ export class Server implements Disposable {
     this.logger.log(
       `%c[${status}] %c${richRequest.path}${richRequest.searchString}`,
       {
-        additionalInfo: `${responsePerformance}ms`,
-        badge: 'Request',
+        additionalInfo: `${
+          responsePerformance.length < 5
+            ? `${
+              ' '.repeat(5 - responsePerformance.length)
+            }${responsePerformance}`
+            : responsePerformance
+        }ms`,
         colors: [statusColor, ''],
       },
     );
@@ -406,7 +411,6 @@ export class Server implements Disposable {
                     : `%c${this.router.baseUrl()}`
                 } %c[${OS === 'darwin' ? '⌃C' : 'Ctrl+C'} to quit]`,
                 {
-                  badge: 'Server',
                   colors: ['blue', 'gray'],
                 },
               );
@@ -465,9 +469,7 @@ export class Server implements Disposable {
                 switch (true) {
                   case (path.includes('src') && path.includes('.atom.html')) ||
                     path.includes('views'):
-                    this.logger.log('View reload request...', {
-                      badge: 'Hot reload',
-                    });
+                    this.logger.log('View reload request...');
 
                     hotReloadChannel.sendReloadRequest();
 
