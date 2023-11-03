@@ -8,7 +8,6 @@ import { ValidationRulesList } from '../../validator/interfaces/validation_rules
 export interface RouteOptions {
   cookies?: Record<string, string>;
   headers?: Record<string, string>;
-  injectRequest?: boolean;
   middleware?: Constructor<Middleware>[];
   name?: string;
   paramPipes?: Record<string, Constructor<Pipe>>;

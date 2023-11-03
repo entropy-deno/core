@@ -518,7 +518,6 @@ export class Router {
       const {
         cookies,
         headers,
-        injectRequest,
         methods,
         middleware,
         name,
@@ -555,10 +554,6 @@ export class Router {
           'headers',
           controllerMethod,
         ) ?? headers,
-        injectRequest: Reflector.getMetadata<boolean>(
-          'injectRequest',
-          controllerMethod,
-        ) ?? injectRequest,
         middleware: Reflector.getMetadata<Constructor<Middleware>[]>(
           'middleware',
           controllerMethod,
@@ -638,7 +633,6 @@ export class Router {
           action,
           cookies,
           headers,
-          injectRequest,
           methods,
           middleware,
           paramPipes,
@@ -757,8 +751,8 @@ export class Router {
             return await this.createResponse(
               request,
               await action(
-                ...(injectRequest ? [request] : []),
-                ...resolvedParams,
+                resolvedParams,
+                request,
               ),
               {
                 cookies,
