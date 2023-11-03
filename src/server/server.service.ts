@@ -9,7 +9,7 @@ import { HotReloadChannel } from './channels/hot_reload.channel.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { Localizator } from '../localizator/localizator.module.ts';
 import { Logger } from '../logger/logger.service.ts';
-import { MIN_DENO_VERSION, VERSION } from '../constants.ts';
+import { MIN_DENO_VERSION, OS, VERSION } from '../constants.ts';
 import { HttpRequest } from '../http/http_request.class.ts';
 import { Reflector } from '../utils/reflector.class.ts';
 import { Router } from '../router/router.service.ts';
@@ -56,7 +56,7 @@ export class Server implements Disposable {
 
   private addExitSignalListener(callback: () => void): void {
     for (const signal of this.exitSignals) {
-      if (Deno.build.os === 'windows' && signal !== 'SIGINT') {
+      if (OS === 'windows' && signal !== 'SIGINT') {
         continue;
       }
 
@@ -300,12 +300,7 @@ export class Server implements Disposable {
     if (flags.open && !localStorage.getItem(this.devServerCheckKey)) {
       try {
         Utils.runShellCommand(
-          `${
-            WebClientAlias[
-              Deno.build.os as 'darwin' | 'linux' | 'windows'
-            ] ??
-              'open'
-          }`,
+          `${WebClientAlias[OS as 'darwin' | 'linux' | 'windows'] ?? 'open'}`,
           [this.router.baseUrl()],
         );
       } finally {
@@ -407,7 +402,7 @@ export class Server implements Disposable {
                   this.configurator.entries.isProduction
                     ? `port %c${this.configurator.entries.port}`
                     : `%c${this.router.baseUrl()}`
-                } %c[${Deno.build.os === 'darwin' ? '⌃C' : 'Ctrl+C'} to quit]`,
+                } %c[${OS === 'darwin' ? '⌃C' : 'Ctrl+C'} to quit]`,
                 {
                   badge: 'Server',
                   colors: ['blue', 'gray'],
