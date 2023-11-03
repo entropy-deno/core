@@ -145,12 +145,13 @@ export class Server implements Disposable {
       }
     }
 
-    const responseTime = (performance.now() - performanceTimerStart).toFixed(1);
+    const responsePerformance = (performance.now() - performanceTimerStart)
+      .toFixed(1);
 
     this.logger.log(
       `%c[${status}] %c${richRequest.path}${richRequest.searchString}`,
       {
-        additionalInfo: `${responseTime}ms`,
+        additionalInfo: `${responsePerformance}ms`,
         badge: 'Request',
         colors: [statusColor, ''],
       },
@@ -248,11 +249,12 @@ export class Server implements Disposable {
 
   private async setup(): Promise<void> {
     this.router.registerControllers(this.options.controllers ?? []);
-    this.webSocketChannels.push(...this.options.channels ?? []);
     this.validator.registerRules(this.configurator.entries.validatorRules);
     this.templateCompiler.registerDirectives(
       this.configurator.entries.templateDirectives,
     );
+
+    this.webSocketChannels.push(...this.options.channels ?? []);
 
     for (const route of this.options.routes ?? []) {
       this.router.registerRoute(...route);
@@ -471,7 +473,7 @@ export class Server implements Disposable {
 
                     break;
 
-                  case event.paths[0]?.includes('locales'):
+                  case path.includes('locales'):
                     await this.localizator.setup();
 
                     break;
