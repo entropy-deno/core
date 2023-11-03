@@ -1,5 +1,6 @@
 import { getCookies } from 'https://deno.land/std@0.205.0/http/cookie.ts';
 import { Encrypter } from '../encrypter/encrypter.service.ts';
+import { FormFile } from './form_file.class.ts';
 import { HttpMethod } from './enums/http_method.enum.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { Localizator } from '../localizator/localizator.service.ts';
@@ -56,7 +57,37 @@ export class HttpRequest {
     return this.request.headers;
   }
 
+  public async files(): Promise<Record<string, FormFile | FormFile[]>> {
+    const files: Record<string, FormFile | FormFile[]> = {};
+
+    for (const [name, field] of (await this.form()).entries()) {
+      if (!(field instanceof File)) {
+        continue;
+      }
+
+      if (name.endsWith('[]')) {
+        const fieldName = name.slice(0, -2);
+
+        if (!files[fieldName]) {
+          files[fieldName] = [];
+        }
+
+        (files[fieldName] as FormFile[]).push(new FormFile(field));
+
+        continue;
+      }
+
+      files[name] = new FormFile(field);
+    }
+
+    return files;
+  }
+
   public async form(): Promise<FormData> {
+    if (!this.isFormRequest()) {
+      throw new Error('Request is not a form request');
+    }
+
     return await this.request.formData();
   }
 

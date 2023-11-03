@@ -11,6 +11,7 @@ export * from './decorators/transform.decorator.ts';
 export * from './decorators/use.decorator.ts';
 export * from './enums/http_method.enum.ts';
 export * from './enums/http_status.enum.ts';
+export * from './form_file.class.ts';
 export * from './interfaces/authorizer.interface.ts';
 export * from './interfaces/middleware.interface.ts';
 export * from './json.class.ts';
