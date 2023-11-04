@@ -59,8 +59,6 @@ export class Router {
 
   private readonly routeStore = inject(RouteStore);
 
-  private readonly templateCompiler = inject(TemplateCompiler);
-
   private readonly validator = inject(Validator);
 
   private async createAbortResponse(
@@ -87,7 +85,7 @@ export class Router {
 
     return await this.createResponse(
       request,
-      await this.templateCompiler.render(statusPage, payload, { request }),
+      await inject(TemplateCompiler).render(statusPage, payload, { request }),
       {
         statusCode,
       },
@@ -339,7 +337,7 @@ export class Router {
 
       case body instanceof View: {
         const template = await (body as View).template();
-        const compiledTemplate = await this.templateCompiler.render(
+        const compiledTemplate = await inject(TemplateCompiler).render(
           template,
           (body as View).variables,
           {
@@ -822,7 +820,7 @@ export class Router {
 
       return await this.createResponse(
         request,
-        await this.templateCompiler.render(
+        await inject(TemplateCompiler).render(
           errorPage,
           {
             error,

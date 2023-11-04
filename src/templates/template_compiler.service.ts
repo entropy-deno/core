@@ -17,8 +17,6 @@ import { Pipe } from '../pipes/interfaces/pipe.interface.ts';
 export class TemplateCompiler {
   private readonly configurator = inject(Configurator);
 
-  private directives: TemplateDirective[] = [];
-
   private readonly functions = {
     '$env': env,
     '$escape': Utils.escapeEntities,
@@ -55,8 +53,10 @@ export class TemplateCompiler {
 
   private variables: Record<string, unknown> = {};
 
+  public static directives: TemplateDirective[] = [];
+
   constructor() {
-    this.directives = [
+    TemplateCompiler.directives = [
       {
         name: 'raw',
         type: 'block',
@@ -430,7 +430,9 @@ export class TemplateCompiler {
       ) as TValue;
     } catch (error) {
       throw new Error((error as Error).message, {
-        ...(this.options.file ? { cause: new Error(this.options.file) } : {}),
+        ...(this.options.file && !this.layoutFile
+          ? { cause: new Error(this.options.file) }
+          : {}),
       });
     }
   }
@@ -578,7 +580,7 @@ export class TemplateCompiler {
   private validateSyntax(): void {
     for (
       const directive of [
-        ...this.directives,
+        ...TemplateCompiler.directives,
         { name: 'case' },
         { name: 'default' },
         { name: 'each' },
@@ -602,7 +604,7 @@ export class TemplateCompiler {
     this.template = template.replaceAll('\r\n', '\n');
     this.variables = variables;
 
-    for (const directive of this.directives) {
+    for (const directive of TemplateCompiler.directives) {
       const pattern = directive.type === 'single'
         ? new RegExp(`@${directive.name}\s*(\\((.*?)\\))?`, 'g')
         : new RegExp(
@@ -688,7 +690,7 @@ export class TemplateCompiler {
   }
 
   public registerDirective(directive: TemplateDirective): void {
-    for (const registeredDirective of this.directives) {
+    for (const registeredDirective of TemplateCompiler.directives) {
       if (
         registeredDirective.name === directive.name ||
         ['case', 'default', 'each', 'else', 'empty', 'slot'].includes(
@@ -701,7 +703,7 @@ export class TemplateCompiler {
       }
     }
 
-    this.directives.push(directive);
+    TemplateCompiler.directives.push(directive);
   }
 
   public registerDirectives(directives: TemplateDirective[]): void {
