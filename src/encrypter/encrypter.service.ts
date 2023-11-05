@@ -20,11 +20,11 @@ export class Encrypter {
     return await this.hash(plainText) === hash;
   }
 
-  public base64Decode(encoded: string): string {
+  public decodeBase64(encoded: string): string {
     return this.decoder.decode(decodeBase64(encoded));
   }
 
-  public base64Encode(plainText: string | ArrayBuffer): string {
+  public encodeBase64(plainText: string | ArrayBuffer): string {
     return encodeBase64(plainText);
   }
 
