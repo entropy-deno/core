@@ -1,5 +1,6 @@
 import { HttpStatus } from './enums/http_status.enum.ts';
 import { inject } from '../injector/functions/inject.function.ts';
+import { HttpRequest } from './http_request.class.ts';
 import { Json } from './json.class.ts';
 import { TemplateCompilerOptions } from '../templates/interfaces/template_compiler_options.interface.ts';
 import { RedirectDestination } from '../router/types/redirect_destination.type.ts';
@@ -19,6 +20,20 @@ export abstract class Controller {
     return inject(Router).createRedirect(destination, statusCode);
   }
 
+  protected async redirectBack(
+    request: HttpRequest,
+    statusCode = HttpStatus.Found,
+  ): Promise<Response> {
+    const destination = await request.session.get<RedirectDestination>(
+      '@entropy/previous_location',
+    );
+
+    return inject(Router).createRedirect(
+      destination ?? request.path,
+      statusCode,
+    );
+  }
+
   protected render(
     file: string,
     variables: Record<string, unknown> = {},
@@ -33,5 +48,15 @@ export abstract class Controller {
     }
 
     return new View(file, variables, options);
+  }
+
+  protected async viewExists(file: string): Promise<boolean> {
+    try {
+      await this.render(file).template();
+
+      return true;
+    } catch {
+      return false;
+    }
   }
 }

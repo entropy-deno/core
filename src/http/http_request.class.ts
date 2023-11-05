@@ -182,8 +182,8 @@ export class HttpRequest {
     return { ...paramGroups } as Record<string, string | undefined>;
   }
 
-  public get path(): string {
-    return new URL(this.request.url).pathname;
+  public get path(): RoutePath {
+    return new URL(this.request.url).pathname as RoutePath;
   }
 
   public get pattern(): string | null {
