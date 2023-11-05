@@ -10,7 +10,7 @@ export interface RouteOptions {
   headers?: Record<string, string>;
   middleware?: Constructor<Middleware>[];
   name?: string;
-  paramPipes?: Record<string, Constructor<Pipe>>;
+  pipes?: Record<string, Constructor<Pipe>>;
   redirectTo?: RedirectDestination;
   statusCode?: HttpStatus;
   validationRules?: Record<

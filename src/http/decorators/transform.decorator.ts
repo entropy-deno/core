@@ -3,12 +3,12 @@ import { Pipe } from '../../pipes/interfaces/pipe.interface.ts';
 import { Reflector } from '../../utils/reflector.class.ts';
 
 export function Transform(
-  paramPipes: Record<string, Constructor<Pipe>>,
+  pipes: Record<string, Constructor<Pipe>>,
 ): MethodDecorator {
   return (_target, _methodName, descriptor) => {
     Reflector.defineMetadata<Record<string, Constructor<Pipe>>>(
-      'paramPipes',
-      paramPipes,
+      'pipes',
+      pipes,
       descriptor.value as object,
     );
 

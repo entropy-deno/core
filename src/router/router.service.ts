@@ -520,7 +520,7 @@ export class Router {
         middleware,
         name,
         path,
-        paramPipes,
+        pipes,
         redirectTo,
         statusCode,
         validationRules,
@@ -560,9 +560,9 @@ export class Router {
           'name',
           controllerMethod,
         ) ?? name,
-        paramPipes: Reflector.getMetadata<
+        pipes: Reflector.getMetadata<
           Record<string, Constructor<Pipe>>
-        >('paramPipes', controllerMethod) ?? paramPipes,
+        >('pipes', controllerMethod) ?? pipes,
         redirectTo: Reflector.getMetadata<RedirectDestination>(
           'redirectDestination',
           controllerMethod,
@@ -633,7 +633,7 @@ export class Router {
           headers,
           methods,
           middleware,
-          paramPipes,
+          pipes,
           path,
           redirectTo,
           statusCode,
@@ -728,8 +728,8 @@ export class Router {
               }
             }
 
-            if (paramPipes) {
-              for (const [paramName, pipe] of Object.entries(paramPipes)) {
+            if (pipes) {
+              for (const [paramName, pipe] of Object.entries(pipes)) {
                 if (!(paramName in paramGroups) || !paramGroups[paramName]) {
                   continue;
                 }
