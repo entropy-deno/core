@@ -62,7 +62,7 @@ export class ErrorHandler {
     this.readErrorStack();
 
     this.logger.error(
-      `${error.message} [${this.currentFile}${
+      `${error.message} [${this.currentFile ?? this.defaultFilePlaceholder}${
         this.currentLine && this.currentFile !== this.defaultFilePlaceholder
           ? `:${this.currentLine}`
           : ''

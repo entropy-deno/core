@@ -662,29 +662,12 @@ export class Router {
             }
 
             if (view) {
-              const file = view.endsWith('.atom.html')
-                ? view
-                : `${view}.atom.html`;
-
-              try {
-                return await this.createResponse(
-                  request,
-                  await Deno.readTextFile(file),
-                  {
-                    cookies,
-                    headers,
-                    statusCode,
-                  },
-                );
-              } catch (error) {
-                if (!(error instanceof Deno.errors.NotFound)) {
-                  throw error;
-                }
-
-                throw new Error(
-                  `View '${file}' does not exist`,
-                );
-              }
+              return await this.createResponse(
+                request,
+                new View(
+                  view.endsWith('.atom.html') ? view : `${view}.atom.html`,
+                ),
+              );
             }
 
             if (validationRules) {
