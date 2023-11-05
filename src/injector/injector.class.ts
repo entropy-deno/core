@@ -29,10 +29,10 @@ export abstract class Injector {
 
   public static resolve<TService>(
     service: Constructor<TService>,
-    options: ServiceResolveOptions = {},
+    { singleton = true }: ServiceResolveOptions = {},
   ): TService {
     const isSingleton = Reflector.getMetadata<boolean>('singleton', service) ??
-      options.singleton ?? true;
+      singleton;
 
     if (isSingleton && this.has(service)) {
       return this.cachedInstances.get(service) as TService;

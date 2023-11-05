@@ -1,6 +1,7 @@
 import { resolve as resolvePath } from 'https://deno.land/std@0.205.0/path/mod.ts';
 import * as constants from '../constants.ts';
 import * as pipes from '../pipes/pipes.module.ts';
+import { Encrypter } from '../encrypter/encrypter.service.ts';
 import { HttpMethod } from '../http/enums/http_method.enum.ts';
 import { TemplateCompilerOptions } from './interfaces/template_compiler_options.interface.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
@@ -16,6 +17,8 @@ import { Pipe } from '../pipes/interfaces/pipe.interface.ts';
 @NonSingleton()
 export class TemplateCompiler {
   private readonly configurator = inject(Configurator);
+
+  private readonly encrypter = inject(Encrypter);
 
   private readonly functions = {
     '$env': env,
@@ -34,7 +37,7 @@ export class TemplateCompiler {
   private options: TemplateCompilerOptions = {};
 
   private pipes: Record<string, (...args: unknown[]) => unknown> = Object
-    .entries(pipes).reduce((result, [_key, pipe]) => {
+    .entries(pipes).reduce((result, [, pipe]) => {
       const instance = inject(pipe as Constructor<Pipe>);
 
       return {
@@ -42,10 +45,6 @@ export class TemplateCompiler {
         [instance.alias!]: instance.transform,
       };
     }, {});
-
-  private rawContent: string[] = [];
-
-  private rawContentCount = 0;
 
   private stacks = new Map<string, string[]>();
 
@@ -55,15 +54,19 @@ export class TemplateCompiler {
 
   public static directives: TemplateDirective[] = [];
 
+  public rawContent = new Map<string, string>();
+
   constructor() {
     TemplateCompiler.directives = [
       {
         name: 'raw',
         type: 'block',
         render: (content: string) => {
-          this.rawContent.push(content);
+          const id = this.encrypter.generateUuid();
 
-          return `$__raw__${this.rawContentCount++}`;
+          this.rawContent.set(id, content);
+
+          return `$__raw__${id}`;
         },
       },
       {
@@ -343,6 +346,11 @@ export class TemplateCompiler {
               { file, recursiveCall: true, request: this.options.request },
             );
 
+            this.rawContent = new Map([
+              ...compiler.rawContent,
+              ...this.rawContent,
+            ]);
+
             return compiledPartial;
           } catch (error) {
             if (!(error instanceof Deno.errors.NotFound)) {
@@ -548,6 +556,11 @@ export class TemplateCompiler {
               recursiveCall: true,
             },
           );
+
+          this.rawContent = new Map([
+            ...compiler.rawContent,
+            ...this.rawContent,
+          ]);
         }
       }
 
@@ -565,14 +578,12 @@ export class TemplateCompiler {
   }
 
   private restoreRawContent(): void {
-    const matches = this.template.matchAll(/\$__raw__([0-9]+)/g) ?? [];
+    const matches = this.template.matchAll(/\$__raw__([\w-]+)/g) ?? [];
 
-    for (const [wholeMatch, segmentIndex] of matches) {
-      const index = parseInt(segmentIndex);
-
+    for (const [wholeMatch, id] of matches) {
       this.template = this.template.replace(
         wholeMatch,
-        this.rawContent[index],
+        this.rawContent.get(id)!,
       );
     }
   }
@@ -662,6 +673,11 @@ export class TemplateCompiler {
               { recursiveCall: true, request: this.options.request },
             ),
           );
+
+          this.rawContent = new Map([
+            ...compiler.rawContent,
+            ...this.rawContent,
+          ]);
         }
 
         this.template = compiledLayout;
@@ -682,9 +698,8 @@ export class TemplateCompiler {
 
     if (!options.recursiveCall) {
       this.validateSyntax();
+      this.restoreRawContent();
     }
-
-    this.restoreRawContent();
 
     return this.template;
   }
