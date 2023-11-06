@@ -10,6 +10,7 @@ export * from './lower_case.pipe.ts';
 export * from './number.pipe.ts';
 export * from './param_case.pipe.ts';
 export * from './pascal_case.pipe.ts';
+export * from './percent.pipe.ts';
 export * from './snake_case.pipe.ts';
 export * from './title_case.pipe.ts';
 export * from './upper_case.pipe.ts';

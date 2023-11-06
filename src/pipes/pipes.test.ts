@@ -11,6 +11,7 @@ import { LowerCasePipe } from './lower_case.pipe.ts';
 import { NumberPipe } from './number.pipe.ts';
 import { ParamCasePipe } from './param_case.pipe.ts';
 import { PascalCasePipe } from './pascal_case.pipe.ts';
+import { PercentPipe } from './percent.pipe.ts';
 import { SnakeCasePipe } from './snake_case.pipe.ts';
 import { TitleCasePipe } from './title_case.pipe.ts';
 import { UpperCasePipe } from './upper_case.pipe.ts';
@@ -41,6 +42,8 @@ Deno.test('pipes module', async (test) => {
     assertEquals(inject(ParamCasePipe).transform('fooBar'), 'foo-bar');
 
     assertEquals(inject(PascalCasePipe).transform('foo_bar'), 'FooBar');
+
+    assertEquals(inject(PercentPipe).transform('1.4'), '140%');
 
     assertEquals(inject(SnakeCasePipe).transform('fooBar'), 'foo_bar');
 
