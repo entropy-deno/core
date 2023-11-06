@@ -139,6 +139,9 @@ export abstract class Utils {
 
         break;
 
+      case file.startsWith('views/'):
+        break;
+
       default:
         file = `views/${file}`;
     }
