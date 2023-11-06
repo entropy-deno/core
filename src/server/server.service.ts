@@ -3,13 +3,13 @@ import { parse as parseFlags } from 'https://deno.land/std@0.205.0/flags/mod.ts'
 import { Broadcaster } from '../web_socket/broadcaster.class.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
 import { Constructor } from '../utils/interfaces/constructor.interface.ts';
+import { DENO_VERSION, MIN_DENO_VERSION, OS, VERSION } from '../constants.ts';
 import { Encrypter } from '../encrypter/encrypter.service.ts';
 import { ErrorHandler } from '../error_handler/error_handler.service.ts';
 import { HotReloadChannel } from './channels/hot_reload.channel.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { Localizator } from '../localizator/localizator.module.ts';
 import { Logger } from '../logger/logger.service.ts';
-import { MIN_DENO_VERSION, OS, VERSION } from '../constants.ts';
 import { HttpRequest } from '../http/http_request.class.ts';
 import { Reflector } from '../utils/reflector.class.ts';
 import { Router } from '../router/router.service.ts';
@@ -67,7 +67,7 @@ export class Server implements Disposable {
   }
 
   private checkSystemRequirements(): void {
-    const satisfiesDenoVersion = Deno.version.deno
+    const satisfiesDenoVersion = DENO_VERSION
       .localeCompare(MIN_DENO_VERSION, undefined, {
         numeric: true,
         sensitivity: 'base',
