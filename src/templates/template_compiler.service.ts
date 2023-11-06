@@ -532,6 +532,7 @@ export class TemplateCompiler {
 
           const scopeVariables = {
             [variableName]: item,
+            $count: Object.keys(iterable).length,
             $even: index % 2 === 0,
             $first: index === 0,
             $index: iterator,
