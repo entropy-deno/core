@@ -338,7 +338,7 @@ export class Router {
       }
 
       case body instanceof View: {
-        const template = await (body as View).template();
+        const template = await (body as View).getTemplate();
         const compiledTemplate = await inject(TemplateCompiler).render(
           template,
           (body as View).variables,
@@ -664,12 +664,13 @@ export class Router {
             }
 
             if (view) {
-              return await this.createResponse(
-                request,
-                new View(
-                  view.endsWith('.atom.html') ? view : `${view}.atom.html`,
-                ),
+              const viewInstance = new View(
+                view.endsWith('.atom.html') ? view : `${view}.atom.html`,
               );
+
+              await viewInstance.assertExists();
+
+              return await this.createResponse(request, viewInstance);
             }
 
             if (validationRules) {

@@ -34,11 +34,11 @@ export abstract class Controller {
     );
   }
 
-  protected render(
+  protected async render(
     file: string,
     variables: Record<string, unknown> = {},
     options: Omit<TemplateCompilerOptions, 'file'> = {},
-  ) {
+  ): Promise<View> {
     const caller = Utils.callerFile();
 
     file = Utils.resolveViewFile(caller, file);
@@ -47,16 +47,10 @@ export abstract class Controller {
       file = `${file}.atom.html`;
     }
 
-    return new View(file, variables, options);
-  }
+    const view = new View(file, variables, options);
 
-  protected async viewExists(file: string): Promise<boolean> {
-    try {
-      await this.render(file).template();
+    await view.assertExists();
 
-      return true;
-    } catch {
-      return false;
-    }
+    return view;
   }
 }

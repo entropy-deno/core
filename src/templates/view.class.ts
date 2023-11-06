@@ -7,9 +7,9 @@ export class View {
     public readonly options: Omit<TemplateCompilerOptions, 'file'> = {},
   ) {}
 
-  public async template(): Promise<string> {
+  public async assertExists(): Promise<void> {
     try {
-      return await Deno.readTextFile(this.file);
+      await Deno.stat(this.file);
     } catch (error) {
       if (!(error instanceof Deno.errors.NotFound)) {
         throw error;
@@ -21,5 +21,9 @@ export class View {
         }' does not exist`,
       );
     }
+  }
+
+  public async getTemplate(): Promise<string> {
+    return await Deno.readTextFile(this.file);
   }
 }
