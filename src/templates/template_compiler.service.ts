@@ -150,8 +150,6 @@ export class TemplateCompiler {
           if (defaultCaseValue) {
             return defaultCaseValue;
           }
-
-          return '';
         },
       },
       {
@@ -232,6 +230,34 @@ export class TemplateCompiler {
           }
 
           return result;
+        },
+      },
+      {
+        name: 'error',
+        type: 'block',
+        render: (content: string, error: string) => {
+          if (
+            '$errors' in this.variables &&
+            (error in
+              ((this.variables.$errors as
+                | Record<string, string[]>
+                | undefined) ?? {}))
+          ) {
+            return content;
+          }
+        },
+      },
+      {
+        name: 'error',
+        type: 'single',
+        render: (error: string) => {
+          const message =
+            (this.variables.$errors as Record<string, string[]> | undefined)
+              ?.[error]?.[0];
+
+          if (message) {
+            return message;
+          }
         },
       },
       {
@@ -317,8 +343,6 @@ export class TemplateCompiler {
               ? [...this.stacks.get(stack)!, content]
               : [content],
           );
-
-          return '';
         },
       },
       {
@@ -381,8 +405,6 @@ export class TemplateCompiler {
 
           this.layout = layout;
           this.layoutFile = file;
-
-          return '';
         },
       },
       {
@@ -390,8 +412,6 @@ export class TemplateCompiler {
         type: 'block',
         render: (content: string, name: string) => {
           this.layoutSections.set(name, content);
-
-          return '';
         },
       },
       {
@@ -642,7 +662,7 @@ export class TemplateCompiler {
 
         this.template = this.template.replace(
           expression,
-          result instanceof Promise ? await result : result,
+          (result instanceof Promise ? await result : result) ?? '',
         );
       }
 
