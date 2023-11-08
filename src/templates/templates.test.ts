@@ -20,9 +20,9 @@ Deno.test('templates module', async (test) => {
     assertStringIncludes(rendered, 'entropy');
   });
 
-  await test.step('compiler properly renders @each directive', async () => {
+  await test.step('compiler properly renders @for directive', async () => {
     const rendered = await inject(TemplateCompiler).render(
-      '@each (item in [1, 2, 3]) {{ item }} @/each',
+      '@for (item in [1, 2, 3]) {{ item }} @/for',
     );
 
     assertStringIncludes(rendered, '1');
@@ -31,20 +31,20 @@ Deno.test('templates module', async (test) => {
 
     const renderedWithDestructuring = await inject(TemplateCompiler).render(
       `
-      @each ({ name, surname } in [{ name: 'James', surname: 'Bond' }])
+      @for ({ name, surname } in [{ name: 'James', surname: 'Bond' }])
         {{ name }} {{ surname }}
-      @/each`,
+      @/for`,
     );
 
     assertStringIncludes(renderedWithDestructuring, 'James Bond');
 
     const renderedEmpty = await inject(TemplateCompiler).render(
       `
-      @each (item in [])
+      @for (item in [])
         {{ item }}
       @empty
         no items
-      @/each`,
+      @/for`,
     );
 
     assertStringIncludes(renderedEmpty, 'no items');

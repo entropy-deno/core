@@ -522,7 +522,7 @@ export class TemplateCompiler {
 
   private async parseEachDirectives(): Promise<void> {
     const matches = this.template.matchAll(
-      /@each\s*\((.*?)\s+(?:in|of)\s+([^\n]*)\)(.*?)@\/each/gsm,
+      /@for\s*\((.*?)\s+(?:in|of)\s+([^\n]*)\)(.*?)@\/for/gsm,
     ) ?? [];
 
     for (const [wholeMatch, variableName, iterableValue, block] of matches) {
@@ -615,8 +615,8 @@ export class TemplateCompiler {
         ...TemplateCompiler.directives,
         { name: 'case' },
         { name: 'default' },
-        { name: 'each' },
         { name: 'else' },
+        { name: 'for' },
         { name: 'empty' },
         { name: 'slot' },
       ]
@@ -729,7 +729,7 @@ export class TemplateCompiler {
     for (const registeredDirective of TemplateCompiler.directives) {
       if (
         registeredDirective.name === directive.name ||
-        ['case', 'default', 'each', 'else', 'empty', 'slot'].includes(
+        ['case', 'default', 'for', 'else', 'empty', 'slot'].includes(
           directive.name,
         )
       ) {

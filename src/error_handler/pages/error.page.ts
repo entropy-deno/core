@@ -166,7 +166,7 @@ export const errorPage = `<!doctype html>
       <section class="trace">
         <h2 class="trace__header">Thrown in:</h2>
 
-        @each (entry in stackTrace ?? [])
+        @for (entry in stackTrace ?? [])
           <div class="trace__entry">
             <p class="trace__entry-caller">
               {{ entry.split(' ')[0] }}
@@ -182,7 +182,7 @@ export const errorPage = `<!doctype html>
               }}
             </p>
           </div>
-        @/each
+        @/for
       </section>
 
       <button class="button" id="reload">
