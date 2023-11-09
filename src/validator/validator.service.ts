@@ -301,6 +301,7 @@ export class Validator {
       Partial<ValidationRulesList> | Record<string, unknown>
     >,
     subject: HttpRequest | Record<string, string | null>,
+    errorLocale?: string,
   ): Promise<Record<string, string[]>> {
     const errors: Record<string, string[]> = {};
 
@@ -308,10 +309,6 @@ export class Validator {
       const fieldValue = subject instanceof HttpRequest
         ? await request.input(fieldName)
         : subject[fieldName];
-
-      if (typeof fieldValue !== 'string') {
-        continue;
-      }
 
       for (const [rule, ruleValue] of Object.entries(ruleSet)) {
         const ruleObject = this.rules.find((ruleData) =>
@@ -335,7 +332,11 @@ export class Validator {
 
           errors[fieldName].push(
             this.localizator
-              .translate(request.locale, ruleObject.errorMessage)
+              .translate(
+                subject.locale ?? errorLocale ??
+                  this.configurator.entries.locales.default,
+                ruleObject.errorMessage,
+              )
               .replaceAll(':field', fieldName)
               .replaceAll(
                 ':value',
