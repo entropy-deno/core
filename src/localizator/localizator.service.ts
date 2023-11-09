@@ -20,11 +20,7 @@ export class Localizator {
         );
 
         for (const [key, value] of Object.entries<string | string[]>(locales)) {
-          if (!this.translations.has(locale)) {
-            this.translations.set(locale, new Map());
-          }
-
-          this.translations.get(locale)!.set(key, value);
+          this.set(locale, key, value);
         }
       } catch (error) {
         if (!(error instanceof Deno.errors.NotFound)) {
@@ -44,6 +40,18 @@ export class Localizator {
         ? new Map()
         : this.translations.get(locale) ?? new Map(),
     );
+  }
+
+  public set(
+    locale: string,
+    text: string,
+    translation: string | string[],
+  ): void {
+    if (!this.translations.has(locale)) {
+      this.translations.set(locale, new Map());
+    }
+
+    this.translations.get(locale)!.set(text, translation);
   }
 
   public async setup(): Promise<void> {
