@@ -6,7 +6,7 @@ const configurator = inject(Configurator);
 
 Deno.test('configurator module', async (test) => {
   await test.step('implements properly .env parsing', () => {
-    assertEquals(configurator.getEnv('TESTING'), true);
+    assertEquals(configurator.getEnv<boolean>('TESTING'), true);
   });
 
   await test.step('implements properly configuration parsing', () => {

@@ -40,6 +40,14 @@ export class Server implements Disposable {
     'SIGTERM',
   ];
 
+  private readonly flags = parseFlags(Deno.args, {
+    boolean: ['dev', 'open'],
+    default: {
+      dev: false,
+      open: false,
+    },
+  });
+
   private readonly localizator = inject(Localizator);
 
   private readonly logger = inject(Logger);
@@ -291,23 +299,16 @@ export class Server implements Disposable {
   private setupDevelopmentEnvironment(): void {
     this.webSocketChannels.push(HotReloadChannel);
 
-    const flags = parseFlags(Deno.args, {
-      boolean: ['open'],
-      default: {
-        open: false,
-      },
-    });
-
     this.addExitSignalListener(() => {
       localStorage.removeItem(this.devServerCheckKey);
 
       Deno.exit();
     });
 
-    if (flags.open && !localStorage.getItem(this.devServerCheckKey)) {
+    if (this.flags.open && !localStorage.getItem(this.devServerCheckKey)) {
       try {
         Utils.runShellCommand(
-          `${WebClientAlias[OS as 'darwin' | 'linux' | 'windows'] ?? 'open'}`,
+          `${WebClientAlias[OS as keyof typeof WebClientAlias] ?? 'open'}`,
           [this.router.baseUrl()],
         );
       } finally {
@@ -333,14 +334,7 @@ export class Server implements Disposable {
   }
 
   public async start(): Promise<void> {
-    const flags = parseFlags(Deno.args, {
-      boolean: ['dev'],
-      default: {
-        dev: false,
-      },
-    });
-
-    Deno.env.set('PRODUCTION', flags.dev ? 'false' : 'true');
+    Deno.env.set('PRODUCTION', this.flags.dev ? 'false' : 'true');
 
     if (
       this.configurator.getEnv<boolean>('TESTING') &&
@@ -355,7 +349,7 @@ export class Server implements Disposable {
       if (this.configurator.entries.envFile) {
         await loadDotEnv({
           allowEmptyValues: true,
-          envPath: (this.configurator.entries.envFile ?? '.env'),
+          envPath: this.configurator.entries.envFile ?? '.env',
           export: true,
         });
       }
@@ -366,7 +360,7 @@ export class Server implements Disposable {
     await this.localizator.setup();
 
     if (!this.configurator.entries.isDenoDeploy) {
-      flags.dev
+      this.flags.dev
         ? this.setupDevelopmentEnvironment()
         : this.setupProductionEnvironment();
     }
@@ -427,7 +421,7 @@ export class Server implements Disposable {
         );
       }
 
-      if (flags.dev) {
+      if (this.flags.dev) {
         let watcher: Deno.FsWatcher;
 
         this.addExitSignalListener(() => {

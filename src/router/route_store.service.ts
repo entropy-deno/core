@@ -31,14 +31,14 @@ export class RouteStore {
 
     const params = new URLSearchParams(queryParams);
 
-    return `${
-      this.configurator.entries.tls.enabled ? 'https' : 'http'
-    }://${this.configurator.entries.host}${
-      this.configurator.entries.isProduction
-        ? ''
-        : `:${this.configurator.entries.port}`
-    }${!route || typeof route === 'string' && route[0] === '/' ? '' : '/'}${
-      typeof route === 'string' || !route ? route ?? '' : namedRoutePath
-    }${params.toString() ? `?${params.toString()}` : ''}`;
+    const protocol = this.configurator.entries.tls.enabled ? 'https' : 'http';
+    const port = this.configurator.entries.isProduction
+      ? ''
+      : `:${this.configurator.entries.port}`;
+    const path = typeof route === 'string' ? route : namedRoutePath;
+
+    return `${protocol}://${this.configurator.entries.host}${port}${
+      !route || typeof route === 'string' && route[0] === '/' ? '' : '/'
+    }${path}${params.toString() ? `?${params.toString()}` : ''}`;
   }
 }

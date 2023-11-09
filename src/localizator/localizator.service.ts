@@ -4,16 +4,16 @@ import { inject } from '../injector/functions/inject.function.ts';
 export class Localizator {
   private readonly configurator = inject(Configurator);
 
-  private defaultLocale = 'en';
+  private readonly defaultLocale = this.configurator.entries.locales.default;
 
   private translations = new Map<string, Map<string, string | string[]>>();
 
   private async loadTranslations(): Promise<void> {
-    for (const locale of this.configurator.entries.locales.supported) {
-      if (locale === this.defaultLocale) {
-        continue;
-      }
+    const supportedLocales = this.configurator.entries.locales.supported.filter(
+      (locale) => locale !== this.defaultLocale,
+    );
 
+    for (const locale of supportedLocales) {
       try {
         const locales = JSON.parse(
           await Deno.readTextFile(`locales/${locale}.json`),
@@ -32,7 +32,7 @@ export class Localizator {
         }
 
         throw new Error(
-          `Locale '${locale}' has no corresponding translation file`,
+          `Locale '${locale}' has no corresponding translation file in '/locales' directory`,
         );
       }
     }
@@ -47,8 +47,6 @@ export class Localizator {
   }
 
   public async setup(): Promise<void> {
-    this.defaultLocale = this.configurator.entries.locales.default;
-
     await this.loadTranslations();
   }
 
