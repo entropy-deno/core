@@ -300,12 +300,14 @@ export class Validator {
       string,
       Partial<ValidationRulesList> | Record<string, unknown>
     >,
-    request: HttpRequest,
+    subject: HttpRequest | Record<string, string | null>,
   ): Promise<Record<string, string[]>> {
     const errors: Record<string, string[]> = {};
 
     for (const [fieldName, ruleSet] of Object.entries(rules)) {
-      const fieldValue = await request.input(fieldName);
+      const fieldValue = subject instanceof HttpRequest
+        ? await request.input(fieldName)
+        : subject[fieldName];
 
       if (typeof fieldValue !== 'string') {
         continue;
