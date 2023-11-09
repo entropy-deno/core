@@ -11,6 +11,8 @@ export interface ValidationRulesList {
   in: string[];
   number: boolean;
   ip: boolean;
+  ipv4: boolean;
+  ipv6: boolean;
   json: boolean;
   length: number;
   lowercase: boolean;

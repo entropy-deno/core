@@ -119,6 +119,20 @@ export class Validator {
         },
       },
       {
+        name: 'ipv4',
+        errorMessage: `Field :field must be a valid IPv4 address`,
+        validate: ([value]) => {
+          return this.patterns.ipv4.test(value ?? '');
+        },
+      },
+      {
+        name: 'ipv6',
+        errorMessage: `Field :field must be a valid IPv6 address`,
+        validate: ([value]) => {
+          return this.patterns.ipv6.test(value ?? '');
+        },
+      },
+      {
         name: 'json',
         errorMessage: `Field :field must be a valid JSON string`,
         validate: ([value]) => {
