@@ -307,7 +307,7 @@ export class Validator {
 
     for (const [fieldName, ruleSet] of Object.entries(rules)) {
       const fieldValue = subject instanceof HttpRequest
-        ? await request.input(fieldName)
+        ? await subject.input(fieldName)
         : subject[fieldName];
 
       for (const [rule, ruleValue] of Object.entries(ruleSet)) {
