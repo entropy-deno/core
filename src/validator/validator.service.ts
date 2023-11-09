@@ -12,6 +12,17 @@ export class Validator {
 
   private readonly rules: ValidationRule[] = [];
 
+  private readonly patterns: Record<string, RegExp> = {
+    email:
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+    ipv4:
+      /^(?:25[0-5]|2[0-4]\d|[0-1]?\d{1,2})(?:\.(?:25[0-5]|2[0-4]\d|[0-1]?\d{1,2})){3}$/,
+    ipv6:
+      /^([[:xdigit:]]{1,4}(?::[[:xdigit:]]{1,4}){7}|::|:(?::[[:xdigit:]]{1,4}){1,6}|[[:xdigit:]]{1,4}:(?::[[:xdigit:]]{1,4}){1,5}|(?:[[:xdigit:]]{1,4}:){2}(?::[[:xdigit:]]{1,4}){1,4}|(?:[[:xdigit:]]{1,4}:){3}(?::[[:xdigit:]]{1,4}){1,3}|(?:[[:xdigit:]]{1,4}:){4}(?::[[:xdigit:]]{1,4}){1,2}|(?:[[:xdigit:]]{1,4}:){5}:[[:xdigit:]]{1,4}|(?:[[:xdigit:]]{1,4}:){1,6}:)$/,
+    phoneNumber: /^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/,
+    username: /^[a-z][a-z0-9]*(?:[ _-][a-z0-9]*)*$/iu,
+  };
+
   constructor() {
     this.rules = [
       {
@@ -75,10 +86,7 @@ export class Validator {
         name: 'email',
         errorMessage: `Field :field must be a valid email`,
         validate: ([value]) => {
-          const emailRegexp =
-            /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-
-          return emailRegexp.test(value ?? '');
+          return this.patterns.email.test(value ?? '');
         },
       },
       {
@@ -106,13 +114,8 @@ export class Validator {
         name: 'ip',
         errorMessage: `Field :field must be a valid IP address`,
         validate: ([value]) => {
-          const ipv4Regexp =
-            /^([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])$/;
-
-          const ipv6Regexp =
-            /^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$/;
-
-          return ipv4Regexp.test(value ?? '') || ipv6Regexp.test(value ?? '');
+          return this.patterns.ipv4.test(value ?? '') ||
+            this.patterns.ipv6.test(value ?? '');
         },
       },
       {
@@ -230,10 +233,9 @@ export class Validator {
         name: 'phoneNumber',
         errorMessage: `Field :field must be a valid phone number`,
         validate: ([value]) => {
-          const phoneNumberRegexp =
-            /^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/;
-
-          return phoneNumberRegexp.test(value?.replaceAll(' ', '') ?? '');
+          return this.patterns.phoneNumber.test(
+            value?.replaceAll(' ', '') ?? '',
+          );
         },
       },
       {
@@ -268,9 +270,7 @@ export class Validator {
         name: 'username',
         errorMessage: `Field :field must be a valid user name`,
         validate: ([value]) => {
-          const usernameRegexp = /^[a-z][a-z0-9]*(?:[ _-][a-z0-9]*)*$/iu;
-
-          return usernameRegexp.test(value ?? '');
+          return this.patterns.username.test(value ?? '');
         },
       },
       ...(this.configurator.entries.validatorRules ?? []),
