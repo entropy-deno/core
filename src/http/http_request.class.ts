@@ -57,6 +57,12 @@ export class HttpRequest {
     return this.request.headers;
   }
 
+  public async file(name: string): Promise<FormFile | null> {
+    const files = await this.files();
+
+    return files[name] ?? null;
+  }
+
   public async files(): Promise<Record<string, FormFile | FormFile[]>> {
     const files: Record<string, FormFile | FormFile[]> = {};
 
@@ -92,7 +98,9 @@ export class HttpRequest {
   }
 
   public async input(name: string): Promise<FormDataEntryValue | null> {
-    return (await this.form()).get(name);
+    const entry = (await this.form()).get(name);
+
+    return entry instanceof File ? null : entry;
   }
 
   public get integrity(): string {
