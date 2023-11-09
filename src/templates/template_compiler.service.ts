@@ -235,10 +235,10 @@ export class TemplateCompiler {
       {
         name: 'error',
         type: 'block',
-        render: (content: string, error: string) => {
+        render: (content: string, invalidField: string) => {
           if (
             '$errors' in this.variables &&
-            (error in
+            (invalidField in
               ((this.variables.$errors as
                 | Record<string, string[]>
                 | undefined) ?? {}))
@@ -250,10 +250,10 @@ export class TemplateCompiler {
       {
         name: 'error',
         type: 'single',
-        render: (error: string) => {
+        render: (invalidField: string) => {
           const message =
             (this.variables.$errors as Record<string, string[]> | undefined)
-              ?.[error]?.[0];
+              ?.[invalidField]?.[0];
 
           if (message) {
             return message;
