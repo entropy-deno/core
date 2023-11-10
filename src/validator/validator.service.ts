@@ -293,8 +293,9 @@ export class Validator {
 
   private async check(
     rule: ValidationRule,
-    fieldValue: string | null,
+    fieldValue: FormDataEntryValue | string | null,
     ruleValue: unknown,
+    fieldName: string,
   ): Promise<boolean> {
     const passes = rule.validate.call(
       this,
@@ -347,7 +348,7 @@ export class Validator {
           throw new Error(`Invalid validation rule '${rule}'`);
         }
 
-        if (!await this.check(ruleObject, fieldValue, ruleValue)) {
+        if (!await this.check(ruleObject, fieldValue, ruleValue, fieldName)) {
           if (!(fieldName in errors)) {
             errors[fieldName] = [];
           }

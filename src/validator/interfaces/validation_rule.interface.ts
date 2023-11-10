@@ -1,8 +1,11 @@
+import { FalsyValue } from '../../utils/types/falsy_value.type.ts';
+import { TruthyValue } from '../../utils/types/truthy_value.type.ts';
+
 export interface ValidationRule {
   name: string;
   errorMessage: string;
   validate: (
     input: [string | null, ...unknown[]],
     fieldName: string,
-  ) => boolean | Promise<boolean | null | string | undefined>;
+  ) => FalsyValue | TruthyValue | Promise<FalsyValue | TruthyValue>;
 }
