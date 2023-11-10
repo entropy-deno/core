@@ -198,7 +198,7 @@ export const errorPage = `<!doctype html>
     </main>
 
     <script @nonceProp>
-      const reloadButton = document.getElementById('reload');
+      const reloadButton = document.querySelector('#reload');
 
       reloadButton.addEventListener('click', () => {
         window.location.reload();

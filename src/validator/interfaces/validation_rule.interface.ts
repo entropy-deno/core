@@ -4,10 +4,5 @@ export interface ValidationRule {
   validate: (
     input: [string | null, ...unknown[]],
     fieldName: string,
-  ) =>
-    | boolean
-    | null
-    | string
-    | undefined
-    | Promise<boolean | null | string | undefined>;
+  ) => boolean | Promise<boolean | null | string | undefined>;
 }

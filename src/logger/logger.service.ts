@@ -6,20 +6,12 @@ interface LogOptions {
   colors?: string[];
 }
 
-enum LogType {
-  Error,
-  Log,
-  Info,
-  Warning,
-}
-
 export class Logger {
   private readonly configurator = inject(Configurator);
 
   private readonly endPadding = 4;
 
   private write(
-    type: LogType,
     message: string | string[],
     { additionalInfo, colors = [] }: LogOptions,
   ): void {
@@ -29,7 +21,7 @@ export class Logger {
 
     if (Array.isArray(message)) {
       for (const text of message) {
-        this.write(type, text, {
+        this.write(text, {
           additionalInfo,
           colors,
         });
@@ -38,9 +30,10 @@ export class Logger {
       return;
     }
 
-    const maxMessageLength = Deno.consoleSize().columns - 4;
+    const maxMessageLength = Deno.consoleSize().columns - this.endPadding;
     const plainMessage = message.replaceAll('%c', '');
     const exceedsSpace = plainMessage.length > maxMessageLength;
+
     const trimmedMessage = exceedsSpace
       ? message.slice(0, maxMessageLength)
       : message;
@@ -66,13 +59,15 @@ export class Logger {
         : ''
     }`;
 
+    const messageEnd =
+      trimmedMessage.replace(/(%c|%)$/, '').match(/%c/g)?.length ?? 0;
+
     const params = [
       output,
       'font-weight: bold',
-      ...colors.slice(
-        0,
-        trimmedMessage.replace(/(%c|%)$/, '').match(/%c/g)?.length ?? 0,
-      ).map((color) => `color: ${color}; font-weight: bold`),
+      ...colors.slice(0, messageEnd).map((color) =>
+        `color: ${color}; font-weight: bold`
+      ),
       ...(additionalInfo && !exceedsSpace ? ['color: gray'] : []),
     ];
 
@@ -99,14 +94,20 @@ export class Logger {
     message: string | string[],
     { additionalInfo, colors = [] }: LogOptions = {},
   ): void {
-    this.write(LogType.Info, message, { additionalInfo, colors });
+    this.write(message, {
+      additionalInfo,
+      colors,
+    });
   }
 
   public log(
     message: string | string[],
     { additionalInfo, colors = [] }: LogOptions = {},
   ): void {
-    this.write(LogType.Log, message, { additionalInfo, colors });
+    this.write(message, {
+      additionalInfo,
+      colors,
+    });
   }
 
   public raw(...messages: string[]): void {

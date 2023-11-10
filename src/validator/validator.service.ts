@@ -291,6 +291,20 @@ export class Validator {
     ];
   }
 
+  private async check(
+    rule: ValidationRule,
+    fieldValue: string | null,
+    ruleValue: unknown,
+  ): Promise<boolean> {
+    const passes = rule.validate.call(
+      this,
+      [fieldValue instanceof File ? null : fieldValue, ruleValue],
+      fieldName,
+    );
+
+    return passes instanceof Promise ? await passes : passes;
+  }
+
   public registerRule(rule: ValidationRule): void {
     for (const registeredRule of this.rules) {
       if (registeredRule.name === rule.name) {
@@ -333,13 +347,7 @@ export class Validator {
           throw new Error(`Invalid validation rule '${rule}'`);
         }
 
-        const passes = ruleObject.validate.call(
-          this,
-          [fieldValue, ruleValue],
-          fieldName,
-        );
-
-        if (!(passes instanceof Promise ? await passes : passes)) {
+        if (!await this.check(ruleObject, fieldValue, ruleValue)) {
           if (!(fieldName in errors)) {
             errors[fieldName] = [];
           }

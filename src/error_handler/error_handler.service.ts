@@ -35,14 +35,15 @@ export class ErrorHandler {
 
     const file = (this.currentError?.cause as Error | undefined)?.message ??
       thrownAt?.match(/\(file:\/\/(.*?)\)/)?.[1];
-    const line = file?.match(/(?:.*):(.*):(.*)/)?.[1];
 
     if (file) {
-      const path =
-        fromFileUrl(`file://${file.split(Deno.cwd())[1]}`).split(':')[0];
+      const fileUrl = `file://${file.split(Deno.cwd())[1]}`;
+      const path = fromFileUrl(fileUrl).split(':')[0];
 
       this.currentFile = path === '/' ? this.defaultFilePlaceholder : path;
     }
+
+    const line = file?.match(/(?:.*):(.*):(.*)/)?.[1];
 
     this.currentLine = line
       ? Number(file?.match(/(?:.*):(.*):(.*)/)?.[1])
