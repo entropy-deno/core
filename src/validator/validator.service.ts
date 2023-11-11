@@ -293,7 +293,7 @@ export class Validator {
 
   private async check(
     rule: ValidationRule,
-    fieldValue: FormDataEntryValue | string | null,
+    fieldValue: FormDataEntryValue | string | null | undefined,
     ruleValue: unknown,
     fieldName: string,
   ): Promise<boolean> {
@@ -329,7 +329,7 @@ export class Validator {
       string,
       Partial<ValidationRulesList> | Record<string, unknown>
     >,
-    subject: HttpRequest | Record<string, string | null>,
+    subject: HttpRequest | Record<string, string | null | undefined>,
     errorLocale?: string,
   ): Promise<Record<string, string[]>> {
     const errors: Record<string, string[]> = {};

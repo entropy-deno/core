@@ -28,9 +28,9 @@ export class TemplateCompiler {
     '$url': url,
   };
 
-  private layout: string | null = null;
+  private layout?: string;
 
-  private layoutFile: string | null = null;
+  private layoutFile?: string;
 
   private layoutSections = new Map<string, string>();
 

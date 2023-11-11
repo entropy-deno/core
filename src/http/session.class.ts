@@ -36,11 +36,11 @@ export class Session {
     await this.kv?.delete(this.kvStorageKey);
   }
 
-  public async get<TValue>(key: string): Promise<TValue | null> {
+  public async get<TValue>(key: string): Promise<TValue | undefined> {
     return (await this.kv?.get<Record<string, TValue>>([
       ...this.kvStorageKey,
       key,
-    ]))?.value as TValue ?? null;
+    ]))?.value as TValue;
   }
 
   public async has(key: string): Promise<boolean> {

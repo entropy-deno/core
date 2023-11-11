@@ -57,10 +57,10 @@ export class HttpRequest {
     return this.request.headers;
   }
 
-  public async file(name: string): Promise<FormFile | FormFile[] | null> {
+  public async file(name: string): Promise<FormFile | FormFile[]> {
     const files = await this.files();
 
-    return files[name] ?? null;
+    return files[name];
   }
 
   public async files(): Promise<Record<string, FormFile | FormFile[]>> {
@@ -97,18 +97,18 @@ export class HttpRequest {
     return await this.request.formData();
   }
 
-  public async input(name: string): Promise<FormDataEntryValue | null> {
+  public async input(name: string): Promise<FormDataEntryValue | undefined> {
     const entry = (await this.form()).get(name);
 
-    return entry instanceof File ? null : entry;
+    return entry instanceof File ? undefined : entry;
   }
 
   public get integrity(): string {
     return this.request.integrity;
   }
 
-  public get ip(): string | null {
-    return this.info?.remoteAddr.hostname ?? null;
+  public get ip(): string {
+    return this.info?.remoteAddr.hostname;
   }
 
   public get isAjax(): boolean {
@@ -206,8 +206,8 @@ export class HttpRequest {
     return new URL(this.request.url).protocol.replace(':', '');
   }
 
-  public queryParam(name: string): string | null {
-    return new URL(this.request.url).searchParams.get(name);
+  public queryParam(name: string): string {
+    return new URL(this.request.url).searchParams.get(name) ?? undefined;
   }
 
   public get queryParams(): Record<string, string> {
