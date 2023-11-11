@@ -14,9 +14,9 @@ export class HttpRequest {
 
   private readonly localizator = inject(Localizator);
 
-  private matchedPattern: RoutePath | null = null;
+  private matchedPattern?: RoutePath;
 
-  private sessionObject: Session | null = null;
+  private sessionObject?: Session;
 
   constructor(
     private readonly request: Request,
@@ -30,11 +30,11 @@ export class HttpRequest {
   }
 
   public get cache(): RequestCache {
-    return this.request.cache;
+    return this.request.cache ?? 'default';
   }
 
-  public cookie(name: string): string | null {
-    return this.cookies[name] ?? null;
+  public cookie(name: string): string | undefined {
+    return this.cookies[name];
   }
 
   public get cookies(): Record<string, string> {
@@ -42,22 +42,22 @@ export class HttpRequest {
   }
 
   public get credentials(): RequestCredentials {
-    return this.request.credentials;
+    return this.request.credentials ?? 'same-origin';
   }
 
   public get destination(): RequestDestination {
     return this.request.destination;
   }
 
-  public header(name: string): string | null {
-    return this.headers.get(name);
+  public header(name: string): string | undefined {
+    return this.headers.get(name) ?? undefined;
   }
 
   public get headers(): Headers {
     return this.request.headers;
   }
 
-  public async file(name: string): Promise<FormFile | null> {
+  public async file(name: string): Promise<FormFile | FormFile[] | null> {
     const files = await this.files();
 
     return files[name] ?? null;
@@ -194,7 +194,7 @@ export class HttpRequest {
     return new URL(this.request.url).pathname as RoutePath;
   }
 
-  public get pattern(): string | null {
+  public get pattern(): string | undefined {
     return this.matchedPattern;
   }
 

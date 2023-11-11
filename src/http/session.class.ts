@@ -8,7 +8,7 @@ export class Session {
 
   private kvStorageKey: string[] = [];
 
-  constructor(private readonly id: string | null) {}
+  constructor(private readonly id?: string) {}
 
   public async all(): Promise<Record<string, unknown>> {
     const entries = this.kv?.list({
