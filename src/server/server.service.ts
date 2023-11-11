@@ -19,7 +19,7 @@ import { Utils } from '../utils/utils.class.ts';
 import { Validator } from '../validator/validator.service.ts';
 import { Module } from './interfaces/module.interface.ts';
 
-enum WebClientAlias {
+const enum WebClientAlias {
   darwin = 'open',
   linux = 'sensible-browser',
   windows = 'explorer',
