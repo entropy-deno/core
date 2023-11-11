@@ -126,6 +126,11 @@ export class HttpRequest {
     ].includes(await this.method());
   }
 
+  public async isMultipartRequest(): Promise<boolean> {
+    return (await this.isFormRequest()) &&
+      this.header('content-type')?.includes('multipart/form-data');
+  }
+
   public get isSecure(): boolean {
     return ['https', 'wss'].includes(this.protocol);
   }
