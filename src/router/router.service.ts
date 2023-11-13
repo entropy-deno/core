@@ -24,7 +24,7 @@ import { statusPage } from '../http/pages/status.page.ts';
 import { TemplateCompiler } from '../templates/template_compiler.service.ts';
 import { Url } from './types/url.type.ts';
 import { Utils } from '../utils/utils.class.ts';
-import { ValidationRulesList } from '../validator/interfaces/validation_rules_list.interface.ts';
+import { ValidatorRulesList } from '../validator/interfaces/validator_rules_list.interface.ts';
 import { Validator } from '../validator/validator.service.ts';
 import { View } from '../templates/view.class.ts';
 
@@ -525,7 +525,7 @@ export class Router {
         pipes,
         redirectTo,
         statusCode,
-        validationRules,
+        ValidatorRules,
         view,
       } = Reflector.getMetadata<
         Exclude<Route, 'action'>
@@ -573,12 +573,12 @@ export class Router {
           'statusCode',
           controllerMethod,
         ) ?? statusCode,
-        validationRules: Reflector.getMetadata<
-          Record<string, Partial<ValidationRulesList> | Record<string, unknown>>
+        ValidatorRules: Reflector.getMetadata<
+          Record<string, Partial<ValidatorRulesList> | Record<string, unknown>>
         >(
-          'validationRules',
+          'ValidatorRules',
           controllerMethod,
-        ) ?? validationRules,
+        ) ?? ValidatorRules,
         view: Reflector.getMetadata<string>(
           'view',
           controllerMethod,
@@ -639,7 +639,7 @@ export class Router {
           path,
           redirectTo,
           statusCode,
-          validationRules,
+          ValidatorRules,
           view,
         } of this.routeStore.routes
       ) {
@@ -673,9 +673,9 @@ export class Router {
               return await this.createResponse(request, viewInstance);
             }
 
-            if (validationRules) {
+            if (ValidatorRules) {
               const errors = await this.validator.validate(
-                validationRules,
+                ValidatorRules,
                 request,
               );
 

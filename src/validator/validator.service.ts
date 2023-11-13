@@ -2,15 +2,15 @@ import { Configurator } from '../configurator/configurator.service.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { Localizator } from '../localizator/localizator.service.ts';
 import { HttpRequest } from '../http/http_request.class.ts';
-import { ValidationRule } from './interfaces/validation_rule.interface.ts';
-import { ValidationRulesList } from './interfaces/validation_rules_list.interface.ts';
+import { ValidatorRule } from './interfaces/validator_rule.interface.ts';
+import { ValidatorRulesList } from './interfaces/validator_rules_list.interface.ts';
 
 export class Validator {
   private readonly configurator = inject(Configurator);
 
   private readonly localizator = inject(Localizator);
 
-  private readonly rules: ValidationRule[] = [];
+  private readonly rules: ValidatorRule[] = [];
 
   private readonly patterns: Record<string, RegExp> = {
     email:
@@ -292,8 +292,8 @@ export class Validator {
   }
 
   private async check(
-    rule: ValidationRule,
-    fieldValue: FormDataEntryValue | string | null | undefined,
+    rule: ValidatorRule,
+    fieldValue: FormDataEntryValue | string | null,
     ruleValue: unknown,
     fieldName: string,
   ): Promise<boolean> {
@@ -306,7 +306,7 @@ export class Validator {
     return passes instanceof Promise ? await passes : passes;
   }
 
-  public registerRule(rule: ValidationRule): void {
+  public registerRule(rule: ValidatorRule): void {
     for (const registeredRule of this.rules) {
       if (registeredRule.name === rule.name) {
         throw new Error(
@@ -318,7 +318,7 @@ export class Validator {
     this.rules.push(rule);
   }
 
-  public registerRules(rules: ValidationRule[]): void {
+  public registerRules(rules: ValidatorRule[]): void {
     for (const rule of rules) {
       this.registerRule(rule);
     }
@@ -327,7 +327,7 @@ export class Validator {
   public async validate(
     rules: Record<
       string,
-      Partial<ValidationRulesList> | Record<string, unknown>
+      Partial<ValidatorRulesList> | Record<string, unknown>
     >,
     subject: HttpRequest | Record<string, string | null | undefined>,
     errorLocale?: string,
@@ -348,7 +348,14 @@ export class Validator {
           throw new Error(`Invalid validation rule '${rule}'`);
         }
 
-        if (!await this.check(ruleObject, fieldValue, ruleValue, fieldName)) {
+        if (
+          !await this.check(
+            ruleObject,
+            fieldValue ?? null,
+            ruleValue,
+            fieldName,
+          )
+        ) {
           if (!(fieldName in errors)) {
             errors[fieldName] = [];
           }

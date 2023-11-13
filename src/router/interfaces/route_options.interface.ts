@@ -3,7 +3,7 @@ import { HttpStatus } from '../../http/enums/http_status.enum.ts';
 import { Middleware } from '../../http/interfaces/middleware.interface.ts';
 import { Pipe } from '../../pipes/interfaces/pipe.interface.ts';
 import { RedirectDestination } from '../types/redirect_destination.type.ts';
-import { ValidationRulesList } from '../../validator/interfaces/validation_rules_list.interface.ts';
+import { ValidatorRulesList } from '../../validator/interfaces/validator_rules_list.interface.ts';
 
 export interface RouteOptions {
   cookies?: Record<string, string>;
@@ -13,9 +13,9 @@ export interface RouteOptions {
   pipes?: Record<string, Constructor<Pipe>>;
   redirectTo?: RedirectDestination;
   statusCode?: HttpStatus;
-  validationRules?: Record<
+  ValidatorRules?: Record<
     string,
-    Partial<ValidationRulesList> | Record<string, unknown>
+    Partial<ValidatorRulesList> | Record<string, unknown>
   >;
   view?: string;
 }

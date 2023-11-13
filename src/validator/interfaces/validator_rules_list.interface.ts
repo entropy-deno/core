@@ -1,4 +1,4 @@
-export interface ValidationRulesList {
+export interface ValidatorRulesList {
   accepted: boolean;
   boolean: boolean;
   date: string | Date;

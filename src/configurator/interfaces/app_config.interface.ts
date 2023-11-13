@@ -1,6 +1,6 @@
 import { RoutePath } from '../../router/types/route_path.type.ts';
 import { TemplateDirective } from '../../templates/interfaces/template_directive.interface.ts';
-import { ValidationRule } from '../../validator/interfaces/validation_rule.interface.ts';
+import { ValidatorRule } from '../../validator/interfaces/validator_rule.interface.ts';
 
 export interface AppConfig {
   cache: {
@@ -53,6 +53,6 @@ export interface AppConfig {
     key: string | false;
     keyFile: string | false;
   };
-  validatorRules: ValidationRule[];
+  validatorRules: ValidatorRule[];
   webSocket: boolean;
 }

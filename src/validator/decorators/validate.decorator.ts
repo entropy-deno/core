@@ -1,12 +1,12 @@
 import { Reflector } from '../../utils/reflector.class.ts';
-import { ValidationRulesList } from '../interfaces/validation_rules_list.interface.ts';
+import { ValidatorRulesList } from '../interfaces/validator_rules_list.interface.ts';
 
 export function Validate(
-  rules: Record<string, Partial<ValidationRulesList> | Record<string, unknown>>,
+  rules: Record<string, Partial<ValidatorRulesList> | Record<string, unknown>>,
 ): MethodDecorator {
   return (_target, _methodName, descriptor) => {
     Reflector.defineMetadata<typeof rules>(
-      'validationRules',
+      'ValidatorRules',
       rules,
       descriptor.value as object,
     );
