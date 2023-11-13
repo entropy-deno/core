@@ -2,18 +2,23 @@
 
 ## Version support
 
-Each major version of Entropy is supported for couple of months.
+Entropy aligns with release [semantic versioning](https://semver.org). It does
+not have a fixed release cycle - new major versions are released every few
+months.
 
 Our policy is to provide major versions with as few breaking changes as
 possible, so you do not need to worry about LTS support or minor-version-only
-bugfixes. Just upgrade the framework regularly and enjoy!
+bugfixes.
 
-Alpha and beta versions are released independently and are intended for testing
-purposes, so we do not provide any additional support for them as they are
-unstable and may contain breaking changes.
+- **Patch** releases are released as needed and contain only bug fixes
+- **Minor** versions contain new features and fixes
+- **Major** releases contain breaking API changes and new features
+- **Alpha** and **beta** versions are released independently and are intended
+  for testing purposes
 
 ## Reporting vulnerabilities
 
-If you have discovered any security vulnerability in Entropy, please report it
-directly to [me](https://github.com/dominiq007) privately. **Do not create a
-GitHub issue for any security vulnerabilities!**
+If you have discovered any security vulnerability in Entropy, please
+[report it](https://github.com/dominiq007) privately.
+
+**Do not create a GitHub issue for any security vulnerabilities!**
