@@ -90,8 +90,8 @@ export class HttpRequest {
   }
 
   public async form(): Promise<FormData> {
-    if (!this.isFormRequest()) {
-      throw new Error('Request is not a form request');
+    if (!await this.isFormRequest()) {
+      return new FormData();
     }
 
     return await this.request.formData();
@@ -100,14 +100,14 @@ export class HttpRequest {
   public async input(name: string): Promise<FormDataEntryValue | undefined> {
     const entry = (await this.form()).get(name);
 
-    return entry instanceof File ? undefined : entry;
+    return entry instanceof File ? undefined : entry ?? undefined;
   }
 
   public get integrity(): string {
     return this.request.integrity;
   }
 
-  public get ip(): string {
+  public get ip(): string | undefined {
     return this.info?.remoteAddr.hostname;
   }
 
@@ -118,7 +118,7 @@ export class HttpRequest {
   }
 
   public async isFormRequest(): Promise<boolean> {
-    return ![
+    return this.headers.has('content-type') && ![
       HttpMethod.Get,
       HttpMethod.Head,
       HttpMethod.PropFind,
@@ -128,7 +128,7 @@ export class HttpRequest {
 
   public async isMultipartRequest(): Promise<boolean> {
     return (await this.isFormRequest()) &&
-      this.header('content-type')?.includes('multipart/form-data');
+      !!this.header('content-type')?.includes('multipart/form-data');
   }
 
   public get isSecure(): boolean {
@@ -155,7 +155,9 @@ export class HttpRequest {
 
   public async method(): Promise<HttpMethod> {
     if (!this.headers.get('content-type')) {
-      return HttpMethod.Get;
+      return Object.values(HttpMethod).find((value) =>
+        value === this.request.method
+      ) ?? HttpMethod.Get;
     }
 
     const method = await this.input('_method') ?? this.request.method ??
@@ -211,7 +213,7 @@ export class HttpRequest {
     return new URL(this.request.url).protocol.replace(':', '');
   }
 
-  public queryParam(name: string): string {
+  public queryParam(name: string): string | undefined {
     return new URL(this.request.url).searchParams.get(name) ?? undefined;
   }
 
