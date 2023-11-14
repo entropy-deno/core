@@ -9,11 +9,11 @@ Deno.test('validator module', async (test) => {
     assertEquals(
       Object.keys(
         await validator.validate({
+          email: 'test@entropy.deno.dev',
+        }, {
           email: {
             email: true,
           },
-        }, {
-          email: 'test@entropy.deno.dev',
         }),
       ).length,
       0,
@@ -21,12 +21,12 @@ Deno.test('validator module', async (test) => {
 
     assertEquals(
       (await validator.validate({
+        email: '@invalid@entropy.deno.dev',
+      }, {
         email: {
           email: true,
           maxLength: 12,
         },
-      }, {
-        email: '@invalid@entropy.deno.dev',
       })).email.length,
       2,
     );

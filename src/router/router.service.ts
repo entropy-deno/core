@@ -675,8 +675,8 @@ export class Router {
 
             if (ValidatorRules) {
               const errors = await this.validator.validate(
-                ValidatorRules,
                 request,
+                ValidatorRules,
               );
 
               if (Object.keys(errors).length) {

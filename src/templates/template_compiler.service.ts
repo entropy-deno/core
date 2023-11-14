@@ -235,15 +235,18 @@ export class TemplateCompiler {
       {
         name: 'error',
         type: 'block',
-        render: (content: string, invalidField: string) => {
-          if (
-            '$errors' in this.variables &&
-            (invalidField in
-              ((this.variables.$errors as
-                | Record<string, string[]>
-                | undefined) ?? {}))
-          ) {
-            return content;
+        render: async (content: string, invalidField: string) => {
+          const errorMessages =
+            this.variables.$errors as Record<string, string[]> | undefined ??
+              {};
+
+          if ('$errors' in this.variables && invalidField in errorMessages) {
+            const compiler = inject(TemplateCompiler);
+
+            return await compiler.render(content, {
+              ...this.variables,
+              $message: errorMessages[invalidField],
+            }, { recursiveCall: true, request: this.options.request });
           }
         },
       },

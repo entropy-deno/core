@@ -325,11 +325,11 @@ export class Validator {
   }
 
   public async validate(
+    subject: HttpRequest | Record<string, string | null | undefined>,
     rules: Record<
       string,
       Partial<ValidatorRulesList> | Record<string, unknown>
     >,
-    subject: HttpRequest | Record<string, string | null | undefined>,
     errorLocale?: string,
   ): Promise<Record<string, string[]>> {
     const errors: Record<string, string[]> = {};
