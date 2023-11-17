@@ -1,4 +1,4 @@
-import { assertEquals } from 'https://deno.land/std@0.205.0/assert/mod.ts';
+import { assertEquals } from 'https://deno.land/std@0.207.0/assert/mod.ts';
 import { HttpMethod } from './enums/http_method.enum.ts';
 import { HttpRequest } from './http_request.class.ts';
 

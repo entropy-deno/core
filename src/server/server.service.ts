@@ -1,5 +1,5 @@
-import { load as loadDotEnv } from 'https://deno.land/std@0.205.0/dotenv/mod.ts';
-import { parse as parseFlags } from 'https://deno.land/std@0.205.0/flags/mod.ts';
+import { load as loadDotEnv } from 'https://deno.land/std@0.207.0/dotenv/mod.ts';
+import { parseArgs } from 'https://deno.land/std@0.207.0/cli/parse_args.ts';
 import { Broadcaster } from '../web_socket/broadcaster.class.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
 import { Constructor } from '../utils/interfaces/constructor.interface.ts';
@@ -26,6 +26,14 @@ enum WebClientAlias {
 }
 
 export class Server implements Disposable {
+  private readonly args = parseArgs(Deno.args, {
+    boolean: ['dev', 'open'],
+    default: {
+      dev: false,
+      open: false,
+    },
+  });
+
   private readonly configurator = inject(Configurator);
 
   private readonly devServerCheckKey = '@entropy/dev_server';
@@ -39,14 +47,6 @@ export class Server implements Disposable {
     'SIGQUIT',
     'SIGTERM',
   ];
-
-  private readonly flags = parseFlags(Deno.args, {
-    boolean: ['dev', 'open'],
-    default: {
-      dev: false,
-      open: false,
-    },
-  });
 
   private readonly localizator = inject(Localizator);
 
@@ -305,7 +305,7 @@ export class Server implements Disposable {
       Deno.exit();
     });
 
-    if (this.flags.open && !localStorage.getItem(this.devServerCheckKey)) {
+    if (this.args.open && !localStorage.getItem(this.devServerCheckKey)) {
       try {
         Utils.runShellCommand(
           `${WebClientAlias[OS as keyof typeof WebClientAlias] ?? 'open'}`,
@@ -334,7 +334,7 @@ export class Server implements Disposable {
   }
 
   public async start(): Promise<void> {
-    Deno.env.set('PRODUCTION', this.flags.dev ? 'false' : 'true');
+    Deno.env.set('PRODUCTION', this.args.dev ? 'false' : 'true');
 
     if (
       this.configurator.getEnv<boolean>('TESTING') &&
@@ -360,7 +360,7 @@ export class Server implements Disposable {
     await this.localizator.setup();
 
     if (!this.configurator.entries.isDenoDeploy) {
-      this.flags.dev
+      this.args.dev
         ? this.setupDevelopmentEnvironment()
         : this.setupProductionEnvironment();
     }
@@ -421,7 +421,7 @@ export class Server implements Disposable {
         );
       }
 
-      if (this.flags.dev) {
+      if (this.args.dev) {
         let watcher: Deno.FsWatcher;
 
         this.addExitSignalListener(() => {

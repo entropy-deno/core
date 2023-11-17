@@ -1,7 +1,7 @@
 import {
   decodeBase64,
   encodeBase64,
-} from 'https://deno.land/std@0.205.0/encoding/base64.ts';
+} from 'https://deno.land/std@0.207.0/encoding/base64.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 
