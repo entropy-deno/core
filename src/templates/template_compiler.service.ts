@@ -46,8 +46,6 @@ export class TemplateCompiler {
       };
     }, {});
 
-  private stacks = new Map<string, string[]>();
-
   private template = '';
 
   private variables: Record<string, unknown> = {};
@@ -55,6 +53,8 @@ export class TemplateCompiler {
   public static directives: TemplateDirective[] = [];
 
   public rawContent = new Map<string, string>();
+
+  public static stacks = new Map<string, string[]>();
 
   constructor() {
     TemplateCompiler.directives = [
@@ -340,10 +340,10 @@ export class TemplateCompiler {
         name: 'push',
         type: 'block',
         render: (content: string, stack: string) => {
-          this.stacks.set(
+          TemplateCompiler.stacks.set(
             stack,
-            this.stacks.has(stack)
-              ? [...this.stacks.get(stack)!, content]
+            TemplateCompiler.stacks.has(stack)
+              ? [...TemplateCompiler.stacks.get(stack)!, content]
               : [content],
           );
         },
@@ -421,7 +421,7 @@ export class TemplateCompiler {
         name: 'stack',
         type: 'single',
         render: (stackName: string) => {
-          const stackedContent = this.stacks.get(stackName) ?? [];
+          const stackedContent = TemplateCompiler.stacks.get(stackName) ?? [];
 
           return stackedContent.join('');
         },
@@ -638,6 +638,10 @@ export class TemplateCompiler {
     this.options = options;
     this.template = template.replaceAll('\r\n', '\n');
     this.variables = variables;
+
+    if (!options.recursiveCall) {
+      TemplateCompiler.stacks.clear();
+    }
 
     for (const directive of TemplateCompiler.directives) {
       const pattern = directive.type === 'single'
