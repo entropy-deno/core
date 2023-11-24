@@ -15,7 +15,7 @@
     <span> · </span>
     <a href="https://github.com/entropy-deno/core" target="_blank">Repository</a>
     <span> · </span>
-    <a href="https://deno.land/x/entropy/src/mod.ts" target="_blank">API Reference</a>
+    <a href="https://deno.land/x/entropy/mod.ts" target="_blank">API Reference</a>
     <span> · </span>
     <a href="https://entropy.deno.dev/docs/more/contributing" target="_blank">Contributing</a>
   </h4>
@@ -73,7 +73,7 @@ dom.rajkowski@gmail.com. In case of security vulnerability, please contact
 
 - Author: [Dominik Rajkowski](https://github.com/dominiq007)
 - Documentation: [entropy.deno.dev](https://entropy.deno.dev)
-- [API Reference](https://deno.land/x/entropy/src/mod.ts)
+- [API Reference](https://deno.land/x/entropy/mod.ts)
 - [GitHub repository](https://github.com/entropy-deno/core)
 - [GitHub organization](https://github.com/entropy-deno)
 - [MIT License](https://github.com/entropy-deno/core/blob/main/LICENSE)
