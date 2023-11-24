@@ -1,6 +1,11 @@
-export * from './src/constants.ts';
+/**
+ * Modern and declarative backend development framework for Deno.
+ * 
+ * Documentation is available at [entropy.deno.dev](https://entropy.deno.dev).
+ */
 
 export * from './src/configurator/configurator.module.ts';
+export * from './src/constants.ts';
 export * from './src/encrypter/encrypter.module.ts';
 export * from './src/http/http.module.ts';
 export * from './src/injector/injector.module.ts';
