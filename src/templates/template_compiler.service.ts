@@ -525,7 +525,7 @@ export class TemplateCompiler {
 
   private async parseEachDirectives(): Promise<void> {
     const matches = this.template.matchAll(
-      /@for\s*\((.*?)\s+(?:in|of)\s+([^\n]*)\)(.*?)@\/for/gsm,
+      /@for\s*\((.*?)\s+(?:in|of)\s+([^\n]*)\)(.*)@\/for/gsm,
     ) ?? [];
 
     for (const [wholeMatch, variableName, iterableValue, block] of matches) {
@@ -647,7 +647,7 @@ export class TemplateCompiler {
       const pattern = directive.type === 'single'
         ? new RegExp(`@${directive.name}\s*(\\((.*?)\\))?`, 'g')
         : new RegExp(
-          `@${directive.name}\\s*(\\(([^\\n]*)\\))?(.*?)@\\/${directive.name}`,
+          `@${directive.name}\\s*(\\(([^\\n]*)\\))?(.*)@\\/${directive.name}`,
           'gsm',
         );
 
