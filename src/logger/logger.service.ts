@@ -11,7 +11,7 @@ export class Logger {
 
   private readonly endPadding = 4;
 
-  private write(
+  private writeLog(
     message: string | string[],
     { additionalInfo, colors = [] }: LogOptions,
   ): void {
@@ -21,7 +21,7 @@ export class Logger {
 
     if (Array.isArray(message)) {
       for (const text of message) {
-        this.write(text, {
+        this.writeLog(text, {
           additionalInfo,
           colors,
         });
@@ -74,27 +74,31 @@ export class Logger {
     console.log(...params);
   }
 
-  public clear(): void {
-    console.clear();
-  }
-
-  public error(message: string | string[]): void {
+  public writeMessage(message: string | string[], color: string): void {
     if (Array.isArray(message)) {
       for (const text of message) {
-        this.error(text);
+        this.writeMessage(text, color);
       }
 
       return;
     }
 
-    console.error(`%c${message}`, 'color: red; font-weight: bold');
+    console.warn(`%c${message}`, `color: ${color}; font-weight: bold`);
+  }
+
+  public clear(): void {
+    console.clear();
+  }
+
+  public error(message: string | string[]): void {
+    this.writeMessage(message, 'red');
   }
 
   public info(
     message: string | string[],
     { additionalInfo, colors = [] }: LogOptions = {},
   ): void {
-    this.write(message, {
+    this.writeLog(message, {
       additionalInfo,
       colors,
     });
@@ -104,7 +108,7 @@ export class Logger {
     message: string | string[],
     { additionalInfo, colors = [] }: LogOptions = {},
   ): void {
-    this.write(message, {
+    this.writeLog(message, {
       additionalInfo,
       colors,
     });
@@ -115,15 +119,7 @@ export class Logger {
   }
 
   public success(message: string | string[]): void {
-    if (Array.isArray(message)) {
-      for (const text of message) {
-        this.success(text);
-      }
-
-      return;
-    }
-
-    console.log(`%c${message}`, 'color: green; font-weight: bold');
+    this.writeMessage(message, 'green');
   }
 
   public table(data: unknown): void {
@@ -131,14 +127,6 @@ export class Logger {
   }
 
   public warn(message: string | string[]): void {
-    if (Array.isArray(message)) {
-      for (const text of message) {
-        this.warn(text);
-      }
-
-      return;
-    }
-
-    console.warn(`%c${message}`, 'color: orange; font-weight: bold');
+    this.writeMessage(message, 'orange');
   }
 }
