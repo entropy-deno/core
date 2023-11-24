@@ -1,4 +1,4 @@
-import { fromFileUrl } from 'https://deno.land/std@0.207.0/path/mod.ts';
+import { fromFileUrl } from 'https://deno.land/std@0.208.0/path/mod.ts';
 import {
   camelCase,
   constantCase,
@@ -7,7 +7,7 @@ import {
   snakeCase,
   titleCase,
 } from 'https://deno.land/x/case@2.2.0/mod.ts';
-import { resolve as resolvePath } from 'https://deno.land/std@0.207.0/path/mod.ts';
+import { resolve as resolvePath } from 'https://deno.land/std@0.208.0/path/mod.ts';
 
 export abstract class Utils {
   public static callerFile() {
