@@ -1,5 +1,6 @@
 import { load as loadDotEnv } from 'https://deno.land/std@0.208.0/dotenv/mod.ts';
 import { parseArgs } from 'https://deno.land/std@0.208.0/cli/parse_args.ts';
+import { $ } from '../utils/functions/$.function.ts';
 import { Broadcaster } from '../web_socket/broadcaster.class.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
 import { Constructor } from '../utils/interfaces/constructor.interface.ts';
@@ -15,7 +16,6 @@ import { Reflector } from '../utils/reflector.class.ts';
 import { Router } from '../router/router.service.ts';
 import { ServerOptions } from './interfaces/server_options.interface.ts';
 import { TemplateCompiler } from '../templates/template_compiler.service.ts';
-import { Utils } from '../utils/utils.class.ts';
 import { Validator } from '../validator/validator.service.ts';
 import { Module } from './interfaces/module.interface.ts';
 
@@ -307,10 +307,9 @@ export class Server implements Disposable {
 
     if (this.args.open && !localStorage.getItem(this.devServerCheckKey)) {
       try {
-        await Utils.executeShellCommand(
-          `${WebClientAlias[OS as keyof typeof WebClientAlias] ?? 'open'}`,
-          [this.router.baseUrl()],
-        );
+        await $`${
+          WebClientAlias[OS as keyof typeof WebClientAlias] ?? 'open'
+        } ${this.router.baseUrl()}`;
       } finally {
         localStorage.setItem(this.devServerCheckKey, 'on');
       }
@@ -485,6 +484,10 @@ export class Server implements Disposable {
   }
 
   public [Symbol.dispose](): void {
-    this.logger.info('Server terminated');
+    this.logger.warn('Server terminated');
+
+    if (!this.configurator.entries.isDenoDeploy) {
+      Deno.exit(1);
+    }
   }
 }

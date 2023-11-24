@@ -2,15 +2,15 @@ import { Utils } from '../utils.class.ts';
 
 export async function $(
   strings: TemplateStringsArray,
-  ...values: unknown[]
+  ...values: string[]
 ): Promise<boolean> {
-  const fullCmmand = strings.reduce((accumulator, string, index) => {
-    const value = values[index] ?? '';
+  const fullCommand = values.reduce(
+    (accumulator, value, index) =>
+      `${accumulator}${value}${strings[index + 1]}`,
+    strings[0] ?? '',
+  );
 
-    return `${accumulator}${string}${value}`;
-  });
-
-  const parts = fullCmmand.split(' ');
+  const parts = fullCommand.split(' ');
 
   return await Utils.executeShellCommand(parts[0], parts.slice(1));
 }

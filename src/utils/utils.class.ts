@@ -110,19 +110,23 @@ export abstract class Utils {
     name: string,
     args: string[] = [],
   ): Promise<boolean> {
-    const command = new Deno.Command(
-      name,
-      {
-        args,
-        stdin: 'null',
-        stdout: 'null',
-        stderr: 'null',
-      },
-    );
-
-    const { success } = await command.output();
-
-    return success;
+    try {
+      const command = new Deno.Command(
+        name,
+        {
+          args,
+          stdin: 'null',
+          stdout: 'null',
+          stderr: 'null',
+        },
+      );
+  
+      const { success } = await command.output();
+  
+      return success;
+    } catch {
+      return false;
+    }
   }
 
   public static getEnumKey<TValue = string | number>(
