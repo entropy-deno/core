@@ -1,7 +1,4 @@
-import {
-  assertEquals,
-  assertStringIncludes,
-} from 'https://deno.land/std@0.208.0/assert/mod.ts';
+import { expect } from 'https://deno.land/std@0.208.0/expect/expect.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { TemplateCompiler } from './template_compiler.service.ts';
 
@@ -9,7 +6,7 @@ Deno.test('templates module', async (test) => {
   await test.step('compiler properly renders @csrf directive', async () => {
     const rendered = await inject(TemplateCompiler).render('@csrf');
 
-    assertStringIncludes(rendered, '<input type="hidden"');
+    expect(rendered).toContain('<input type="hidden"');
   });
 
   await test.step('compiler properly renders @dev directive', async () => {
@@ -17,7 +14,7 @@ Deno.test('templates module', async (test) => {
       '@dev entropy @/dev',
     );
 
-    assertStringIncludes(rendered, 'entropy');
+    expect(rendered).toContain('entropy');
   });
 
   await test.step('compiler properly renders @for directive', async () => {
@@ -25,9 +22,9 @@ Deno.test('templates module', async (test) => {
       '@for (item in [1, 2, 3]) {{ item }} @/for',
     );
 
-    assertStringIncludes(rendered, '1');
-    assertStringIncludes(rendered, '2');
-    assertStringIncludes(rendered, '3');
+    expect(rendered).toContain('1');
+    expect(rendered).toContain('2');
+    expect(rendered).toContain('3');
 
     const renderedWithDestructuring = await inject(TemplateCompiler).render(
       `
@@ -36,7 +33,7 @@ Deno.test('templates module', async (test) => {
       @/for`,
     );
 
-    assertStringIncludes(renderedWithDestructuring, 'James Bond');
+    expect(renderedWithDestructuring).toContain('James Bond');
 
     const renderedEmpty = await inject(TemplateCompiler).render(
       `
@@ -47,7 +44,7 @@ Deno.test('templates module', async (test) => {
       @/for`,
     );
 
-    assertStringIncludes(renderedEmpty, 'no items');
+    expect(renderedEmpty).toContain('no items');
   });
 
   await test.step('compiler properly renders @error directives', async () => {
@@ -69,14 +66,14 @@ Deno.test('templates module', async (test) => {
       },
     );
 
-    assertStringIncludes(renderedInline, 'Invalid name');
-    assertStringIncludes(renderedBlock, 'Entered invalid name');
+    expect(renderedInline).toContain('Invalid name');
+    expect(renderedBlock).toContain('Entered invalid name');
   });
 
   await test.step('compiler properly renders @hotReload directive', async () => {
     const rendered = await inject(TemplateCompiler).render('@hotReload');
 
-    assertStringIncludes(rendered, '<script');
+    expect(rendered).toContain('<script');
   });
 
   await test.step('compiler properly renders @if directive', async () => {
@@ -90,9 +87,9 @@ Deno.test('templates module', async (test) => {
       '@if (false) yes @else no @/if',
     );
 
-    assertStringIncludes(renderedTrue, 'yes');
-    assertEquals(renderedFalse, '');
-    assertStringIncludes(renderedElse, 'no');
+    expect(renderedTrue).toContain('yes');
+    expect(renderedFalse).toBe('');
+    expect(renderedElse).toContain('no');
   });
 
   await test.step('compiler properly renders @json directive', async () => {
@@ -100,19 +97,19 @@ Deno.test('templates module', async (test) => {
       `@json({ name: 'Bond' })`,
     );
 
-    assertEquals(rendered, '{"name":"Bond"}');
+    expect(rendered).toBe('{"name":"Bond"}');
   });
 
   await test.step('compiler properly renders @method directive', async () => {
     const rendered = await inject(TemplateCompiler).render(`@method('PATCH')`);
 
-    assertStringIncludes(rendered, '<input type="hidden"');
+    expect(rendered).toContain('<input type="hidden"');
   });
 
   await test.step('compiler properly renders @nonceProp directive', async () => {
     const rendered = await inject(TemplateCompiler).render('@nonceProp');
 
-    assertStringIncludes(rendered, 'nonce=');
+    expect(rendered).toContain('nonce=');
   });
 
   await test.step('compiler properly renders @prod directive', async () => {
@@ -120,7 +117,7 @@ Deno.test('templates module', async (test) => {
       '@prod entropy @/prod',
     );
 
-    assertEquals(rendered, '');
+    expect(rendered).toBe('');
   });
 
   await test.step('compiler properly renders @stack and @push directive', async () => {
@@ -133,8 +130,8 @@ Deno.test('templates module', async (test) => {
       `,
     );
 
-    assertStringIncludes(rendered, 'a');
-    assertStringIncludes(rendered, 'b');
+    expect(rendered).toContain('a');
+    expect(rendered).toContain('b');
   });
 
   await test.step('compiler properly renders @switch directive', async () => {
@@ -156,7 +153,7 @@ Deno.test('templates module', async (test) => {
       `,
     );
 
-    assertStringIncludes(rendered, '2');
+    expect(rendered).toContain('2');
   });
 
   await test.step('compiler exposes $env function', async () => {
@@ -164,7 +161,7 @@ Deno.test('templates module', async (test) => {
       `{{ $env('TESTING') }}`,
     );
 
-    assertEquals(rendered, 'true');
+    expect(rendered).toBe('true');
   });
 
   await test.step('compiler exposes $escape function', async () => {
@@ -172,7 +169,7 @@ Deno.test('templates module', async (test) => {
       `{{# $escape('<div></div>') }}`,
     );
 
-    assertEquals(rendered, '&lt;div&gt;&lt;/div&gt;');
+    expect(rendered).toBe('&lt;div&gt;&lt;/div&gt;');
   });
 
   await test.step('compiler exposes $range function', async () => {
@@ -180,13 +177,13 @@ Deno.test('templates module', async (test) => {
       `{{ $range(2, 6).length }}`,
     );
 
-    assertEquals(rendered, '5');
+    expect(rendered).toBe('5');
   });
 
   await test.step('compiler ignores raw interpolations', async () => {
     const rendered = await inject(TemplateCompiler).render('{{@ message }}');
 
-    assertEquals(rendered, '{{ message }}');
+    expect(rendered).toBe('{{ message }}');
   });
 
   await test.step('compiler interpolates data with pipes correctly', async () => {
@@ -194,6 +191,6 @@ Deno.test('templates module', async (test) => {
       `{{ 'test' | upper }}`,
     );
 
-    assertEquals(rendered, 'TEST');
+    expect(rendered).toBe('TEST');
   });
 });

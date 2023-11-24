@@ -1,4 +1,4 @@
-import { assertEquals } from 'https://deno.land/std@0.208.0/assert/mod.ts';
+import { expect } from 'https://deno.land/std@0.208.0/expect/expect.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { BoolPipe } from './bool.pipe.ts';
 import { CamelCasePipe } from './camel_case.pipe.ts';
@@ -18,37 +18,36 @@ import { UpperCasePipe } from './upper_case.pipe.ts';
 
 Deno.test('pipes module', async (test) => {
   await test.step('properly produces output based on pipe input', () => {
-    assertEquals(inject(BoolPipe).transform('1'), true);
-    assertEquals(inject(BoolPipe).transform('0'), false);
+    expect(inject(BoolPipe).transform('1')).toBe(true);
+    expect(inject(BoolPipe).transform('0')).toBe(false);
 
-    assertEquals(inject(CamelCasePipe).transform('foo_bar'), 'fooBar');
-    assertEquals(inject(ConstantCasePipe).transform('foo-bar'), 'FOO_BAR');
+    expect(inject(CamelCasePipe).transform('foo_bar')).toBe('fooBar');
+    expect(inject(ConstantCasePipe).transform('foo-bar')).toBe('FOO_BAR');
 
-    assertEquals(
-      inject(DatePipe).transform('2040-01-01'),
+    expect(inject(DatePipe).transform('2040-01-01')).toEqual(
       new Date('2040-01-01'),
     );
 
-    assertEquals(inject(FloatPipe).transform('1.5'), 1.5);
+    expect(inject(FloatPipe).transform('1.5')).toBe(1.5);
 
-    assertEquals(inject(IntPipe).transform('1.0'), 1);
+    expect(inject(IntPipe).transform('1.0')).toBe(1);
 
-    assertEquals(inject(JsonPipe).transform('{"foo":"bar"}'), { foo: 'bar' });
+    expect(inject(JsonPipe).transform('{"foo":"bar"}')).toEqual({ foo: 'bar' });
 
-    assertEquals(inject(LowerCasePipe).transform('FOO'), 'foo');
+    expect(inject(LowerCasePipe).transform('FOO')).toBe('foo');
 
-    assertEquals(inject(NumberPipe).transform('1.5'), 1.5);
+    expect(inject(NumberPipe).transform('1.5')).toBe(1.5);
 
-    assertEquals(inject(ParamCasePipe).transform('fooBar'), 'foo-bar');
+    expect(inject(ParamCasePipe).transform('fooBar')).toBe('foo-bar');
 
-    assertEquals(inject(PascalCasePipe).transform('foo_bar'), 'FooBar');
+    expect(inject(PascalCasePipe).transform('foo_bar')).toBe('FooBar');
 
-    assertEquals(inject(PercentPipe).transform('1.4'), '140%');
+    expect(inject(PercentPipe).transform('1.4')).toBe('140%');
 
-    assertEquals(inject(SnakeCasePipe).transform('fooBar'), 'foo_bar');
+    expect(inject(SnakeCasePipe).transform('fooBar')).toBe('foo_bar');
 
-    assertEquals(inject(TitleCasePipe).transform('foo_bar'), 'Foo Bar');
+    expect(inject(TitleCasePipe).transform('foo_bar')).toBe('Foo Bar');
 
-    assertEquals(inject(UpperCasePipe).transform('foo bar'), 'FOO BAR');
+    expect(inject(UpperCasePipe).transform('foo bar')).toBe('FOO BAR');
   });
 });

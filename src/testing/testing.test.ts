@@ -1,7 +1,4 @@
-import {
-  assertEquals,
-  assertStringIncludes,
-} from 'https://deno.land/std@0.208.0/assert/mod.ts';
+import { expect } from 'https://deno.land/std@0.208.0/expect/expect.ts';
 import { fetchRoute } from './functions/fetch_route.function.ts';
 import { Controller } from '../http/controller.class.ts';
 import { HttpStatus } from '../http/enums/http_status.enum.ts';
@@ -18,7 +15,7 @@ Deno.test('testing module', async (test) => {
   await test.step('implements properly the fetchRoute() function', async () => {
     const { body, statusCode } = await fetchRoute('/', RootController);
 
-    assertStringIncludes(body, 'Hello, world!');
-    assertEquals(statusCode, HttpStatus.Ok);
+    expect(body).toContain('Hello, world!');
+    expect(statusCode).toBe(HttpStatus.Ok);
   });
 });

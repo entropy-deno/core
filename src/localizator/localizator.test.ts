@@ -1,4 +1,4 @@
-import { assertEquals } from 'https://deno.land/std@0.208.0/assert/mod.ts';
+import { expect } from 'https://deno.land/std@0.208.0/expect/expect.ts';
 import { Localizator } from './localizator.service.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 
@@ -8,11 +8,11 @@ Deno.test('localizator module', async (test) => {
   await test.step('localizator properly sets translations', () => {
     localizator.set('pl', 'hello world', 'witaj świecie');
 
-    assertEquals(localizator.translate('pl', 'hello world'), 'witaj świecie');
+    expect(localizator.translate('pl', 'hello world')).toBe('witaj świecie');
   });
 
   await test.step('localizator properly returns translation list', () => {
-    assertEquals(localizator.all('pl'), {
+    expect(localizator.all('pl')).toEqual({
       'hello world': 'witaj świecie',
     });
   });

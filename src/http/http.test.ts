@@ -1,4 +1,4 @@
-import { assertEquals } from 'https://deno.land/std@0.208.0/assert/mod.ts';
+import { expect } from 'https://deno.land/std@0.208.0/expect/expect.ts';
 import { HttpMethod } from './enums/http_method.enum.ts';
 import { HttpRequest } from './http_request.class.ts';
 
@@ -13,11 +13,11 @@ Deno.test('http module', async (test) => {
 
     const httpRequest = new HttpRequest(request);
 
-    assertEquals(httpRequest.cache, 'default');
-    assertEquals(httpRequest.credentials, 'same-origin');
-    assertEquals(httpRequest.cookie('test'), undefined);
-    assertEquals(httpRequest.header('test'), 'test');
-    assertEquals(await httpRequest.files(), {});
-    assertEquals(await httpRequest.method(), HttpMethod.Get);
+    expect(httpRequest.cache).toBe('default');
+    expect(httpRequest.credentials).toBe('same-origin');
+    expect(httpRequest.cookie('test')).toBeUndefined();
+    expect(httpRequest.header('test')).toBe('test');
+    expect(await httpRequest.files()).toEqual({});
+    expect(await httpRequest.method()).toBe(HttpMethod.Get);
   });
 });

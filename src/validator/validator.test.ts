@@ -1,4 +1,4 @@
-import { assertEquals } from 'https://deno.land/std@0.208.0/assert/mod.ts';
+import { expect } from 'https://deno.land/std@0.208.0/expect/expect.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { Validator } from './validator.service.ts';
 
@@ -6,7 +6,7 @@ Deno.test('validator module', async (test) => {
   const validator = inject(Validator);
 
   await test.step('validator properly asserts data satisfies requirements', async () => {
-    assertEquals(
+    expect(
       Object.keys(
         await validator.validate({
           email: 'test@entropy.deno.dev',
@@ -16,10 +16,9 @@ Deno.test('validator module', async (test) => {
           },
         }),
       ).length,
-      0,
-    );
+    ).toBe(0);
 
-    assertEquals(
+    expect(
       (await validator.validate({
         email: '@invalid@entropy.deno.dev',
       }, {
@@ -28,7 +27,6 @@ Deno.test('validator module', async (test) => {
           maxLength: 12,
         },
       })).email.length,
-      2,
-    );
+    ).toBe(2);
   });
 });

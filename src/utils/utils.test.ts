@@ -1,12 +1,9 @@
-import {
-  assertEquals,
-  assertStringIncludes,
-} from 'https://deno.land/std@0.208.0/assert/mod.ts';
+import { expect } from 'https://deno.land/std@0.208.0/expect/expect.ts';
 import { Utils } from './utils.class.ts';
 
 Deno.test('utils module', async (test) => {
   await test.step('implements properly the callerFile() function', () => {
-    assertStringIncludes(Utils.callerFile(), 'utils.class.ts');
+    expect(Utils.callerFile()).toContain('utils.class.ts');
   });
 
   await test.step('implements properly the deepMerge() function', () => {
@@ -23,7 +20,7 @@ Deno.test('utils module', async (test) => {
       },
     };
 
-    assertEquals(Utils.deepMerge(a, b), {
+    expect(Utils.deepMerge(a, b)).toEqual({
       a: 1,
       b: {
         c: 2,
@@ -33,11 +30,11 @@ Deno.test('utils module', async (test) => {
   });
 
   await test.step('implements properly the escapeEntities() function', () => {
-    assertEquals(Utils.escapeEntities(`&<>"'`), '&amp;&lt;&gt;&quot;&#39;');
+    expect(Utils.escapeEntities(`&<>"'`)).toBe('&amp;&lt;&gt;&quot;&#39;');
   });
 
   await test.step('implements properly the range() function', () => {
-    assertEquals(Utils.range(4, 10), [4, 5, 6, 7, 8, 9, 10]);
-    assertEquals(Utils.range(6), [0, 1, 2, 3, 4, 5, 6]);
+    expect(Utils.range(4, 10)).toEqual([4, 5, 6, 7, 8, 9, 10]);
+    expect(Utils.range(6)).toEqual([0, 1, 2, 3, 4, 5, 6]);
   });
 });
