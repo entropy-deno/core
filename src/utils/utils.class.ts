@@ -120,9 +120,9 @@ export abstract class Utils {
           stderr: 'null',
         },
       );
-  
+
       const { success } = await command.output();
-  
+
       return success;
     } catch {
       return false;

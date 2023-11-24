@@ -114,6 +114,18 @@ export class Logger {
     console.log(...messages);
   }
 
+  public success(message: string | string[]): void {
+    if (Array.isArray(message)) {
+      for (const text of message) {
+        this.success(text);
+      }
+
+      return;
+    }
+
+    console.log(`%c${message}`, 'color: green; font-weight: bold');
+  }
+
   public table(data: unknown): void {
     console.table(data);
   }
