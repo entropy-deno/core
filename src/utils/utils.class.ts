@@ -1,4 +1,3 @@
-import { fromFileUrl } from 'https://deno.land/std@0.208.0/path/mod.ts';
 import {
   camelCase,
   constantCase,
@@ -7,6 +6,7 @@ import {
   snakeCase,
   titleCase,
 } from 'https://deno.land/x/case@2.2.0/mod.ts';
+import { fromFileUrl } from 'https://deno.land/std@0.208.0/path/mod.ts';
 import { resolve as resolvePath } from 'https://deno.land/std@0.208.0/path/mod.ts';
 
 export abstract class Utils {
@@ -106,6 +106,25 @@ export abstract class Utils {
     );
   }
 
+  public static async executeShellCommand(
+    name: string,
+    args: string[] = [],
+  ): Promise<boolean> {
+    const command = new Deno.Command(
+      name,
+      {
+        args,
+        stdin: 'null',
+        stdout: 'null',
+        stderr: 'null',
+      },
+    );
+
+    const { success } = await command.output();
+
+    return success;
+  }
+
   public static getEnumKey<TValue = string | number>(
     value: TValue,
     enumObject: Record<string, unknown>,
@@ -147,19 +166,5 @@ export abstract class Utils {
     }
 
     return resolvePath(file);
-  }
-
-  public static runShellCommand(name: string, args: string[] = []): void {
-    const command = new Deno.Command(
-      name,
-      {
-        args,
-        stdin: 'null',
-        stdout: 'null',
-        stderr: 'null',
-      },
-    );
-
-    command.spawn();
   }
 }

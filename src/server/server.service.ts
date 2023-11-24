@@ -296,7 +296,7 @@ export class Server implements Disposable {
     }
   }
 
-  private setupDevelopmentEnvironment(): void {
+  private async setupDevelopmentEnvironment(): Promise<void> {
     this.webSocketChannels.push(HotReloadChannel);
 
     this.addExitSignalListener(() => {
@@ -307,7 +307,7 @@ export class Server implements Disposable {
 
     if (this.args.open && !localStorage.getItem(this.devServerCheckKey)) {
       try {
-        Utils.runShellCommand(
+        await Utils.executeShellCommand(
           `${WebClientAlias[OS as keyof typeof WebClientAlias] ?? 'open'}`,
           [this.router.baseUrl()],
         );
@@ -361,7 +361,7 @@ export class Server implements Disposable {
 
     if (!this.configurator.entries.isDenoDeploy) {
       this.args.dev
-        ? this.setupDevelopmentEnvironment()
+        ? await this.setupDevelopmentEnvironment()
         : this.setupProductionEnvironment();
     }
 
