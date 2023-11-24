@@ -15,8 +15,8 @@ Deno.test('validator module', async (test) => {
             email: true,
           },
         }),
-      ).length,
-    ).toBe(0);
+      ),
+    ).toHaveLength(0);
 
     expect(
       (await validator.validate({
@@ -26,7 +26,7 @@ Deno.test('validator module', async (test) => {
           email: true,
           maxLength: 12,
         },
-      })).email.length,
-    ).toBe(2);
+      })).email,
+    ).toHaveLength(2);
   });
 });
