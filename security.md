@@ -3,7 +3,7 @@
 ## Version support
 
 Entropy aligns with release [semantic versioning](https://semver.org). It does
-not have a fixed release cycle - new major versions are released every few
+not have a fixed release cycle – new major versions are released every few
 months.
 
 Our policy is to provide major versions with as few breaking changes as
