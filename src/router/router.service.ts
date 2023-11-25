@@ -648,7 +648,7 @@ export class Router {
         }
 
         for (const middlewareHandler of middleware ?? []) {
-          const result = inject(middlewareHandler).handle();
+          const result = inject(middlewareHandler).handle(request);
 
           result instanceof Promise ? await result : result;
         }
