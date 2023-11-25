@@ -74,37 +74,21 @@ export class Logger {
     console.log(...params);
   }
 
-  public writeMessage(message: string | string[], color: string): void {
-    if (Array.isArray(message)) {
-      for (const text of message) {
-        this.writeMessage(text, color);
-      }
-
-      return;
-    }
-
-    console.warn(`%c${message}`, `color: ${color}; font-weight: bold`);
-  }
-
   public clear(): void {
     console.clear();
   }
 
-  public error(message: string | string[]): void {
-    this.writeMessage(message, 'red');
-  }
-
-  public info(
+  public error(
     message: string | string[],
     { additionalInfo, colors = [] }: LogOptions = {},
   ): void {
-    this.writeLog(message, {
+    this.writeLog(`%c${message}`, {
       additionalInfo,
-      colors,
+      colors: ['red', ...colors],
     });
   }
 
-  public log(
+  public info(
     message: string | string[],
     { additionalInfo, colors = [] }: LogOptions = {},
   ): void {
@@ -118,15 +102,27 @@ export class Logger {
     console.log(...messages);
   }
 
-  public success(message: string | string[]): void {
-    this.writeMessage(message, 'green');
+  public success(
+    message: string | string[],
+    { additionalInfo, colors = [] }: LogOptions = {},
+  ): void {
+    this.writeLog(`%c${message}`, {
+      additionalInfo,
+      colors: ['green', ...colors],
+    });
   }
 
   public table(data: unknown): void {
     console.table(data);
   }
 
-  public warn(message: string | string[]): void {
-    this.writeMessage(message, 'orange');
+  public warn(
+    message: string | string[],
+    { additionalInfo, colors = [] }: LogOptions = {},
+  ): void {
+    this.writeLog(`%c${message}`, {
+      additionalInfo,
+      colors: ['orange', ...colors],
+    });
   }
 }

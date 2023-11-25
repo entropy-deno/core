@@ -156,7 +156,7 @@ export class Server implements Disposable {
     const responsePerformance = (performance.now() - performanceTimerStart)
       .toFixed(1);
 
-    this.logger.log(
+    this.logger.info(
       `%c[${status}] %c${richRequest.path}${richRequest.searchString}`,
       {
         additionalInfo: `${
@@ -462,7 +462,7 @@ export class Server implements Disposable {
                 switch (true) {
                   case (path.includes('src') && path.includes('.atom.html')) ||
                     path.includes('views'):
-                    this.logger.log('View reload request...');
+                    this.logger.info('View reload request...');
 
                     hotReloadChannel.sendReloadRequest();
 
