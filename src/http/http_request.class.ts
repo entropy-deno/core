@@ -97,7 +97,7 @@ export class HttpRequest {
     return await this.request.formData();
   }
 
-  public async input(name: string): Promise<FormDataEntryValue | undefined> {
+  public async input(name: string): Promise<string | undefined> {
     const entry = (await this.form()).get(name);
 
     return entry instanceof File ? undefined : entry ?? undefined;
