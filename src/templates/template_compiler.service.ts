@@ -676,6 +676,11 @@ export class TemplateCompiler {
       }
 
       if (directive.name === 'raw') {
+        this.template = this.template.replaceAll(
+          /\$([^\w])/g,
+          '$__escaped__$1',
+        );
+
         await this.parseEachDirectives();
       }
     }
@@ -729,6 +734,8 @@ export class TemplateCompiler {
     if (!options.recursiveCall) {
       this.validateSyntax();
       this.restoreRawContent();
+
+      this.template = this.template.replaceAll('$__escaped__', '$');
     }
 
     return this.template;
