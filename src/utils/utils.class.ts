@@ -48,47 +48,6 @@ export abstract class Utils {
     return titleCase(text);
   }
 
-  public static deepMerge<
-    TTarget extends object = Record<string, unknown>,
-    TObject = Record<string, unknown>,
-  >(
-    target: TTarget,
-    ...elements: TObject[]
-  ): TTarget {
-    if (!elements.length) {
-      return target;
-    }
-
-    const source = elements.shift() ?? {};
-
-    for (const key in source) {
-      if (
-        (source[key as keyof typeof source] &&
-          typeof source[key as keyof typeof source] === 'object' &&
-          !Array.isArray(source[key as keyof typeof source]))
-      ) {
-        if (!target[key as keyof TTarget]) {
-          Object.assign(target as object, {
-            [key]: {},
-          });
-        }
-
-        this.deepMerge(
-          target[key as keyof TTarget] as TTarget,
-          source[key as keyof typeof source] as TObject,
-        );
-
-        continue;
-      }
-
-      Object.assign(target, {
-        [key]: source[key as keyof typeof source],
-      });
-    }
-
-    return this.deepMerge(target, ...elements);
-  }
-
   public static escapeEntities(html: string) {
     return html.replace(
       /[&<>'"]/g,
@@ -134,6 +93,47 @@ export abstract class Utils {
     enumObject: Record<string, unknown>,
   ): string | undefined {
     return Object.keys(enumObject).find((key) => enumObject[key] === value);
+  }
+
+  public static mergeDeep<
+    TTarget extends object = Record<string, unknown>,
+    TObject = Record<string, unknown>,
+  >(
+    target: TTarget,
+    ...elements: TObject[]
+  ): TTarget {
+    if (!elements.length) {
+      return target;
+    }
+
+    const source = elements.shift() ?? {};
+
+    for (const key in source) {
+      if (
+        (source[key as keyof typeof source] &&
+          typeof source[key as keyof typeof source] === 'object' &&
+          !Array.isArray(source[key as keyof typeof source]))
+      ) {
+        if (!target[key as keyof TTarget]) {
+          Object.assign(target as object, {
+            [key]: {},
+          });
+        }
+
+        this.mergeDeep(
+          target[key as keyof TTarget] as TTarget,
+          source[key as keyof typeof source] as TObject,
+        );
+
+        continue;
+      }
+
+      Object.assign(target, {
+        [key]: source[key as keyof typeof source],
+      });
+    }
+
+    return this.mergeDeep(target, ...elements);
   }
 
   public static range(start: number, end?: number) {

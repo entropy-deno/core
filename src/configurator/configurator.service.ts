@@ -114,7 +114,7 @@ export class Configurator {
   }
 
   public setup(configuration: DeepPartial<AppConfig> = {}): void {
-    this.configuration = Utils.deepMerge(this.configuration, configuration);
+    this.configuration = Utils.mergeDeep(this.configuration, configuration);
 
     this.validateConfiguration();
   }

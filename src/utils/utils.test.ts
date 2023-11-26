@@ -6,7 +6,7 @@ Deno.test('utils module', async (test) => {
     expect(Utils.callerFile()).toContain('utils.class.ts');
   });
 
-  await test.step('implements properly the deepMerge() function', () => {
+  await test.step('implements properly the mergeDeep() function', () => {
     const a = {
       a: 1,
       b: {
@@ -20,7 +20,7 @@ Deno.test('utils module', async (test) => {
       },
     };
 
-    expect(Utils.deepMerge(a, b)).toEqual({
+    expect(Utils.mergeDeep(a, b)).toEqual({
       a: 1,
       b: {
         c: 2,
