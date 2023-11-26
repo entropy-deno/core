@@ -1,5 +1,5 @@
 /**
- * Modern and declarative backend development framework for Deno.
+ * ## Entropy – a modern and declarative backend development framework for Deno.
  * 
  * Documentation is available at [entropy.deno.dev](https://entropy.deno.dev).
  * Source code is available at [github.com/entropy-deno](https://github.com/entropy-deno).
