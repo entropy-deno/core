@@ -215,7 +215,9 @@ export class Router {
       );
     }
 
-    await request.session.set('@entropy/previous_location', request.path);
+    if (!await request.isStaticFileRequest()) {
+      await request.session.set('@entropy/previous_location', request.path);
+    }
 
     return response;
   }
