@@ -184,7 +184,9 @@ export class TemplateCompiler {
               );
             }
 
-            const path = `public/${file}`;
+            const path = `public/${
+              file.startsWith('public') ? file.slice(6) : file
+            }`;
 
             try {
               const content = await Deno.readTextFile(path);
