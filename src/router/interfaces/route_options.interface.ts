@@ -13,7 +13,7 @@ export interface RouteOptions {
   pipes?: Record<string, Constructor<Pipe>>;
   redirectTo?: RedirectDestination;
   statusCode?: HttpStatus;
-  ValidatorRules?: Record<
+  validationRules?: Record<
     string,
     Partial<ValidatorRulesList> | Record<string, unknown>
   >;

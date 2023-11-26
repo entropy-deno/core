@@ -525,7 +525,7 @@ export class Router {
         pipes,
         redirectTo,
         statusCode,
-        ValidatorRules,
+        validationRules,
         view,
       } = Reflector.getMetadata<
         Exclude<Route, 'action'>
@@ -573,12 +573,12 @@ export class Router {
           'statusCode',
           controllerMethod,
         ) ?? statusCode,
-        ValidatorRules: Reflector.getMetadata<
+        validationRules: Reflector.getMetadata<
           Record<string, Partial<ValidatorRulesList> | Record<string, unknown>>
         >(
-          'ValidatorRules',
+          'validationRules',
           controllerMethod,
-        ) ?? ValidatorRules,
+        ) ?? validationRules,
         view: Reflector.getMetadata<string>(
           'view',
           controllerMethod,
@@ -635,11 +635,11 @@ export class Router {
           headers,
           methods,
           middleware,
-          pipes,
           path,
+          pipes,
           redirectTo,
           statusCode,
-          ValidatorRules,
+          validationRules,
           view,
         } of this.routeStore.routes
       ) {
@@ -673,10 +673,10 @@ export class Router {
               return await this.createResponse(request, viewInstance);
             }
 
-            if (ValidatorRules) {
+            if (validationRules) {
               const errors = await this.validator.validate(
                 request,
-                ValidatorRules,
+                validationRules,
               );
 
               if (Object.keys(errors).length) {
