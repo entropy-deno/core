@@ -29,7 +29,14 @@ export const statusPage = `<!doctype html>
           --bg: #111827;
           --font-sans: 'Urbanist', sans-serif;
           --text: #f3f4f6;
-          --theme: #38bdf8;
+          --text-dark: #052133;
+          --selection: #c4b5fd;
+          --theme: #a78bfa;
+        }
+
+        ::selection {
+          background: var(--selection);
+          color: var(--text-dark);
         }
 
         body {

@@ -34,7 +34,13 @@ export const errorPage = `<!doctype html>
           --text: #f3f4f6;
           --text-gray: #b2b2b2;
           --text-dark: #052133;
-          --theme: #38bdf8;
+          --selection: #c4b5fd;
+          --theme: #a78bfa;
+        }
+
+        ::selection {
+          background: var(--selection);
+          color: var(--text-dark);
         }
 
         body {
