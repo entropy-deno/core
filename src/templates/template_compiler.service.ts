@@ -644,12 +644,12 @@ export class TemplateCompiler {
     }
 
     for (const directive of TemplateCompiler.directives) {
-      const pattern = directive.type === 'single'
-        ? new RegExp(`@${directive.name}\s*(\\((.*?)\\))?`, 'g')
-        : new RegExp(
-          `@${directive.name}\\s*(\\(([^\\n]*)\\))?(.*?)@\\/${directive.name}`,
-          'gsm',
-        );
+      const pattern = new RegExp(
+        directive.type === 'single'
+          ? `@${directive.name}\s*(\\((.*?)\\))?`
+          : `@${directive.name}\\s*(\\(([^\\n]*)\\))?(.*?)@\\/${directive.name}`,
+        'gsm',
+      );
 
       const matches = this.template.matchAll(directive.pattern ?? pattern) ??
         [];
