@@ -25,6 +25,7 @@ export class Configurator {
       exposedHeaders: [],
       maxAge: 0,
     },
+    csrfProtection: true,
     encryption: {
       key: this.getEnv<string>('ENCRYPTION_KEY') ?? crypto.randomUUID(),
     },

@@ -600,32 +600,34 @@ export class Router {
     try {
       await request.session.setup();
 
-      if (!await request.session.has('@entropy/csrf_token')) {
-        await request.session.set(
-          '@entropy/csrf_token',
-          this.encrypter.generateUuid({ clean: true }),
-        );
-      }
-
       if (
-        await request.isFormRequest() &&
+        this.configurator.entries.csrfProtection &&
         !this.configurator.getEnv<boolean>('TESTING')
       ) {
-        const csrfToken = await request.session.get<string>(
-          '@entropy/csrf_token',
-        );
+        if (!await request.session.has('@entropy/csrf_token')) {
+          await request.session.set(
+            '@entropy/csrf_token',
+            this.encrypter.generateUuid({ clean: true }),
+          );
+        }
 
-        if (
-          !csrfToken ||
-          ![
-            await request.input('_csrf'),
-            request.header('csrf-token'),
-            request.header('xsrf-token'),
-            request.header('x-csrf-token'),
-            request.header('x-xsrf-token'),
-          ].includes(csrfToken)
-        ) {
-          throw new HttpError(HttpStatus.InvalidToken);
+        if (await request.isFormRequest()) {
+          const csrfToken = await request.session.get<string>(
+            '@entropy/csrf_token',
+          );
+
+          if (
+            !csrfToken ||
+            ![
+              await request.input('_csrf'),
+              request.header('csrf-token'),
+              request.header('xsrf-token'),
+              request.header('x-csrf-token'),
+              request.header('x-xsrf-token'),
+            ].includes(csrfToken)
+          ) {
+            throw new HttpError(HttpStatus.InvalidToken);
+          }
         }
       }
 

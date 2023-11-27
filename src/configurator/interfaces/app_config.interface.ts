@@ -23,6 +23,7 @@ export interface AppConfig {
     exposedHeaders: string[];
     maxAge: number;
   };
+  csrfProtection: boolean;
   encryption: {
     key: string;
   };
