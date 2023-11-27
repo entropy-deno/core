@@ -48,12 +48,12 @@ type RouteDecoratorFunction<THttpMethods> = THttpMethods extends
 export class Router {
   private readonly configurator = inject(Configurator);
 
-  private readonly encrypter = inject(Encrypter);
-
   private readonly customHttpHandlers = new Map<
     HttpStatus | undefined,
     (statusCode: HttpStatus) => unknown
   >();
+  
+  private readonly encrypter = inject(Encrypter);
 
   private readonly errorHandler = inject(ErrorHandler);
 
