@@ -12,6 +12,8 @@ export class HttpRequest {
 
   private readonly cspNonce = this.encrypter.generateRandomString(24);
 
+  private formData?: FormData;
+
   private readonly localizator = inject(Localizator);
 
   private matchedPattern?: RoutePath;
@@ -90,11 +92,15 @@ export class HttpRequest {
   }
 
   public async form(): Promise<FormData> {
-    if (!await this.isFormRequest()) {
-      return new FormData();
+    try {
+      this.formData = await this.request.formData();
+    } catch {
+      if (!this.formData) {
+        this.formData = new FormData();
+      }
     }
 
-    return await this.request.formData();
+    return this.formData;
   }
 
   public async input(name: string): Promise<string | undefined> {
