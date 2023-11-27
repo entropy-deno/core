@@ -25,8 +25,21 @@ export class FormFile {
 
     const content = new Uint8Array(buffer);
     const path = `${destination}/${fileName}`;
+    const pathParts = path.split('/');
+
+    pathParts.pop();
 
     try {
+      try {
+        await Deno.mkdir(pathParts.join('/'), {
+          recursive: true,
+        });
+      } catch (error) {
+        if (!(error instanceof Deno.errors.AlreadyExists)) {
+          throw error;
+        }
+      }
+
       await Deno.writeFile(path, content);
     } catch {
       throw new Error(`Cannot upload file ${fileName} to ${destination}`);

@@ -75,10 +75,21 @@ export class HttpRequest {
         continue;
       }
 
+      if (name in files) {
+        files[name] = [
+          ...(Array.isArray(files[name])
+            ? files[name] as FormFile[]
+            : [files[name]] as FormFile[]),
+          new FormFile(field),
+        ];
+
+        continue;
+      }
+
       if (name.endsWith('[]')) {
         const fieldName = name.slice(0, -2);
 
-        if (!files[fieldName]) {
+        if (!(fieldName in files)) {
           files[fieldName] = [];
         }
 
