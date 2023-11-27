@@ -150,10 +150,11 @@ export class Router {
         'access-control-allow-methods': cors.allowedMethods.join(','),
       }),
       ...((cors.allowedOrigins.length &&
-        cors.allowedOrigins.includes(request.origin)) && {
+          cors.allowedOrigins.includes(request.header('origin') ?? '') ||
+        cors.allowedOrigins[0] === '*') && {
         'access-control-allow-origin': cors.allowedOrigins[0] === '*'
           ? '*'
-          : request.origin,
+          : request.header('origin'),
       }),
       ...(cors.exposedHeaders.length && {
         'access-control-expose-headers': cors.exposedHeaders.join(','),
