@@ -52,7 +52,7 @@ export class Router {
     HttpStatus | undefined,
     (statusCode: HttpStatus) => unknown
   >();
-  
+
   private readonly encrypter = inject(Encrypter);
 
   private readonly errorHandler = inject(ErrorHandler);

@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  test:
+  lint_and_test:
     runs-on: ubuntu-latest
 
     steps:
