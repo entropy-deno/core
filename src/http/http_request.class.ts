@@ -59,10 +59,12 @@ export class HttpRequest {
     return this.request.headers;
   }
 
-  public async file(name: string): Promise<FormFile | FormFile[]> {
+  public async file<TFile = FormFile | FormFile[]>(
+    name: string,
+  ): Promise<TFile> {
     const files = await this.files();
 
-    return files[name];
+    return files[name] as TFile;
   }
 
   public async files(): Promise<Record<string, FormFile | FormFile[]>> {

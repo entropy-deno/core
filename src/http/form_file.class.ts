@@ -27,15 +27,9 @@ export class FormFile {
     const path = `${destination}/${fileName}`;
 
     try {
-      const textContent = new TextDecoder('utf-8').decode(content);
-
-      await Deno.writeTextFile(path, textContent);
+      await Deno.writeFile(path, content);
     } catch {
-      try {
-        await Deno.writeFile(path, content);
-      } catch {
-        throw new Error(`Cannot upload file ${fileName} to ${destination}`);
-      }
+      throw new Error(`Cannot upload file ${fileName} to ${destination}`);
     }
 
     return fileName;
