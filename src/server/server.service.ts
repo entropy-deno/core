@@ -462,8 +462,6 @@ export class Server implements Disposable {
                 switch (true) {
                   case (path.includes('src') && path.includes('.atom.html')) ||
                     path.includes('views'):
-                    this.logger.info('View reload request...');
-
                     hotReloadChannel.sendReloadRequest();
 
                     break;
