@@ -278,17 +278,17 @@ export class TemplateCompiler {
         render: () => {
           return this.configurator.entries.isProduction ? '' : `
             <script nonce="${this.options.request?.nonce ?? ''}">
-              const ws = new WebSocket('${
+              const $entropySocket = new WebSocket('${
             this.configurator.entries.tls.enabled ? 'wss' : 'ws'
           }://${this.configurator.entries.host}:${this.configurator.entries.port}');
 
-              ws.onmessage = (event) => {
+              $entropySocket.onmessage = (event) => {
                 if (JSON.parse(event.data).channel === '@entropy/hot-reload') {
                   window.location.reload();
                 }
               };
 
-              ws.onclose = () => console.error('[entropy] Hot reload disconnected');
+              $entropySocket.onclose = () => console.error('[entropy] Hot reload disconnected');
             </script>
           `;
         },
