@@ -1,5 +1,6 @@
 import { Configurator } from '../configurator/configurator.service.ts';
 import { inject } from '../injector/functions/inject.function.ts';
+import { TimeUnit } from '../scheduler/enums/time_unit.enum.ts';
 
 export class Session {
   private readonly configurator = inject(Configurator);
@@ -49,7 +50,7 @@ export class Session {
 
   public async set(key: string, value: unknown): Promise<void> {
     await this.kv?.set([...this.kvStorageKey, key], value, {
-      expireIn: this.configurator.entries.session.lifetime * 24 * 3600 * 1000,
+      expireIn: this.configurator.entries.session.lifetime * 24 * TimeUnit.Hour,
     });
   }
 

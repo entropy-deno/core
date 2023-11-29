@@ -22,6 +22,7 @@ import { RoutePath } from './types/route_path.type.ts';
 import { RouteStore } from './route_store.service.ts';
 import { statusPage } from '../http/pages/status.page.ts';
 import { TemplateCompiler } from '../templates/template_compiler.service.ts';
+import { TimeUnit } from '../scheduler/enums/time_unit.enum.ts';
 import { Url } from './types/url.type.ts';
 import { Utils } from '../utils/utils.class.ts';
 import { ValidatorRulesList } from '../validator/interfaces/validator_rules_list.interface.ts';
@@ -202,7 +203,9 @@ export class Router {
         'content-type': `${contentType}; charset=utf-8`,
         'cache-control': this.configurator.entries.cache.enabled &&
             await request.isStaticFileRequest()
-          ? `max-age=${this.configurator.entries.cache.maxAge * 24 * 3600}`
+          ? `max-age=${
+            this.configurator.entries.cache.maxAge * 24 * TimeUnit.Hour / 1000
+          }`
           : 'no-cache',
         ...securityHeaders,
         ...headers,
@@ -215,7 +218,7 @@ export class Router {
         `session_id=${
           this.encrypter.generateUuid({ clean: true })
         }; SameSite=Lax; Max-Age=${
-          this.configurator.entries.session.lifetime * 24 * 3600
+          this.configurator.entries.session.lifetime * 24 * TimeUnit.Hour / 1000
         }`,
       );
     }
@@ -224,7 +227,7 @@ export class Router {
       response.headers.append(
         'set-cookie',
         `${cookie}=${cookieValue}; SameSite=Lax; Max-Age=${
-          this.configurator.entries.cookies.maxAge * 24 * 3600
+          this.configurator.entries.cookies.maxAge * 24 * TimeUnit.Hour / 1000
         }`,
       );
     }
