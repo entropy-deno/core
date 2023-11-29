@@ -130,7 +130,7 @@ export class HttpRequest {
     return this.info?.remoteAddr.hostname;
   }
 
-  public get isAjax(): boolean {
+  public isAjaxRequest(): boolean {
     return !!(this.header('x-requested-with')?.toLowerCase() ===
         'xmlhttprequest' ||
       this.header('accept')?.includes('application/json'));

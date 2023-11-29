@@ -74,12 +74,25 @@ export class Router {
         'HTTP Error',
     };
 
-    if (request.isAjax) {
+    if (request.isAjaxRequest()) {
       return await this.createResponse(request, JSON.stringify(payload), {
         statusCode,
         headers: {
           'content-type': 'application/json; charset=utf-8',
         },
+      });
+    }
+
+    if (
+      this.customHttpHandlers.has(undefined) ||
+      this.customHttpHandlers.has(statusCode)
+    ) {
+      const body = this.customHttpHandlers.get(
+        this.customHttpHandlers.has(statusCode) ? statusCode : undefined,
+      )?.(statusCode);
+
+      return await this.createResponse(request, body, {
+        statusCode,
       });
     }
 
@@ -685,7 +698,7 @@ export class Router {
               );
 
               if (Object.keys(errors).length) {
-                if (request.isAjax) {
+                if (request.isAjaxRequest()) {
                   return await this.createResponse(
                     request,
                     JSON.stringify({
@@ -779,24 +792,9 @@ export class Router {
         this.errorHandler.handle(error as Error, false);
       }
 
-      const { statusCode } = error;
-
       if (
         this.configurator.entries.isProduction || error instanceof HttpError
       ) {
-        if (
-          this.customHttpHandlers.has(undefined) ||
-          this.customHttpHandlers.has(statusCode)
-        ) {
-          const body = this.customHttpHandlers.get(
-            this.customHttpHandlers.has(statusCode) ? statusCode : undefined,
-          )?.(statusCode);
-
-          return await this.createResponse(request, body, {
-            statusCode,
-          });
-        }
-
         return await this.createAbortResponse(
           request,
           error instanceof HttpError
