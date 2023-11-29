@@ -418,6 +418,10 @@ export class Router {
     destination: RedirectDestination,
     statusCode = HttpStatus.Found,
   ): Response {
+    if (statusCode < 300 || statusCode > 399) {
+      throw new Error('Invalid redirect status code');
+    }
+
     if (typeof destination === 'string') {
       return Response.redirect(
         destination[0] === '/'
@@ -445,6 +449,24 @@ export class Router {
     }
 
     throw new Error(`Invalid named route '${destination.name}'`);
+  }
+
+  public async createRedirectBack(
+    request: HttpRequest,
+    statusCode = HttpStatus.Found,
+  ): Promise<Response> {
+    const destination = await request.session.get<RedirectDestination>(
+      '@entropy/previous_location',
+    ) ?? request.header('referer') as RedirectDestination | undefined;
+
+    if (!destination) {
+      throw new HttpError(HttpStatus.NotFound);
+    }
+
+    return this.createRedirect(
+      destination,
+      statusCode,
+    );
   }
 
   public createRouteDecorator<
@@ -716,13 +738,7 @@ export class Router {
                   );
                 }
 
-                if (!request.headers.get('referer')) {
-                  throw new HttpError(HttpStatus.BadRequest);
-                }
-
-                return this.createRedirect(
-                  request.headers.get('referer') as Url,
-                );
+                return this.createRedirectBack(request);
               }
             }
 

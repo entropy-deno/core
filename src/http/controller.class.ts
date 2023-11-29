@@ -24,14 +24,7 @@ export abstract class Controller {
     request: HttpRequest,
     statusCode = HttpStatus.Found,
   ): Promise<Response> {
-    const destination = await request.session.get<RedirectDestination>(
-      '@entropy/previous_location',
-    );
-
-    return inject(Router).createRedirect(
-      destination ?? request.path,
-      statusCode,
-    );
+    return await inject(Router).createRedirectBack(request, statusCode);
   }
 
   protected async render(
