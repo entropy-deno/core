@@ -155,6 +155,10 @@ export class HttpRequest {
   }
 
   public async isStaticFileRequest(): Promise<boolean> {
+    if (this.path === '/') {
+      return false;
+    }
+
     try {
       await Deno.stat(`public${this.path}`);
 

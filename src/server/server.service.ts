@@ -153,6 +153,13 @@ export class Server implements Disposable {
       }
     }
 
+    if (
+      await richRequest.isStaticFileRequest() &&
+      !this.configurator.entries.logger.staticFileRequests
+    ) {
+      return response;
+    }
+
     const responsePerformance = (performance.now() - performanceTimerStart)
       .toFixed(1);
 

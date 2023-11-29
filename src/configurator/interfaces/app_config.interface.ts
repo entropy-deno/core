@@ -35,7 +35,10 @@ export interface AppConfig {
     default: string;
     supported: string[];
   };
-  logger: boolean;
+  logger: {
+    enabled: boolean;
+    staticFileRequests: boolean;
+  };
   port: number;
   seo: {
     robots: boolean;

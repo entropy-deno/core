@@ -38,7 +38,10 @@ export class Configurator {
       default: 'en',
       supported: ['en'],
     },
-    logger: true,
+    logger: {
+      enabled: true,
+      staticFileRequests: false,
+    },
     port: this.getEnv<number>('PORT') ?? 5050,
     seo: {
       robots: false,

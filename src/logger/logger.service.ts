@@ -15,7 +15,7 @@ export class Logger {
     message: string | string[],
     { additionalInfo, colors = [] }: LogOptions,
   ): void {
-    if (!this.configurator.entries.logger) {
+    if (!this.configurator.entries.logger.enabled) {
       return;
     }
 
