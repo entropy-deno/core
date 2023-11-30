@@ -586,6 +586,11 @@ export class Router {
     try {
       await request.session.setup();
 
+      if (this.configurator.entries.session.clearOnRestart) {
+        await request.session.destroy();
+        await request.session.setup();
+      }
+
       if (
         !await request.isStaticFileRequest() &&
         !this.configurator.getEnv<boolean>('TESTING')

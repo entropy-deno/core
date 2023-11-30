@@ -50,6 +50,7 @@ export class Configurator {
       sitemapUrls: [],
     },
     session: {
+      clearOnRestart: false,
       lifetime: this.getEnv<number>('SESSION_LIFETIME') ?? 30,
     },
     templateDirectives: [],

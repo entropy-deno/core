@@ -155,7 +155,10 @@ export class Session {
       return;
     }
 
-    this.kv = await Deno.openKv();
+    if (!this.kv) {
+      this.kv = await Deno.openKv();
+    }
+
     this.kvStorageKey = ['@entropy', 'sessions', this.id];
   }
 }
