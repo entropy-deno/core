@@ -1,10 +1,14 @@
 import { getCookies } from 'https://deno.land/std@0.208.0/http/cookie.ts';
 import { Encrypter } from '../encrypter/encrypter.service.ts';
 import { FormFile } from './form_file.class.ts';
+import { HttpError } from './http_error.class.ts';
 import { HttpMethod } from './enums/http_method.enum.ts';
+import { HttpStatus } from './enums/http_status.enum.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { Localizator } from '../localizator/localizator.service.ts';
+import { RedirectDestination } from '../router/types/redirect_destination.type.ts';
 import { RoutePath } from '../router/types/route_path.type.ts';
+import { RouteStore } from '../router/route_store.service.ts';
 import { Session } from './session.class.ts';
 
 export class HttpRequest {
@@ -17,6 +21,8 @@ export class HttpRequest {
   private readonly localizator = inject(Localizator);
 
   private matchedPattern?: RoutePath;
+
+  private readonly routeStore = inject(RouteStore);
 
   private sessionObject?: Session;
 
@@ -45,6 +51,67 @@ export class HttpRequest {
 
   public credentials(): RequestCredentials {
     return this.request.credentials ?? 'same-origin';
+  }
+
+  public async createRedirect(
+    destination: RedirectDestination,
+    variables: Record<string, unknown> = {},
+    statusCode = HttpStatus.Found,
+  ): Promise<Response> {
+    if (statusCode < 300 || statusCode > 399) {
+      throw new Error('Invalid redirect status code');
+    }
+
+    for (const [key, value] of Object.entries(variables)) {
+      await this.session.flash(key, value);
+    }
+
+    if (typeof destination === 'string') {
+      return Response.redirect(
+        destination[0] === '/'
+          ? this.routeStore.url(destination as RoutePath)
+          : destination,
+        statusCode,
+      );
+    }
+
+    for (const { name, path } of this.routeStore.routes) {
+      if (name === destination.name) {
+        let resolvedPath = path;
+
+        for (
+          const [param, paramValue] of Object.entries(destination.params ?? {})
+        ) {
+          resolvedPath = resolvedPath.replace(
+            `:${param}`,
+            paramValue,
+          ) as RoutePath;
+        }
+
+        return Response.redirect(resolvedPath, statusCode);
+      }
+    }
+
+    throw new Error(`Invalid named route '${destination.name}'`);
+  }
+
+  public async createRedirectBack(
+    variables: Record<string, unknown> = {},
+    statusCode = HttpStatus.Found,
+  ): Promise<Response> {
+    const destination = await this.session.get<RedirectDestination>(
+      '@entropy/previous_location',
+    ) ?? this.header('referer') as RedirectDestination | undefined;
+
+    if (!destination) {
+      throw new HttpError(HttpStatus.NotFound);
+    }
+
+    return await this.createRedirect(
+      destination,
+      variables,
+      statusCode,
+    );
   }
 
   public destination(): RequestDestination {
@@ -102,6 +169,16 @@ export class HttpRequest {
     }
 
     return files;
+  }
+
+  public async flash(key: string, value: unknown): Promise<void> {
+    await this.session.flash(key, value);
+  }
+
+  public async flashed<TValue = unknown>(
+    key: string,
+  ): Promise<TValue | undefined> {
+    return await this.session.flashed(key);
   }
 
   public async form(): Promise<FormData> {

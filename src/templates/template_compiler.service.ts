@@ -158,7 +158,7 @@ export class TemplateCompiler {
         render: async () => {
           return `<input type="hidden" name="_csrf" value="${await this.options
             .request
-            ?.session.get<string>('@entropy/csrf_token')}">`;
+            ?.session.get<string>(['_entropy', 'csrf_token'])}">`;
         },
       },
       {
@@ -239,26 +239,31 @@ export class TemplateCompiler {
         type: 'block',
         render: async (content: string, invalidField: string) => {
           const errorMessages =
-            this.variables.$errors as Record<string, string[]> | undefined ??
-              {};
+            await this.options.request?.flashed<Record<string, string[]>>(
+              '$errors',
+            ) ?? {};
 
-          if ('$errors' in this.variables && invalidField in errorMessages) {
+          if (invalidField in errorMessages) {
             const compiler = inject(TemplateCompiler);
 
             return await compiler.render(content, {
               ...this.variables,
-              $message: errorMessages[invalidField],
-            }, { recursiveCall: true, request: this.options.request });
+              $message: errorMessages[invalidField]?.[0],
+            }, {
+              recursiveCall: true,
+              request: this.options.request,
+            });
           }
         },
       },
       {
         name: 'error',
         type: 'single',
-        render: (invalidField: string) => {
+        render: async (invalidField: string) => {
           const message =
-            (this.variables.$errors as Record<string, string[]> | undefined)
-              ?.[invalidField]?.[0];
+            (await this.options.request?.flashed<Record<string, string[]>>(
+              '$errors',
+            ))?.[invalidField]?.[0];
 
           if (message) {
             return message;
@@ -595,7 +600,7 @@ export class TemplateCompiler {
   }
 
   private removeComments(): void {
-    const matches = this.template.matchAll(/\{\{(@?)--(.*?)--\}\}/g) ??
+    const matches = this.template.matchAll(/\{(@?)--(.*?)--\}/gsm) ??
       [];
 
     for (const [wholeMatch] of matches) {

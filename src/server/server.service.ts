@@ -123,6 +123,8 @@ export class Server implements Disposable {
 
     const response = await this.router.respond(richRequest);
 
+    await richRequest.session.save();
+
     const { status } = response;
 
     let statusColor: 'blue' | 'green' | 'orange' | 'red' = 'blue';

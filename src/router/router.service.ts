@@ -232,7 +232,10 @@ export class Router {
       );
     }
 
-    if (!await request.isStaticFileRequest()) {
+    if (
+      !request.isAjaxRequest() && !await request.isFormRequest() &&
+      !await request.isStaticFileRequest()
+    ) {
       await request.session.set('@entropy/previous_location', request.path());
     }
 
@@ -414,61 +417,6 @@ export class Router {
       }${path}` as RoutePath;
   }
 
-  public createRedirect(
-    destination: RedirectDestination,
-    statusCode = HttpStatus.Found,
-  ): Response {
-    if (statusCode < 300 || statusCode > 399) {
-      throw new Error('Invalid redirect status code');
-    }
-
-    if (typeof destination === 'string') {
-      return Response.redirect(
-        destination[0] === '/'
-          ? this.routeStore.url(destination as RoutePath)
-          : destination,
-        statusCode,
-      );
-    }
-
-    for (const { name, path } of this.routeStore.routes) {
-      if (name === destination.name) {
-        let resolvedPath = path;
-
-        for (
-          const [param, paramValue] of Object.entries(destination.params ?? {})
-        ) {
-          resolvedPath = resolvedPath.replace(
-            `:${param}`,
-            paramValue,
-          ) as RoutePath;
-        }
-
-        return Response.redirect(resolvedPath, statusCode);
-      }
-    }
-
-    throw new Error(`Invalid named route '${destination.name}'`);
-  }
-
-  public async createRedirectBack(
-    request: HttpRequest,
-    statusCode = HttpStatus.Found,
-  ): Promise<Response> {
-    const destination = await request.session.get<RedirectDestination>(
-      '@entropy/previous_location',
-    ) ?? request.header('referer') as RedirectDestination | undefined;
-
-    if (!destination) {
-      throw new HttpError(HttpStatus.NotFound);
-    }
-
-    return this.createRedirect(
-      destination,
-      statusCode,
-    );
-  }
-
   public createRouteDecorator<
     THttpMethods extends EnumValuesUnion<HttpMethod>[] | undefined = undefined,
   >(httpMethods?: THttpMethods): RouteDecoratorFunction<THttpMethods> {
@@ -638,20 +586,24 @@ export class Router {
     try {
       await request.session.setup();
 
+      if (!await request.isStaticFileRequest()) {
+        await request.session.increment(['_entropy', 'request_id'], 1, 0);
+      }
+
       if (
         this.configurator.entries.csrfProtection &&
         !this.configurator.getEnv<boolean>('TESTING')
       ) {
-        if (!await request.session.has('@entropy/csrf_token')) {
+        if (!await request.session.has(['_entropy', 'csrf_token'])) {
           await request.session.set(
-            '@entropy/csrf_token',
+            ['_entropy', 'csrf_token'],
             this.encrypter.generateUuid({ clean: true }),
           );
         }
 
         if (await request.isFormRequest()) {
           const csrfToken = await request.session.get<string>(
-            '@entropy/csrf_token',
+            ['_entropy', 'csrf_token'],
           );
 
           if (
@@ -703,7 +655,7 @@ export class Router {
         for (const method of methods) {
           if (requestMethod === method && urlPattern.test(request.url())) {
             if (redirectTo) {
-              return this.createRedirect(redirectTo);
+              return await request.createRedirect(redirectTo);
             }
 
             if (view) {
@@ -738,7 +690,9 @@ export class Router {
                   );
                 }
 
-                return this.createRedirectBack(request);
+                return await request.createRedirectBack({
+                  $errors: errors,
+                });
               }
             }
 
