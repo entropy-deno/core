@@ -233,7 +233,7 @@ export class Router {
     }
 
     if (!await request.isStaticFileRequest()) {
-      await request.session.set('@entropy/previous_location', request.path);
+      await request.session.set('@entropy/previous_location', request.path());
     }
 
     return response;
@@ -312,7 +312,7 @@ export class Router {
   private async createStaticFileResponse(
     request: HttpRequest,
   ): Promise<Response> {
-    const filePath = `public${request.path}`;
+    const filePath = `public${request.path()}`;
 
     try {
       const fileSize = (await Deno.stat(filePath)).size;
@@ -701,7 +701,7 @@ export class Router {
         });
 
         for (const method of methods) {
-          if (requestMethod === method && urlPattern.test(request.url)) {
+          if (requestMethod === method && urlPattern.test(request.url())) {
             if (redirectTo) {
               return this.createRedirect(redirectTo);
             }
@@ -742,8 +742,9 @@ export class Router {
               }
             }
 
-            const paramGroups = urlPattern.exec(request.url)?.pathname.groups ??
-              {};
+            const paramGroups =
+              urlPattern.exec(request.url())?.pathname.groups ??
+                {};
 
             for (const [paramName, paramValue] of Object.entries(paramGroups)) {
               if (paramValue === '') {
@@ -787,16 +788,17 @@ export class Router {
 
       if (
         requestMethod === HttpMethod.Get &&
-        request.path.includes('.')
+        request.path().includes('.')
       ) {
         if (
-          request.path === '/robots.txt' && this.configurator.entries.seo.robots
+          request.path() === '/robots.txt' &&
+          this.configurator.entries.seo.robots
         ) {
           return await this.createSeoRobotsFile(request);
         }
 
         if (
-          request.path === '/sitemap.xml' &&
+          request.path() === '/sitemap.xml' &&
           this.configurator.entries.seo.sitemap
         ) {
           return await this.createSeoSitemapFile(request);

@@ -164,7 +164,7 @@ export class Server implements Disposable {
       .toFixed(1);
 
     this.logger.info(
-      `%c[${status}] %c${richRequest.path}${richRequest.searchString}`,
+      `%c[${status}] %c${richRequest.path()}${richRequest.queryString()}`,
       {
         additionalInfo: `${
           responsePerformance.length < 5

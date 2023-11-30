@@ -31,7 +31,7 @@ export class HttpRequest {
     this.matchedPattern = pattern;
   }
 
-  public get cache(): RequestCache {
+  public cache(): RequestCache {
     return this.request.cache ?? 'default';
   }
 
@@ -43,11 +43,11 @@ export class HttpRequest {
     return getCookies(this.headers);
   }
 
-  public get credentials(): RequestCredentials {
+  public credentials(): RequestCredentials {
     return this.request.credentials ?? 'same-origin';
   }
 
-  public get destination(): RequestDestination {
+  public destination(): RequestDestination {
     return this.request.destination;
   }
 
@@ -122,11 +122,11 @@ export class HttpRequest {
     return entry instanceof File ? undefined : entry ?? undefined;
   }
 
-  public get integrity(): string {
+  public integrity(): string {
     return this.request.integrity;
   }
 
-  public get ip(): string | undefined {
+  public ip(): string | undefined {
     return this.info?.remoteAddr.hostname;
   }
 
@@ -150,17 +150,17 @@ export class HttpRequest {
       !!this.header('content-type')?.includes('multipart/form-data');
   }
 
-  public get isSecure(): boolean {
-    return ['https', 'wss'].includes(this.protocol);
+  public isSecure(): boolean {
+    return ['https', 'wss'].includes(this.protocol());
   }
 
   public async isStaticFileRequest(): Promise<boolean> {
-    if (this.path === '/') {
+    if (this.path() === '/') {
       return false;
     }
 
     try {
-      await Deno.stat(`public${this.path}`);
+      await Deno.stat(`public${this.path()}`);
 
       return true;
     } catch {
@@ -209,7 +209,7 @@ export class HttpRequest {
       pathname: this.matchedPattern ?? '',
     });
 
-    const paramGroups = urlPattern.exec(this.url)?.pathname.groups ?? {};
+    const paramGroups = urlPattern.exec(this.url())?.pathname.groups ?? {};
 
     for (const [paramName, paramValue] of Object.entries(paramGroups)) {
       if (paramValue === '') {
@@ -220,19 +220,19 @@ export class HttpRequest {
     return { ...paramGroups } as Record<string, string | undefined>;
   }
 
-  public get path(): RoutePath {
+  public path(): RoutePath {
     return new URL(this.request.url).pathname as RoutePath;
   }
 
-  public get pattern(): string | undefined {
+  public pattern(): string | undefined {
     return this.matchedPattern;
   }
 
-  public get port(): number {
+  public port(): number {
     return Number(new URL(this.request.url).port);
   }
 
-  public get protocol(): string {
+  public protocol(): string {
     return new URL(this.request.url).protocol.replace(':', '');
   }
 
@@ -252,16 +252,16 @@ export class HttpRequest {
     return params;
   }
 
-  public get referrer(): string {
+  public queryString(): string {
+    return new URL(this.request.url).search;
+  }
+
+  public referrer(): string {
     return this.request.referrer;
   }
 
-  public get referrerPolicy(): ReferrerPolicy {
+  public referrerPolicy(): ReferrerPolicy {
     return this.request.referrerPolicy;
-  }
-
-  public get searchString(): string {
-    return new URL(this.request.url).search;
   }
 
   public get session(): Session {
@@ -276,7 +276,7 @@ export class HttpRequest {
     return this.localizator.translate(this.locale, text, quantity);
   }
 
-  public get url(): string {
+  public url(): string {
     return this.request.url;
   }
 }
