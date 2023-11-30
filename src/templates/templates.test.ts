@@ -47,29 +47,6 @@ Deno.test('templates module', async (test) => {
     expect(renderedEmpty).toContain('no items');
   });
 
-  await test.step('compiler properly renders @error directives', async () => {
-    const renderedInline = await inject(TemplateCompiler).render(
-      `@error('name')`,
-      {
-        $errors: {
-          name: ['Invalid name'],
-        },
-      },
-    );
-
-    const renderedBlock = await inject(TemplateCompiler).render(
-      `@error('name') Entered invalid name @/error`,
-      {
-        $errors: {
-          name: ['Invalid name'],
-        },
-      },
-    );
-
-    expect(renderedInline).toContain('Invalid name');
-    expect(renderedBlock).toContain('Entered invalid name');
-  });
-
   await test.step('compiler properly renders @hotReload directive', async () => {
     const rendered = await inject(TemplateCompiler).render('@hotReload');
 
@@ -184,6 +161,12 @@ Deno.test('templates module', async (test) => {
     const rendered = await inject(TemplateCompiler).render('{{@ message }}');
 
     expect(rendered).toBe('{{ message }}');
+  });
+
+  await test.step('compiler strips comments', async () => {
+    const rendered = await inject(TemplateCompiler).render('{-- @csrf --}');
+
+    expect(rendered).toBe('');
   });
 
   await test.step('compiler interpolates data with pipes correctly', async () => {

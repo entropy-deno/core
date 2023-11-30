@@ -13,8 +13,8 @@ Deno.test('http module', async (test) => {
 
     const httpRequest = new HttpRequest(request);
 
-    expect(httpRequest.cache).toBe('default');
-    expect(httpRequest.credentials).toBe('same-origin');
+    expect(httpRequest.cache()).toBe('default');
+    expect(httpRequest.credentials()).toBe('same-origin');
     expect(httpRequest.cookie('test')).toBeUndefined();
     expect(httpRequest.header('test')).toBe('test');
     expect(await httpRequest.files()).toEqual({});

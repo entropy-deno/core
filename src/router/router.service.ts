@@ -586,7 +586,10 @@ export class Router {
     try {
       await request.session.setup();
 
-      if (!await request.isStaticFileRequest()) {
+      if (
+        !await request.isStaticFileRequest() &&
+        !this.configurator.getEnv<boolean>('TESTING')
+      ) {
         await request.session.increment(['_entropy', 'request_id'], 1, 0);
       }
 

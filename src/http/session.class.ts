@@ -53,7 +53,9 @@ export class Session {
 
     if (typeof value !== 'number') {
       throw new TypeError(
-        `Cannot decrement session value '${key}' as it is not a number`,
+        `Cannot decrement session value '${
+          Array.isArray(key) ? key.pop() : key
+        }' as it is not a number`,
       );
     }
 
@@ -114,7 +116,9 @@ export class Session {
 
     if (typeof value !== 'number') {
       throw new TypeError(
-        `Cannot increment session value '${key}' as it is not a number`,
+        `Cannot increment session value '${
+          Array.isArray(key) ? key.pop() : key
+        }' as it is not a number`,
       );
     }
 
