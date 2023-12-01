@@ -445,38 +445,39 @@ export class TemplateCompiler {
         '$errors',
       ) ?? {};
 
-    const oldInput =
-      await this.options.request?.flashed<Record<string, string[]>>(
-        '$input',
-      ) ?? {};
+    const input = await this.options.request?.flashed<Record<string, string[]>>(
+      '$input',
+    ) ?? {};
 
-    const globalData = {
-      __: (text: string, quantity = 1) => {
-        return this.options.request?.translate(text, quantity) ?? text;
-      },
+    const renamedConstants = Object.keys(constants).reduce((result, key) => ({
+      ...result,
+      [`$${key}`]: constants[key as keyof typeof constants],
+    }), {});
+
+    const translationCallback = (text: string, quantity = 1) => {
+      return this.options.request?.translate(text, quantity) ?? text;
+    };
+
+    const globalVariables = {
+      __: translationCallback,
       $errors: errorMessages,
-      $input: oldInput,
+      $input: input,
       $request: this.options.request,
-      $translate: (text: string, quantity = 1) => {
-        return this.options.request?.translate(text, quantity) ?? text;
-      },
-      ...Object.keys(constants).reduce((result, key) => ({
-        ...result,
-        [`$${key}`]: constants[key as keyof typeof constants],
-      }), {}),
+      $translate: translationCallback,
+      ...renamedConstants,
       ...this.variables,
       ...this.functions,
     };
 
     const header = [
-      ...Object.keys(globalData),
+      ...Object.keys(globalVariables),
       ...Object.keys(variables),
       `return (async () => {${code}})();`,
     ];
 
     try {
       return await new Function(...header)(
-        ...Object.values(globalData),
+        ...Object.values(globalVariables),
       ) as TValue;
     } catch (error) {
       throw new Error((error as Error).message, {
