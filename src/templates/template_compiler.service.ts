@@ -440,10 +440,16 @@ export class TemplateCompiler {
     code: string,
     variables: Record<string, unknown> = {},
   ): Promise<TValue> {
+    const errorMessages =
+      await this.options.request?.flashed<Record<string, string[]>>(
+        '$errors',
+      ) ?? {};
+
     const globalData = {
       __: (text: string, quantity = 1) => {
         return this.options.request?.translate(text, quantity) ?? text;
       },
+      $errors: errorMessages,
       $request: this.options.request,
       $translate: (text: string, quantity = 1) => {
         return this.options.request?.translate(text, quantity) ?? text;
@@ -681,11 +687,6 @@ export class TemplateCompiler {
       }
 
       if (directive.name === 'raw') {
-        this.template = this.template.replaceAll(
-          /\$([^\w])/g,
-          '$__escaped__$1',
-        );
-
         await this.parseEachDirectives();
       }
     }
@@ -739,8 +740,6 @@ export class TemplateCompiler {
     if (!options.recursiveCall) {
       this.validateSyntax();
       this.restoreRawContent();
-
-      this.template = this.template.replaceAll('$__escaped__', '$');
     }
 
     return this.template;

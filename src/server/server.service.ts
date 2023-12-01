@@ -123,7 +123,12 @@ export class Server implements Disposable {
 
     const response = await this.router.respond(richRequest);
 
-    await richRequest.session.save();
+    if (
+      !await richRequest.isStaticFileRequest() &&
+      !this.configurator.getEnv<boolean>('TESTING')
+    ) {
+      await richRequest.session.save();
+    }
 
     const { status } = response;
 
@@ -322,6 +327,24 @@ export class Server implements Disposable {
       } finally {
         localStorage.setItem(this.devServerCheckKey, 'on');
       }
+    }
+
+    if (this.configurator.entries.session.clearOnRestart) {
+      const kv = await Deno.openKv();
+
+      const entries = kv?.list({
+        prefix: ['@entropy', 'sessions'],
+      });
+
+      if (!entries) {
+        return;
+      }
+
+      for await (const entry of entries) {
+        await kv?.delete(entry.key);
+      }
+
+      kv.close();
     }
   }
 

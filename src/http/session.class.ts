@@ -10,7 +10,7 @@ interface FlashedData {
 export class Session {
   private readonly configurator = inject(Configurator);
 
-  private kv: Deno.Kv | null = null;
+  private kv?: Deno.Kv;
 
   private kvStorageKey: string[] = [];
 
@@ -49,7 +49,7 @@ export class Session {
       await this.set(key, defaultValue);
     }
 
-    const value = await this.get(key);
+    const value = await this.get<number>(key);
 
     if (typeof value !== 'number') {
       throw new TypeError(
@@ -71,13 +71,27 @@ export class Session {
     ]);
   }
 
+  public async deleteAll(key: string | string[]): Promise<void> {
+    const entries = this.kv?.list({
+      prefix: [...this.kvStorageKey, ...(Array.isArray(key) ? key : [key])],
+    });
+
+    if (!entries) {
+      return;
+    }
+
+    for await (const entry of entries) {
+      await this.kv?.delete(entry.key);
+    }
+  }
+
   public async destroy(): Promise<void> {
     await this.kv?.delete(this.kvStorageKey);
   }
 
   public async flash(key: string, value: unknown): Promise<void> {
     await this.set(['_entropy', 'flash', key], {
-      requestId: await this.get('_request_id'),
+      requestId: await this.get<number>(['_entropy', 'request_id']) ?? 0,
       value,
     });
   }
@@ -112,7 +126,7 @@ export class Session {
       await this.set(key, defaultValue);
     }
 
-    const value = await this.get(key);
+    const value = await this.get<number>(key);
 
     if (typeof value !== 'number') {
       throw new TypeError(
@@ -133,10 +147,12 @@ export class Session {
       await this.get<number>(['_entropy', 'request_id']) ?? 0;
 
     for (const [key, value] of Object.entries(flashed)) {
-      if ((value as FlashedData).requestId < currentRequestId - 1) {
+      if ((value as FlashedData).requestId < currentRequestId) {
         await this.delete(['_entropy', 'flash', key]);
       }
     }
+
+    this.kv?.close();
   }
 
   public async set(key: string | string[], value: unknown): Promise<void> {
