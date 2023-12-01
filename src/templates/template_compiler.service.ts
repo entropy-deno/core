@@ -445,11 +445,17 @@ export class TemplateCompiler {
         '$errors',
       ) ?? {};
 
+    const oldInput =
+      await this.options.request?.flashed<Record<string, string[]>>(
+        '$input',
+      ) ?? {};
+
     const globalData = {
       __: (text: string, quantity = 1) => {
         return this.options.request?.translate(text, quantity) ?? text;
       },
       $errors: errorMessages,
+      $input: oldInput,
       $request: this.options.request,
       $translate: (text: string, quantity = 1) => {
         return this.options.request?.translate(text, quantity) ?? text;

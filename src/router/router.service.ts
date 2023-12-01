@@ -586,40 +586,36 @@ export class Router {
     try {
       await request.session.setup();
 
-      if (
-        !await request.isStaticFileRequest() &&
-        !this.configurator.getEnv<boolean>('TESTING')
-      ) {
-        await request.session.increment(['_entropy', 'request_id'], 1, 0);
-      }
-
-      if (
-        this.configurator.entries.csrfProtection &&
-        !this.configurator.getEnv<boolean>('TESTING')
-      ) {
-        if (!await request.session.has(['_entropy', 'csrf_token'])) {
-          await request.session.set(
-            ['_entropy', 'csrf_token'],
-            this.encrypter.generateUuid({ clean: true }),
-          );
+      if (!this.configurator.getEnv<boolean>('TESTING')) {
+        if (!await request.isStaticFileRequest()) {
+          await request.session.increment(['_entropy', 'request_id'], 1, 0);
         }
 
-        if (await request.isFormRequest()) {
-          const csrfToken = await request.session.get<string>(
-            ['_entropy', 'csrf_token'],
-          );
+        if (this.configurator.entries.csrfProtection) {
+          if (!await request.session.has(['_entropy', 'csrf_token'])) {
+            await request.session.set(
+              ['_entropy', 'csrf_token'],
+              this.encrypter.generateUuid({ clean: true }),
+            );
+          }
 
-          if (
-            !csrfToken ||
-            ![
-              await request.input('_csrf'),
-              request.header('csrf-token'),
-              request.header('xsrf-token'),
-              request.header('x-csrf-token'),
-              request.header('x-xsrf-token'),
-            ].includes(csrfToken)
-          ) {
-            throw new HttpError(HttpStatus.InvalidToken);
+          if (await request.isFormRequest()) {
+            const csrfToken = await request.session.get<string>(
+              ['_entropy', 'csrf_token'],
+            );
+
+            if (
+              !csrfToken ||
+              ![
+                await request.input('_csrf'),
+                request.header('csrf-token'),
+                request.header('xsrf-token'),
+                request.header('x-csrf-token'),
+                request.header('x-xsrf-token'),
+              ].includes(csrfToken)
+            ) {
+              throw new HttpError(HttpStatus.InvalidToken);
+            }
           }
         }
       }
@@ -695,6 +691,7 @@ export class Router {
 
                 return await request.createRedirectBack({
                   $errors: errors,
+                  $input: Object.fromEntries(await request.form()),
                 });
               }
             }
