@@ -755,7 +755,8 @@ export class TemplateCompiler {
   public registerDirective(directive: TemplateDirective): void {
     for (const registeredDirective of TemplateCompiler.directives) {
       if (
-        registeredDirective.name === directive.name ||
+        registeredDirective.name === directive.name &&
+          registeredDirective.type === directive.type ||
         ['case', 'default', 'for', 'else', 'empty', 'slot'].includes(
           directive.name,
         )
