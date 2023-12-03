@@ -1,4 +1,6 @@
-export const errorPage = `<!doctype html>
+export const errorPage = `<!-- Stack Trace -->
+<!-- {{# fullStackTrace }} -->
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -92,6 +94,30 @@ export const errorPage = `<!doctype html>
           letter-spacing: -0.5px;
         }
 
+        .code-snippet {
+          background: #450a0a;
+          border-radius: 12px;
+          font-family: var(--font-mono);
+          padding: 2px 8px;
+          font-size: 15px;
+          color: #fca5a5;
+          line-height: 0.3;
+          margin: 16px 0;
+
+          & code {
+            font-family: var(--font-mono);
+          }
+        }
+
+        .code-snippet__line {
+          border-radius: 6px;
+          padding: 12px;
+        }
+
+        .code-snippet__line--active {
+          background: #991b1b;
+        }
+
         .trace {
           display: flex;
           flex-direction: column;
@@ -168,6 +194,12 @@ export const errorPage = `<!doctype html>
       <h1 class="header">
         {{ error.message }}
       </h1>
+
+      @if (codeSnippet)
+        <pre class="code-snippet">
+          <code>@for ({ content, line } of codeSnippet) <div class="code-snippet__line{{ line === errorLine ? ' code-snippet__line--active' : '' }}">{{ line }} {{ content }}</div> @/for</code>
+        </pre>
+      @/if
 
       <section class="trace">
         <h2 class="trace__header">Thrown in:</h2>

@@ -763,9 +763,7 @@ export class Router {
 
       throw new HttpError(HttpStatus.NotFound);
     } catch (error) {
-      if (!(error instanceof HttpError)) {
-        this.errorHandler.handle(error as Error, false);
-      }
+      const { file, line } = this.errorHandler.handle(error as Error);
 
       if (
         this.configurator.entries.isProduction || error instanceof HttpError
@@ -782,20 +780,36 @@ export class Router {
         line.trim().replace('at ', '')
       ).filter((line) => !line.startsWith('file')).slice(1, 3);
 
-      return await this.createResponse(
-        request,
-        await inject(TemplateCompiler).render(
-          errorPage,
+      let fileContent: string | undefined;
+
+      try {
+        fileContent = await Deno.readTextFile(file ?? '');
+      } finally {
+        // deno-lint-ignore no-unsafe-finally
+        return await this.createResponse(
+          request,
+          await inject(TemplateCompiler).render(
+            errorPage,
+            {
+              codeSnippet: fileContent?.split('\n').map((content, index) => ({
+                content,
+                line: index + 1,
+              })).slice(
+                line ? line - 2 : 0,
+                line ? line + 2 : undefined,
+              ),
+              error,
+              errorLine: line,
+              stackTrace,
+              fullStackTrace: (error as Error).stack,
+            },
+            { request },
+          ),
           {
-            error,
-            stackTrace,
+            statusCode: HttpStatus.InternalServerError,
           },
-          { request },
-        ),
-        {
-          statusCode: HttpStatus.InternalServerError,
-        },
-      );
+        );
+      }
     }
   }
 

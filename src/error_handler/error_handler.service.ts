@@ -3,14 +3,19 @@ import { Configurator } from '../configurator/configurator.service.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { Logger } from '../logger/logger.service.ts';
 
+interface ErrorInfo {
+  file?: string;
+  line?: number;
+}
+
 export class ErrorHandler {
   private readonly configurator = inject(Configurator);
 
-  private currentError: Error | null = null;
+  private currentError?: Error;
 
-  private currentFile: string | null = null;
+  private currentFile?: string;
 
-  private currentLine: number | null = null;
+  private currentLine?: number;
 
   private readonly defaultFilePlaceholder = 'entropy module';
 
@@ -21,7 +26,7 @@ export class ErrorHandler {
 
     if (!stack) {
       this.currentFile = this.defaultFilePlaceholder;
-      this.currentLine = null;
+      this.currentLine = undefined;
 
       return;
     }
@@ -43,21 +48,14 @@ export class ErrorHandler {
       this.currentFile = path === '/' ? this.defaultFilePlaceholder : path;
     }
 
-    const line = file?.match(/(?:.*):(.*):(.*)/)?.[1];
-
-    this.currentLine = line
-      ? Number(file?.match(/(?:.*):(.*):(.*)/)?.[1])
-      : null;
+    this.currentLine = Number(file?.match(/(?:.*):(.*):(.*)/)?.[1]);
 
     if (this.currentFile?.includes('src/')) {
       this.currentFile = `src/${this.currentFile.split('src/')[1]}`;
     }
   }
 
-  public handle(
-    error: Error,
-    die = this.configurator.entries.isProduction,
-  ): void {
+  public handle(error: Error): ErrorInfo {
     this.currentError = error;
 
     this.readErrorStack();
@@ -70,8 +68,9 @@ export class ErrorHandler {
       }]`,
     );
 
-    if (die && !this.configurator.entries.isDenoDeploy) {
-      Deno.exit(1);
-    }
+    return {
+      file: this.currentFile,
+      line: this.currentLine,
+    };
   }
 }

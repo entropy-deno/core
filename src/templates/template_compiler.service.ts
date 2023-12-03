@@ -91,7 +91,7 @@ export class TemplateCompiler {
           let defaultCaseValue: string | null = null;
 
           const caseMatches = content.matchAll(
-            /@(case|default)\s*\((.*?)\)(.*?)@\/(case|default)/gsm,
+            /@(case|default)\s*\((.*?)\)(.*?)@\/(case|default)/gs,
           );
 
           for (
@@ -490,7 +490,7 @@ export class TemplateCompiler {
 
   private async parseDataInterpolations(): Promise<void> {
     const matches = this.template.matchAll(
-      /\{\{\s*(#|@?)(.*?)(\|\s*[\w\s|]*)?\}\}/gsm,
+      /\{\{\s*(#|@?)(.*?)(\|\s*[\w\s|]*)?\}\}/gs,
     ) ?? [];
 
     for (const [wholeMatch, modifier, matchValue, pipesString] of matches) {
@@ -545,7 +545,7 @@ export class TemplateCompiler {
 
   private async parseEachDirectives(): Promise<void> {
     const matches = this.template.matchAll(
-      /@for\s*\((.*?)\s+(?:in|of)\s+([^\n]*)\)(.*?)@\/for/gsm,
+      /@for\s*\((.*?)\s+(?:in|of)\s+([^\n]*)\)(.*?)@\/for/gs,
     ) ?? [];
 
     for (const [wholeMatch, variableName, iterableValue, block] of matches) {
@@ -613,7 +613,7 @@ export class TemplateCompiler {
   }
 
   private removeComments(): void {
-    const matches = this.template.matchAll(/\{(@?)--(.*?)--\}/gsm) ??
+    const matches = this.template.matchAll(/\{(@?)--(.*?)--\}/gs) ??
       [];
 
     for (const [wholeMatch] of matches) {
@@ -668,7 +668,7 @@ export class TemplateCompiler {
         directive.type === 'single'
           ? `@${directive.name}\s*(\\((.*?)\\))?`
           : `@${directive.name}\\s*(\\(([^\\n]*)\\))?(.*?)@\\/${directive.name}`,
-        'gsm',
+        'gs',
       );
 
       const matches = this.template.matchAll(directive.pattern ?? pattern) ??
