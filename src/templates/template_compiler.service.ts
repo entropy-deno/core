@@ -3,16 +3,16 @@ import * as constants from '../constants.ts';
 import * as pipes from '../pipes/pipes.module.ts';
 import { Encrypter } from '../encrypter/encrypter.service.ts';
 import { HttpMethod } from '../http/enums/http_method.enum.ts';
-import { TemplateCompilerOptions } from './interfaces/template_compiler_options.interface.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
 import { Constructor } from '../utils/interfaces/constructor.interface.ts';
 import { env } from '../configurator/functions/env.function.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { NonSingleton } from '../injector/decorators/non_singleton.decorator.ts';
+import { Pipe } from '../pipes/interfaces/pipe.interface.ts';
+import { TemplateCompilerOptions } from './interfaces/template_compiler_options.interface.ts';
 import { TemplateDirective } from './interfaces/template_directive.interface.ts';
 import { url } from '../router/functions/url.function.ts';
 import { Utils } from '../utils/utils.class.ts';
-import { Pipe } from '../pipes/interfaces/pipe.interface.ts';
 
 @NonSingleton()
 export class TemplateCompiler {
@@ -671,15 +671,14 @@ export class TemplateCompiler {
         'gs',
       );
 
-      const matches = this.template.matchAll(directive.pattern ?? pattern) ??
-        [];
+      const matches = this.template.matchAll(pattern) ?? [];
 
       for (const [expression, hasArguments, args, blockContent] of matches) {
         const resolvedArguments = hasArguments
           ? await this.renderNatively<unknown[]>(`return ${`[${args}]`};`)
           : [];
 
-        const result = !directive.type || directive.type === 'single'
+        const result = directive.type === 'single'
           ? directive.render.call(this, ...resolvedArguments)
           : directive.render.call(
             this,

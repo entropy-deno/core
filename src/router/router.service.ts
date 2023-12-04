@@ -25,8 +25,8 @@ import { TemplateCompiler } from '../templates/template_compiler.service.ts';
 import { TimeUnit } from '../scheduler/enums/time_unit.enum.ts';
 import { Url } from './types/url.type.ts';
 import { Utils } from '../utils/utils.class.ts';
-import { ValidatorRulesList } from '../validator/interfaces/validator_rules_list.interface.ts';
 import { Validator } from '../validator/validator.service.ts';
+import { ValidatorRulesList } from '../validator/interfaces/validator_rules_list.interface.ts';
 import { View } from '../templates/view.class.ts';
 
 interface ResponseOptions {
@@ -99,7 +99,9 @@ export class Router {
 
     return await this.createResponse(
       request,
-      await inject(TemplateCompiler).render(statusPage, payload, { request }),
+      await inject(TemplateCompiler).render(statusPage, payload, {
+        request,
+      }),
       {
         statusCode,
       },
@@ -109,8 +111,11 @@ export class Router {
   private async createResponse(
     request: HttpRequest,
     body: unknown,
-    { cookies = {}, headers = {}, statusCode = HttpStatus.Ok }:
-      ResponseOptions = {},
+    {
+      cookies = {},
+      headers = {},
+      statusCode = HttpStatus.Ok,
+    }: ResponseOptions = {},
   ): Promise<Response> {
     const cspDirectives = ` ${
       this.configurator.entries.contentSecurityPolicy.allowedOrigins.join(' ')
@@ -197,16 +202,20 @@ export class Router {
       body,
     );
 
+    const baseHeaders = {
+      'content-type': `${contentType}; charset=utf-8`,
+      'cache-control': this.configurator.entries.cache.enabled &&
+          await request.isStaticFileRequest()
+        ? `max-age=${
+          this.configurator.entries.cache.maxAge * 24 * TimeUnit.Hour / 1000
+        }`
+        : 'no-cache',
+    };
+
     const response = new Response(parsedBody, {
       status: parsedBody === null ? HttpStatus.NoContent : statusCode,
       headers: {
-        'content-type': `${contentType}; charset=utf-8`,
-        'cache-control': this.configurator.entries.cache.enabled &&
-            await request.isStaticFileRequest()
-          ? `max-age=${
-            this.configurator.entries.cache.maxAge * 24 * TimeUnit.Hour / 1000
-          }`
-          : 'no-cache',
+        ...baseHeaders,
         ...securityHeaders,
         ...headers,
       },
@@ -784,32 +793,35 @@ export class Router {
 
       try {
         fileContent = await Deno.readTextFile(file ?? '');
-      } finally {
-        // deno-lint-ignore no-unsafe-finally
-        return await this.createResponse(
-          request,
-          await inject(TemplateCompiler).render(
-            errorPage,
-            {
-              codeSnippet: fileContent?.split('\n').map((content, index) => ({
-                content,
-                line: index + 1,
-              })).slice(
-                line ? line - 2 : 0,
-                line ? line + 2 : undefined,
-              ),
-              error,
-              errorLine: line,
-              stackTrace,
-              fullStackTrace: (error as Error).stack,
-            },
-            { request },
-          ),
-          {
-            statusCode: HttpStatus.InternalServerError,
-          },
-        );
+      } catch {
+        fileContent = undefined;
       }
+
+      return await this.createResponse(
+        request,
+        await inject(TemplateCompiler).render(
+          errorPage,
+          {
+            codeSnippet: fileContent?.split('\n').map((content, index) => ({
+              content,
+              line: index + 1,
+            })).slice(
+              line ? line - 2 : 0,
+              line ? line + 2 : undefined,
+            ),
+            error,
+            errorLine: line,
+            stackTrace,
+            fullStackTrace: (error as Error).stack,
+          },
+          {
+            request,
+          },
+        ),
+        {
+          statusCode: HttpStatus.InternalServerError,
+        },
+      );
     }
   }
 

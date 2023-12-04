@@ -26,7 +26,7 @@ enum WebClientAlias {
 }
 
 export class Server implements Disposable {
-  private readonly args = parseArgs(Deno.args, {
+  private readonly arguments = parseArgs(Deno.args, {
     boolean: ['dev', 'open'],
     default: {
       dev: false,
@@ -276,7 +276,9 @@ export class Server implements Disposable {
 
   private async setup(): Promise<void> {
     this.router.registerControllers(this.options.controllers ?? []);
+
     this.validator.registerRules(this.configurator.entries.validatorRules);
+
     this.templateCompiler.registerDirectives(
       this.configurator.entries.templateDirectives,
     );
@@ -319,7 +321,7 @@ export class Server implements Disposable {
       Deno.exit();
     });
 
-    if (this.args.open && !localStorage.getItem(this.devServerCheckKey)) {
+    if (this.arguments.open && !localStorage.getItem(this.devServerCheckKey)) {
       try {
         await $`${
           WebClientAlias[OS as keyof typeof WebClientAlias] ?? 'open'
@@ -332,7 +334,7 @@ export class Server implements Disposable {
     if (this.configurator.entries.session.clearOnRestart) {
       const kv = await Deno.openKv();
 
-      const entries = kv?.list({
+      const entries = kv.list({
         prefix: ['@entropy', 'sessions'],
       });
 
@@ -341,7 +343,7 @@ export class Server implements Disposable {
       }
 
       for await (const entry of entries) {
-        await kv?.delete(entry.key);
+        await kv.delete(entry.key);
       }
 
       kv.close();
@@ -365,7 +367,7 @@ export class Server implements Disposable {
   }
 
   public async start(): Promise<void> {
-    Deno.env.set('PRODUCTION', this.args.dev ? 'false' : 'true');
+    Deno.env.set('PRODUCTION', this.arguments.dev ? 'false' : 'true');
 
     if (
       this.configurator.getEnv<boolean>('TESTING') &&
@@ -391,7 +393,7 @@ export class Server implements Disposable {
     await this.localizator.setup();
 
     if (!this.configurator.entries.isDenoDeploy) {
-      this.args.dev
+      this.arguments.dev
         ? await this.setupDevelopmentEnvironment()
         : this.setupProductionEnvironment();
     }
@@ -417,14 +419,16 @@ export class Server implements Disposable {
         this.configurator.entries.tls.enabled = true;
       }
 
+      const tlsConfig = this.configurator.entries.tls.enabled
+        ? {
+          cert: tlsCert,
+          key: tlsKey,
+        }
+        : {};
+
       try {
         Deno.serve({
-          ...(this.configurator.entries.tls.enabled
-            ? {
-              cert: tlsCert,
-              key: tlsKey,
-            }
-            : {}),
+          ...tlsConfig,
           hostname: this.configurator.entries.host,
           port: this.configurator.entries.port,
           onListen: () => {
@@ -441,7 +445,9 @@ export class Server implements Disposable {
               );
             }
           },
-        }, async (request, info) => await this.handleRequest(request, info));
+        }, async (request, info) => {
+          return await this.handleRequest(request, info);
+        });
       } catch (error) {
         if (!(error instanceof Deno.errors.AddrInUse)) {
           throw error;
@@ -452,7 +458,7 @@ export class Server implements Disposable {
         );
       }
 
-      if (this.args.dev) {
+      if (this.arguments.dev) {
         let watcher: Deno.FsWatcher;
 
         this.addExitSignalListener(() => {

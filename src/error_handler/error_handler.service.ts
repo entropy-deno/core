@@ -38,8 +38,9 @@ export class ErrorHandler {
       whereThrown.length,
     );
 
-    const file = (this.currentError?.cause as Error | undefined)?.message ??
-      thrownAt?.match(/\(file:\/\/(.*?)\)/)?.[1];
+    const overridenFile = (this.currentError?.cause as Error | undefined)
+      ?.message;
+    const file = overridenFile ?? thrownAt?.match(/\(file:\/\/(.*?)\)/)?.[1];
 
     if (file) {
       const fileUrl = `file://${file.split(Deno.cwd())[1]}`;
