@@ -859,6 +859,22 @@ export class Router {
     this.registerRoute(path, [HttpMethod.Delete], action, options);
   }
 
+  public except(
+    methods: EnumValuesUnion<HttpMethod>[],
+    path: RoutePath,
+    action: (...args: unknown[]) => Promise<unknown>,
+    options: RouteOptions = {},
+  ): void {
+    this.registerRoute(
+      path,
+      Object.values(HttpMethod).filter((httpMethod) =>
+        !methods.includes(httpMethod)
+      ),
+      action,
+      options,
+    );
+  }
+
   public get(
     path: RoutePath,
     action: (...args: unknown[]) => Promise<unknown>,
