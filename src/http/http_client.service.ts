@@ -27,6 +27,14 @@ export class HttpClient {
     }
   }
 
+  public async copy<TPayload>(
+    url: string,
+    payload: Record<string, string | Blob> = {},
+    headers: Record<string, string> = {},
+  ): Promise<TPayload | null> {
+    return await this.fetch<TPayload>(url, payload, headers, HttpMethod.Copy);
+  }
+
   public async delete<TPayload>(
     url: string,
     payload: Record<string, string | Blob> = {},
@@ -41,6 +49,38 @@ export class HttpClient {
     headers: Record<string, string> = {},
   ): Promise<TPayload | null> {
     return await this.fetch<TPayload>(url, payload, headers, HttpMethod.Get);
+  }
+
+  public async head<TPayload>(
+    url: string,
+    payload: Record<string, string | Blob> = {},
+    headers: Record<string, string> = {},
+  ): Promise<TPayload | null> {
+    return await this.fetch<TPayload>(url, payload, headers, HttpMethod.Head);
+  }
+
+  public async lock<TPayload>(
+    url: string,
+    payload: Record<string, string | Blob> = {},
+    headers: Record<string, string> = {},
+  ): Promise<TPayload | null> {
+    return await this.fetch<TPayload>(url, payload, headers, HttpMethod.Lock);
+  }
+
+  public async mkcol<TPayload>(
+    url: string,
+    payload: Record<string, string | Blob> = {},
+    headers: Record<string, string> = {},
+  ): Promise<TPayload | null> {
+    return await this.fetch<TPayload>(url, payload, headers, HttpMethod.Mkcol);
+  }
+
+  public async move<TPayload>(
+    url: string,
+    payload: Record<string, string | Blob> = {},
+    headers: Record<string, string> = {},
+  ): Promise<TPayload | null> {
+    return await this.fetch<TPayload>(url, payload, headers, HttpMethod.Move);
   }
 
   public async options<TPayload>(
@@ -72,11 +112,61 @@ export class HttpClient {
     return await this.fetch<TPayload>(url, payload, headers, HttpMethod.Post);
   }
 
+  public async propFind<TPayload>(
+    url: string,
+    payload: Record<string, string | Blob> = {},
+    headers: Record<string, string> = {},
+  ): Promise<TPayload | null> {
+    return await this.fetch<TPayload>(
+      url,
+      payload,
+      headers,
+      HttpMethod.PropFind,
+    );
+  }
+
+  public async propPatch<TPayload>(
+    url: string,
+    payload: Record<string, string | Blob> = {},
+    headers: Record<string, string> = {},
+  ): Promise<TPayload | null> {
+    return await this.fetch<TPayload>(
+      url,
+      payload,
+      headers,
+      HttpMethod.PropPatch,
+    );
+  }
+
   public async put<TPayload>(
     url: string,
     payload: Record<string, string | Blob> = {},
     headers: Record<string, string> = {},
   ): Promise<TPayload | null> {
     return await this.fetch<TPayload>(url, payload, headers, HttpMethod.Put);
+  }
+
+  public async search<TPayload>(
+    url: string,
+    payload: Record<string, string | Blob> = {},
+    headers: Record<string, string> = {},
+  ): Promise<TPayload | null> {
+    return await this.fetch<TPayload>(url, payload, headers, HttpMethod.Search);
+  }
+
+  public async trace<TPayload>(
+    url: string,
+    payload: Record<string, string | Blob> = {},
+    headers: Record<string, string> = {},
+  ): Promise<TPayload | null> {
+    return await this.fetch<TPayload>(url, payload, headers, HttpMethod.Trace);
+  }
+
+  public async unlock<TPayload>(
+    url: string,
+    payload: Record<string, string | Blob> = {},
+    headers: Record<string, string> = {},
+  ): Promise<TPayload | null> {
+    return await this.fetch<TPayload>(url, payload, headers, HttpMethod.Unlock);
   }
 }
