@@ -12,12 +12,13 @@ import { inject } from '../injector/functions/inject.function.ts';
 import { Localizator } from '../localizator/localizator.module.ts';
 import { Logger } from '../logger/logger.service.ts';
 import { HttpRequest } from '../http/http_request.class.ts';
+import { Module } from './interfaces/module.interface.ts';
 import { Reflector } from '../utils/reflector.class.ts';
 import { Router } from '../router/router.service.ts';
 import { ServerOptions } from './interfaces/server_options.interface.ts';
 import { TemplateCompiler } from '../templates/template_compiler.service.ts';
+import { TimeUnit } from '../scheduler/enums/time_unit.enum.ts';
 import { Validator } from '../validator/validator.service.ts';
-import { Module } from './interfaces/module.interface.ts';
 
 enum WebClientAlias {
   darwin = 'open',
@@ -167,19 +168,22 @@ export class Server implements Disposable {
       return response;
     }
 
-    const responsePerformance = (performance.now() - performanceTimerStart)
-      .toFixed(1);
+    const passedTime = performance.now() - performanceTimerStart;
+
+    const responsePerformance = passedTime >= TimeUnit.Second
+      ? `${(passedTime / TimeUnit.Second).toFixed(1)}s`
+      : `${passedTime.toFixed(1)}ms`;
 
     this.logger.info(
       `%c[${status}] %c${richRequest.path()}${richRequest.queryString()}`,
       {
         additionalInfo: `${
-          responsePerformance.length < 5
+          responsePerformance.length < 7
             ? `${
               ' '.repeat(5 - responsePerformance.length)
             }${responsePerformance}`
             : responsePerformance
-        }ms`,
+        }`,
         colors: [statusColor, ''],
       },
     );
