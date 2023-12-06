@@ -4,6 +4,7 @@ import { inject } from '../injector/functions/inject.function.ts';
 interface LogOptions {
   additionalInfo?: string;
   colors?: string[];
+  mainColor?: string;
 }
 
 export class Logger {
@@ -13,7 +14,7 @@ export class Logger {
 
   private writeLog(
     message: string | string[],
-    { additionalInfo, colors = [] }: LogOptions,
+    { additionalInfo, colors = [], mainColor }: LogOptions,
   ): void {
     if (!this.configurator.entries.logger.enabled) {
       return;
@@ -24,10 +25,16 @@ export class Logger {
         this.writeLog(text, {
           additionalInfo,
           colors,
+          mainColor,
         });
       }
 
       return;
+    }
+
+    if (mainColor) {
+      message = `%c${message}`;
+      colors = [mainColor, ...colors];
     }
 
     const maxMessageLength = Deno.consoleSize().columns - this.endPadding;
@@ -82,9 +89,10 @@ export class Logger {
     message: string | string[],
     { additionalInfo, colors = [] }: LogOptions = {},
   ): void {
-    this.writeLog(`%c${message}`, {
+    this.writeLog(message, {
       additionalInfo,
-      colors: ['red', ...colors],
+      colors,
+      mainColor: 'red',
     });
   }
 
@@ -106,9 +114,10 @@ export class Logger {
     message: string | string[],
     { additionalInfo, colors = [] }: LogOptions = {},
   ): void {
-    this.writeLog(`%c${message}`, {
+    this.writeLog(message, {
       additionalInfo,
-      colors: ['green', ...colors],
+      colors,
+      mainColor: 'green',
     });
   }
 
@@ -120,9 +129,10 @@ export class Logger {
     message: string | string[],
     { additionalInfo, colors = [] }: LogOptions = {},
   ): void {
-    this.writeLog(`%c${message}`, {
+    this.writeLog(message, {
       additionalInfo,
-      colors: ['orange', ...colors],
+      colors,
+      mainColor: 'orange',
     });
   }
 }
