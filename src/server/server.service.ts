@@ -178,7 +178,7 @@ export class Server implements Disposable {
       `%c[${status}] %c${richRequest.path()}${richRequest.queryString()}`,
       {
         additionalInfo: `${
-          responsePerformance.length < 7
+          responsePerformance.length < 5
             ? `${
               ' '.repeat(5 - responsePerformance.length)
             }${responsePerformance}`
