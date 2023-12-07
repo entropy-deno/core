@@ -449,10 +449,13 @@ export class TemplateCompiler {
       '$input',
     ) ?? {};
 
-    const renamedConstants = Object.keys(constants).reduce((result, key) => ({
-      ...result,
-      [`$${key}`]: constants[key as keyof typeof constants],
-    }), {});
+    const normalizedConstants = Object.keys(constants).reduce(
+      (result, key) => ({
+        ...result,
+        [`$${key}`]: constants[key as keyof typeof constants],
+      }),
+      {},
+    );
 
     const translationCallback = (text: string, quantity = 1) => {
       return this.options.request?.translate(text, quantity) ?? text;
@@ -464,7 +467,7 @@ export class TemplateCompiler {
       $input: input,
       $request: this.options.request,
       $translate: translationCallback,
-      ...renamedConstants,
+      ...normalizedConstants,
       ...this.variables,
       ...this.functions,
     };
@@ -482,7 +485,9 @@ export class TemplateCompiler {
     } catch (error) {
       throw new Error((error as Error).message, {
         ...(this.options.file && !this.layoutFile
-          ? { cause: new Error(this.options.file) }
+          ? {
+            cause: new Error(this.options.file),
+          }
           : {}),
       });
     }
@@ -562,11 +567,13 @@ export class TemplateCompiler {
 
       const [blockContent, elseContent] = block.split(/@(?:else|empty)/);
 
-      if (!Object.keys(iterable).length) {
+      if (!iterable || !Object.keys(iterable).length) {
         this.template = this.template.replace(
           wholeMatch,
           elseContent ?? '',
         );
+
+        continue;
       }
 
       for (const [key, item] of Object.entries(iterable)) {

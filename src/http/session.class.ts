@@ -49,7 +49,7 @@ export class Session {
       await this.set(key, defaultValue);
     }
 
-    const value = await this.get<number>(key);
+    const value = await this.get<number>(key) ?? defaultValue;
 
     if (typeof value !== 'number') {
       throw new TypeError(
@@ -126,7 +126,7 @@ export class Session {
       await this.set(key, defaultValue);
     }
 
-    const value = await this.get<number>(key);
+    const value = await this.get<number>(key) ?? defaultValue;
 
     if (typeof value !== 'number') {
       throw new TypeError(
