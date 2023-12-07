@@ -1,4 +1,5 @@
 import { getCookies } from 'https://deno.land/std@0.208.0/http/cookie.ts';
+import { Configurator } from '../configurator/configurator.service.ts';
 import { Encrypter } from '../encrypter/encrypter.service.ts';
 import { FormFile } from './form_file.class.ts';
 import { HttpError } from './http_error.class.ts';
@@ -12,6 +13,8 @@ import { RouteStore } from '../router/route_store.service.ts';
 import { Session } from './session.class.ts';
 
 export class HttpRequest {
+  private readonly configurator = inject(Configurator);
+
   private readonly encrypter = inject(Encrypter);
 
   private readonly cspNonce = this.encrypter.generateRandomString(24);
@@ -234,6 +237,13 @@ export class HttpRequest {
   public async isStaticFileRequest(): Promise<boolean> {
     if (this.path() === '/') {
       return false;
+    }
+
+    if (
+      this.configurator.entries.seo.robots && this.path() === '/robots.txt' ||
+      this.configurator.entries.seo.sitemap && this.path() === '/sitemap.xml'
+    ) {
+      return true;
     }
 
     try {
