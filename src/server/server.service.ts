@@ -1,3 +1,4 @@
+import { getAvailablePort } from 'https://deno.land/std@0.209.0/net/mod.ts';
 import { load as loadDotEnv } from 'https://deno.land/std@0.209.0/dotenv/mod.ts';
 import { parseArgs } from 'https://deno.land/std@0.209.0/cli/parse_args.ts';
 import { $ } from '../utils/functions/$.function.ts';
@@ -464,7 +465,7 @@ export class Server implements Disposable {
         }
 
         throw new Error(
-          `Port ${this.configurator.entries.port} is already in use`,
+          `Port ${this.configurator.entries.port} is already in use. Try port ${getAvailablePort()}`,
         );
       }
 
