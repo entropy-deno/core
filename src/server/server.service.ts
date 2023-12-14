@@ -1,5 +1,5 @@
-import { load as loadDotEnv } from 'https://deno.land/std@0.208.0/dotenv/mod.ts';
-import { parseArgs } from 'https://deno.land/std@0.208.0/cli/parse_args.ts';
+import { load as loadDotEnv } from 'https://deno.land/std@0.209.0/dotenv/mod.ts';
+import { parseArgs } from 'https://deno.land/std@0.209.0/cli/parse_args.ts';
 import { $ } from '../utils/functions/$.function.ts';
 import { Broadcaster } from '../web_socket/broadcaster.class.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
