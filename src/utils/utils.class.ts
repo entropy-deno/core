@@ -57,7 +57,7 @@ export abstract class Utils {
           '<': '&lt;',
           '>': '&gt;',
           '"': '&quot;',
-          '\'': '&#39;',
+          "'": '&#39;',
         };
 
         return entities[char as keyof typeof entities];

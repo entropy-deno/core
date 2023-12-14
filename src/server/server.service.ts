@@ -431,7 +431,7 @@ export class Server implements Disposable {
         : {};
 
       try {
-        Deno.serve({
+        const server = Deno.serve({
           ...tlsConfig,
           hostname: this.configurator.entries.host,
           port: this.configurator.entries.port,
@@ -451,6 +451,12 @@ export class Server implements Disposable {
           },
         }, async (request, info) => {
           return await this.handleRequest(request, info);
+        });
+
+        this.addExitSignalListener(async () => {
+          await server.shutdown();
+
+          Deno.exit();
         });
       } catch (error) {
         if (!(error instanceof Deno.errors.AddrInUse)) {
