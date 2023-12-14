@@ -6,7 +6,7 @@ export class Scheduler {
   public schedule(
     identifier: string,
     callback: () => void,
-    schedule: string,
+    schedule: string | Deno.CronSchedule,
   ): void {
     Deno.cron(identifier, schedule, callback);
   }

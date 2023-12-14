@@ -3,7 +3,7 @@ import { Scheduler } from '../scheduler.service.ts';
 
 export function Schedule(
   identifier: string,
-  schedule: string,
+  schedule: string | Deno.CronSchedule,
 ): MethodDecorator {
   return (_target, _methodName, descriptor) => {
     const scheduler = inject(Scheduler);
