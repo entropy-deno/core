@@ -480,12 +480,12 @@ export class Server implements Disposable {
 
         try {
           try {
-            watcher = Deno.watchFs(['src', 'views', 'locales']);
+            watcher = Deno.watchFs([Deno.cwd(), 'src', 'views', 'locales']);
           } catch {
-            watcher = Deno.watchFs(['src', 'views']);
+            watcher = Deno.watchFs([Deno.cwd(), 'src', 'views']);
           }
         } catch {
-          watcher = Deno.watchFs('src');
+          watcher = Deno.watchFs([Deno.cwd(), 'src']);
         }
 
         const hotReloadChannel = inject(HotReloadChannel);
@@ -517,6 +517,14 @@ export class Server implements Disposable {
 
                   case path.includes('locales'):
                     await this.localizator.setup();
+
+                    break;
+
+                  case this.configurator.entries.envFile &&
+                    path.endsWith(this.configurator.entries.envFile):
+                    this.logger.warn(
+                      'Environment configuration has been edited. Server needs to be restarted manually',
+                    );
 
                     break;
                 }
