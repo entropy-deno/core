@@ -91,7 +91,7 @@ export class TemplateCompiler {
           let defaultCaseValue: string | null = null;
 
           const caseMatches = content.matchAll(
-            /@(case|default)\s*\((.*?)\)(.*?)@\/(case|default)/gs,
+            /@(case|default)\s*\(([^\n]*)\)(.*?)@\/(case|default)/gs,
           );
 
           for (
