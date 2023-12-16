@@ -514,6 +514,7 @@ export class Router {
       }
 
       const {
+        assert,
         cookies,
         headers,
         methods,
@@ -523,7 +524,6 @@ export class Router {
         pipes,
         redirectTo,
         statusCode,
-        validationRules,
         view,
       } = Reflector.getMetadata<
         Exclude<Route, 'action'>
@@ -544,6 +544,12 @@ export class Router {
           ? await methodResult
           : methodResult;
       }, {
+        assert: Reflector.getMetadata<
+          Record<string, Partial<ValidatorRulesList> | Record<string, unknown>>
+        >(
+          'assert',
+          controllerMethod,
+        ) ?? assert,
         cookies: Reflector.getMetadata<Record<string, string>>(
           'cookies',
           controllerMethod,
@@ -571,12 +577,6 @@ export class Router {
           'statusCode',
           controllerMethod,
         ) ?? statusCode,
-        validationRules: Reflector.getMetadata<
-          Record<string, Partial<ValidatorRulesList> | Record<string, unknown>>
-        >(
-          'validationRules',
-          controllerMethod,
-        ) ?? validationRules,
         view: Reflector.getMetadata<string>(
           'view',
           controllerMethod,
@@ -634,6 +634,7 @@ export class Router {
       for (
         const {
           action,
+          assert,
           cookies,
           headers,
           methods,
@@ -642,7 +643,6 @@ export class Router {
           pipes,
           redirectTo,
           statusCode,
-          validationRules,
           view,
         } of this.routeStore.routes
       ) {
@@ -676,10 +676,10 @@ export class Router {
               return await this.createResponse(request, viewInstance);
             }
 
-            if (validationRules) {
+            if (assert) {
               const errors = await this.validator.validate(
                 request,
-                validationRules,
+                assert,
               );
 
               if (Object.keys(errors).length) {

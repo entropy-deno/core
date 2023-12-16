@@ -6,6 +6,10 @@ import { RedirectDestination } from '../types/redirect_destination.type.ts';
 import { ValidatorRulesList } from '../../validator/interfaces/validator_rules_list.interface.ts';
 
 export interface RouteOptions {
+  assert?: Record<
+    string,
+    Partial<ValidatorRulesList> | Record<string, unknown>
+  >;
   cookies?: Record<string, string>;
   headers?: Record<string, string>;
   middleware?: Constructor<Middleware>[];
@@ -13,9 +17,5 @@ export interface RouteOptions {
   pipes?: Record<string, Constructor<Pipe>>;
   redirectTo?: RedirectDestination;
   statusCode?: HttpStatus;
-  validationRules?: Record<
-    string,
-    Partial<ValidatorRulesList> | Record<string, unknown>
-  >;
   view?: string;
 }

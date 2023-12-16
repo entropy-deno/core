@@ -6,7 +6,7 @@ export function Validate(
 ): MethodDecorator {
   return (_target, _methodName, descriptor) => {
     Reflector.defineMetadata<typeof rules>(
-      'validationRules',
+      'assert',
       rules,
       descriptor.value as object,
     );
