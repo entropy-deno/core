@@ -156,7 +156,7 @@ export class TemplateCompiler {
         name: 'csrf',
         type: 'single',
         render: async () => {
-          return `<input type="hidden" name="_csrf" value="${await this.options
+          return `<input type="hidden" name="_token" value="${await this.options
             .request
             ?.session.get<string>(['_entropy', 'csrf_token'])}">`;
         },

@@ -616,10 +616,9 @@ export class Router {
             if (
               !csrfToken ||
               ![
-                await request.input('_csrf'),
-                request.header('csrf-token'),
-                request.header('xsrf-token'),
+                await request.input('_token'),
                 request.header('x-csrf-token'),
+                request.header('x-token'),
                 request.header('x-xsrf-token'),
               ].includes(csrfToken)
             ) {
