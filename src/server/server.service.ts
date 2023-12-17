@@ -335,24 +335,6 @@ export class Server implements Disposable {
         localStorage.setItem(this.devServerCheckKey, 'on');
       }
     }
-
-    if (this.configurator.entries.session.clearOnRestart) {
-      const kv = await Deno.openKv();
-
-      const entries = kv.list({
-        prefix: ['@entropy', 'sessions'],
-      });
-
-      if (!entries) {
-        return;
-      }
-
-      for await (const entry of entries) {
-        await kv.delete(entry.key);
-      }
-
-      kv.close();
-    }
   }
 
   private setupProductionEnvironment(): void {

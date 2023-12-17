@@ -47,7 +47,6 @@ export interface AppConfig {
     sitemapUrls: RoutePath[];
   };
   session: {
-    clearOnRestart: boolean;
     lifetime: number;
   };
   templateDirectives: TemplateDirective[];
