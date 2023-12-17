@@ -1,5 +1,6 @@
 import { expect } from 'https://deno.land/std@0.209.0/expect/expect.ts';
 import { inject } from '../injector/functions/inject.function.ts';
+import { AbbreviatePipe } from './abbreviate.pipe.ts';
 import { BoolPipe } from './bool.pipe.ts';
 import { CamelCasePipe } from './camel_case.pipe.ts';
 import { ConstantCasePipe } from './constant_case.pipe.ts';
@@ -18,6 +19,11 @@ import { UpperCasePipe } from './upper_case.pipe.ts';
 
 Deno.test('pipes module', async (test) => {
   await test.step('properly produces output based on pipe input', () => {
+    expect(inject(AbbreviatePipe).transform('120')).toBe('120');
+    expect(inject(AbbreviatePipe).transform('1200')).toBe('1.2K');
+    expect(inject(AbbreviatePipe).transform('1 200 000')).toBe('1.2M');
+    expect(inject(AbbreviatePipe).transform('1 200 000 000')).toBe('1.2B');
+
     expect(inject(BoolPipe).transform('1')).toBe(true);
     expect(inject(BoolPipe).transform('0')).toBe(false);
 

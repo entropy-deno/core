@@ -1,3 +1,4 @@
+export * from './abbreviate.pipe.ts';
 export * from './bool.pipe.ts';
 export * from './camel_case.pipe.ts';
 export * from './constant_case.pipe.ts';
