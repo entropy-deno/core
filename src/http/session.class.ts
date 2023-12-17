@@ -160,8 +160,7 @@ export class Session {
       [...this.kvStorageKey, ...(Array.isArray(key) ? key : [key])],
       value,
       {
-        expireIn: this.configurator.entries.session.lifetime * 24 *
-          TimeUnit.Hour,
+        expireIn: this.configurator.entries.session.lifetime * TimeUnit.Day,
       },
     );
   }
