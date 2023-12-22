@@ -1,4 +1,4 @@
-import { Controller } from '../src/http/controller.class.ts';
+import { Controller } from '../src/router/controller.class.ts';
 import { createServer } from '../src/server/functions/create_server.function.ts';
 import { Route } from '../src/router/router.module.ts';
 

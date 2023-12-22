@@ -1,7 +1,7 @@
 import { contentType } from 'https://deno.land/std@0.210.0/media_types/content_type.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
 import { Constructor } from '../utils/interfaces/constructor.interface.ts';
-import { Controller } from '../http/controller.class.ts';
+import { Controller } from './controller.class.ts';
 import { Encrypter } from '../encrypter/encrypter.service.ts';
 import { EnumValuesUnion } from '../utils/types/enum_values_union.type.ts';
 import { ErrorHandler } from '../error_handler/error_handler.service.ts';

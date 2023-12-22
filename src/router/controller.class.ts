@@ -1,4 +1,4 @@
-import { Json } from './json.class.ts';
+import { Json } from '../http/json.class.ts';
 import { TemplateCompilerOptions } from '../templates/interfaces/template_compiler_options.interface.ts';
 import { Utils } from '../utils/utils.class.ts';
 import { View } from '../templates/view.class.ts';

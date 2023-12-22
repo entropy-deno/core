@@ -1,5 +1,5 @@
 import { Constructor } from '../../utils/interfaces/constructor.interface.ts';
-import { Controller } from '../../http/controller.class.ts';
+import { Controller } from '../../router/controller.class.ts';
 import { HttpMethod } from '../../http/enums/http_method.enum.ts';
 import { HttpRequest } from '../../http/http_request.class.ts';
 import { HttpStatus } from '../../http/enums/http_status.enum.ts';
