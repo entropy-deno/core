@@ -466,6 +466,8 @@ export class TemplateCompiler {
       $errors: errorMessages,
       $input: input,
       $request: this.options.request,
+      $session: this.options.request?.session,
+      $token: await this.options.request?.session.get<string>(['_entropy', 'csrf_token']),
       $translate: translationCallback,
       ...normalizedConstants,
       ...this.variables,
