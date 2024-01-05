@@ -1,4 +1,4 @@
-import { expect } from 'https://deno.land/std@0.210.0/expect/expect.ts';
+import { expect } from 'https://deno.land/std@0.211.0/expect/expect.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { AbbreviatePipe } from './abbreviate.pipe.ts';
 import { BoolPipe } from './bool.pipe.ts';

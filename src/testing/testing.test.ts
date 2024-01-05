@@ -1,4 +1,4 @@
-import { expect } from 'https://deno.land/std@0.210.0/expect/expect.ts';
+import { expect } from 'https://deno.land/std@0.211.0/expect/expect.ts';
 import { fetchRoute } from './functions/fetch_route.function.ts';
 import { Controller } from '../router/controller.class.ts';
 import { HttpStatus } from '../http/enums/http_status.enum.ts';

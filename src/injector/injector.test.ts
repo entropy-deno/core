@@ -1,4 +1,4 @@
-import { expect } from 'https://deno.land/std@0.210.0/expect/expect.ts';
+import { expect } from 'https://deno.land/std@0.211.0/expect/expect.ts';
 import { inject } from './functions/inject.function.ts';
 import { Injector } from './injector.class.ts';
 
