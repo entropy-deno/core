@@ -1,4 +1,4 @@
-import { resolve as resolvePath } from 'https://deno.land/std@0.211.0/path/mod.ts';
+import { resolve as resolvePath } from 'https://deno.land/std@0.212.0/path/mod.ts';
 import * as constants from '../constants.ts';
 import * as pipes from '../pipes/pipes.module.ts';
 import { Encrypter } from '../encrypter/encrypter.service.ts';
@@ -467,7 +467,10 @@ export class TemplateCompiler {
       $input: input,
       $request: this.options.request,
       $session: this.options.request?.session,
-      $token: await this.options.request?.session.get<string>(['_entropy', 'csrf_token']),
+      $token: await this.options.request?.session.get<string>([
+        '_entropy',
+        'csrf_token',
+      ]),
       $translate: translationCallback,
       ...normalizedConstants,
       ...this.variables,

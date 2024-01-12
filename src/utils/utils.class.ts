@@ -6,8 +6,8 @@ import {
   snakeCase,
   titleCase,
 } from 'https://deno.land/x/case@2.2.0/mod.ts';
-import { fromFileUrl } from 'https://deno.land/std@0.211.0/path/mod.ts';
-import { resolve as resolvePath } from 'https://deno.land/std@0.211.0/path/mod.ts';
+import { fromFileUrl } from 'https://deno.land/std@0.212.0/path/mod.ts';
+import { resolve as resolvePath } from 'https://deno.land/std@0.212.0/path/mod.ts';
 
 export abstract class Utils {
   public static callerFile() {

@@ -1,6 +1,6 @@
-import { getAvailablePort } from 'https://deno.land/std@0.211.0/net/mod.ts';
-import { load as loadDotEnv } from 'https://deno.land/std@0.211.0/dotenv/mod.ts';
-import { parseArgs } from 'https://deno.land/std@0.211.0/cli/parse_args.ts';
+import { getAvailablePort } from 'https://deno.land/std@0.212.0/net/mod.ts';
+import { load as loadDotEnv } from 'https://deno.land/std@0.212.0/dotenv/mod.ts';
+import { parseArgs } from 'https://deno.land/std@0.212.0/cli/parse_args.ts';
 import { $ } from '../utils/functions/$.function.ts';
 import { Broadcaster } from '../web_socket/broadcaster.class.ts';
 import { Configurator } from '../configurator/configurator.service.ts';

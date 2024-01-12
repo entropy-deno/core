@@ -1,4 +1,4 @@
-import { expect } from 'https://deno.land/std@0.211.0/expect/expect.ts';
+import { expect } from 'https://deno.land/std@0.212.0/expect/expect.ts';
 import { Utils } from './utils.class.ts';
 
 Deno.test('utils module', async (test) => {
