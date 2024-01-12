@@ -1,13 +1,13 @@
 import {
-  camelCase,
-  constantCase,
-  paramCase,
-  pascalCase,
-  snakeCase,
-  titleCase,
-} from 'https://deno.land/x/case@2.2.0/mod.ts';
-import { fromFileUrl } from 'https://deno.land/std@0.212.0/path/mod.ts';
-import { resolve as resolvePath } from 'https://deno.land/std@0.212.0/path/mod.ts';
+  fromFileUrl,
+  resolve as resolvePath,
+} from 'https://deno.land/std@0.212.0/path/mod.ts';
+import {
+  toCamelCase,
+  toKebabCase,
+  toPascalCase,
+  toSnakeCase,
+} from 'https://deno.land/std@0.212.0/text/case.ts';
 
 export abstract class Utils {
   public static callerFile() {
@@ -22,30 +22,6 @@ export abstract class Utils {
     }
 
     return fromFileUrl(import.meta.url);
-  }
-
-  public static caseCamel(text: string): string {
-    return camelCase(text);
-  }
-
-  public static caseConstant(text: string): string {
-    return constantCase(text);
-  }
-
-  public static caseParam(text: string): string {
-    return paramCase(text);
-  }
-
-  public static casePascal(text: string): string {
-    return pascalCase(text);
-  }
-
-  public static caseSnake(text: string): string {
-    return snakeCase(text);
-  }
-
-  public static caseTitle(text: string): string {
-    return titleCase(text);
   }
 
   public static escapeEntities(html: string) {
@@ -170,5 +146,29 @@ export abstract class Utils {
     }
 
     return resolvePath(file);
+  }
+
+  public static toCamelCase(text: string): string {
+    return toCamelCase(text);
+  }
+
+  public static toConstantCase(text: string): string {
+    return toSnakeCase(text).toUpperCase();
+  }
+
+  public static toKebabCase(text: string): string {
+    return toKebabCase(text);
+  }
+
+  public static toPascalCase(text: string): string {
+    return toPascalCase(text);
+  }
+
+  public static toSnakeCase(text: string): string {
+    return toSnakeCase(text);
+  }
+
+  public static toTitleCase(text: string): string {
+    return toPascalCase(text).replace(/([A-Z])/g, ' $1').trim();
   }
 }

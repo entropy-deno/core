@@ -5,6 +5,6 @@ export class TitleCasePipe implements Pipe {
   public readonly alias = 'title';
 
   public transform(value: string) {
-    return Utils.caseTitle(value);
+    return Utils.toTitleCase(value);
   }
 }

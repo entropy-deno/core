@@ -5,6 +5,6 @@ export class SnakeCasePipe implements Pipe {
   public readonly alias = 'snake';
 
   public transform(value: string) {
-    return Utils.caseSnake(value);
+    return Utils.toSnakeCase(value);
   }
 }

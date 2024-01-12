@@ -5,6 +5,6 @@ export class PascalCasePipe implements Pipe {
   public readonly alias = 'pascal';
 
   public transform(value: string) {
-    return Utils.casePascal(value);
+    return Utils.toPascalCase(value);
   }
 }

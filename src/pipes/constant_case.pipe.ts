@@ -5,6 +5,6 @@ export class ConstantCasePipe implements Pipe {
   public readonly alias = 'constant';
 
   public transform(value: string) {
-    return Utils.caseConstant(value);
+    return Utils.toConstantCase(value);
   }
 }

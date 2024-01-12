@@ -9,7 +9,7 @@ export * from './interfaces/pipe.interface.ts';
 export * from './json.pipe.ts';
 export * from './lower_case.pipe.ts';
 export * from './number.pipe.ts';
-export * from './param_case.pipe.ts';
+export * from './kebab_case.pipe.ts';
 export * from './pascal_case.pipe.ts';
 export * from './percent.pipe.ts';
 export * from './snake_case.pipe.ts';

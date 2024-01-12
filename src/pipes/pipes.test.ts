@@ -8,9 +8,9 @@ import { DatePipe } from './date.pipe.ts';
 import { FloatPipe } from './float.pipe.ts';
 import { IntPipe } from './int.pipe.ts';
 import { JsonPipe } from './json.pipe.ts';
+import { KebabCasePipe } from './kebab_case.pipe.ts';
 import { LowerCasePipe } from './lower_case.pipe.ts';
 import { NumberPipe } from './number.pipe.ts';
-import { ParamCasePipe } from './param_case.pipe.ts';
 import { PascalCasePipe } from './pascal_case.pipe.ts';
 import { PercentPipe } from './percent.pipe.ts';
 import { SnakeCasePipe } from './snake_case.pipe.ts';
@@ -40,11 +40,11 @@ Deno.test('pipes module', async (test) => {
 
     expect(inject(JsonPipe).transform('{"foo":"bar"}')).toEqual({ foo: 'bar' });
 
+    expect(inject(KebabCasePipe).transform('fooBar')).toBe('foo-bar');
+
     expect(inject(LowerCasePipe).transform('FOO')).toBe('foo');
 
     expect(inject(NumberPipe).transform('1.5')).toBe(1.5);
-
-    expect(inject(ParamCasePipe).transform('fooBar')).toBe('foo-bar');
 
     expect(inject(PascalCasePipe).transform('foo_bar')).toBe('FooBar');
 
