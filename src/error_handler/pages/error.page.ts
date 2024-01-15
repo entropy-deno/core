@@ -1,5 +1,8 @@
-export const errorPage = `<!-- Stack Trace -->
-<!-- {{# fullStackTrace }} -->
+export const errorPage = `<!--
+Stack Trace:
+
+{{# fullStackTrace }}
+-->
 <!doctype html>
 <html lang="en">
   <head>
@@ -13,7 +16,7 @@ export const errorPage = `<!-- Stack Trace -->
     <link rel="preconnect" href="https://fonts.googleapis.com" @nonceProp>
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;700&family=Roboto+Mono&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Roboto+Mono&display=swap"
       @nonceProp
     >
 
@@ -28,13 +31,13 @@ export const errorPage = `<!-- Stack Trace -->
         }
 
         :root {
-          --bg: #111827;
-          --bg-block: #161f33;
+          --bg: #030303;
+          --bg-block: #12151b;
           --font-mono: 'Roboto Mono', monospace;
-          --font-sans: 'Urbanist', sans-serif;
+          --font-sans: 'Inter', sans-serif;
           --red: #f43f5e;
-          --text: #f3f4f6;
-          --text-gray: #b2b2b2;
+          --text: #e2e6ec;
+          --text-gray: #c4cbd9;
           --text-dark: #052133;
           --selection: #c4b5fd;
           --theme: #a78bfa;
@@ -62,7 +65,7 @@ export const errorPage = `<!-- Stack Trace -->
           flex-direction: column;
           justify-content: center;
           background: var(--bg-block);
-          padding: 52px;
+          padding: 64px;
           border-radius: 20px;
         }
 
@@ -95,7 +98,7 @@ export const errorPage = `<!-- Stack Trace -->
         }
 
         .code-snippet {
-          background: #450a0a;
+          background: #450a1a;
           border-radius: 12px;
           font-family: var(--font-mono);
           padding: 2px 8px;
@@ -115,7 +118,7 @@ export const errorPage = `<!-- Stack Trace -->
         }
 
         .code-snippet__line--active {
-          background: #991b1b;
+          background: #5d0e24;
         }
 
         .trace {
@@ -152,30 +155,30 @@ export const errorPage = `<!-- Stack Trace -->
         }
 
         .button {
-          background: var(--theme);
-          border: none;
-          color: var(--text-dark);
-          padding: 12px 16px;
-          border-radius: 12px;
           display: flex;
           align-items: center;
-          gap: 4px;
-          text-decoration: none;
+          gap: 10px;
+          border: none;
+          border-radius: 12px;
           font: inherit;
+          background: var(--theme);
+          color: var(--text-dark);
+          padding: 14px 18px;
+          text-decoration: none;
           margin-top: 12px;
           user-select: none;
           cursor: pointer;
-          transition: opacity 0.2s ease;
+          transition: all 0.2s ease;
           align-self: flex-end;
-          margin-top: 72px;
 
           &:hover {
             opacity: 0.9;
           }
 
           & svg {
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
+            opacity: 0.9;
           }
         }
       @/raw

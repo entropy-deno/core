@@ -11,7 +11,7 @@ export const statusPage = `<!doctype html>
     <link rel="preconnect" href="https://fonts.googleapis.com" @nonceProp>
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Urbanist:wght@700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap"
       @nonceProp
     >
 
@@ -26,9 +26,9 @@ export const statusPage = `<!doctype html>
         }
 
         :root {
-          --bg: #111827;
-          --font-sans: 'Urbanist', sans-serif;
-          --text: #f3f4f6;
+          --bg: #030303;
+          --font-sans: 'Inter', sans-serif;
+          --text: #e2e6ec;
           --text-dark: #052133;
           --selection: #c4b5fd;
           --theme: #a78bfa;
@@ -56,7 +56,7 @@ export const statusPage = `<!doctype html>
 
         .header {
           line-height: 54px;
-          font-weight: 700;
+          font-weight: 600;
           letter-spacing: -1px;
           text-align: center;
         }
