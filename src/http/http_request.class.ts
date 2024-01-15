@@ -40,6 +40,10 @@ export class HttpRequest {
     this.matchedPattern = pattern;
   }
 
+  public async boolean(name: string): Promise<boolean> {
+    return ['on', 'true', 'yes', '1'].includes(String(await this.input(name)));
+  }
+
   public cache(): RequestCache {
     return this.request.cache ?? 'default';
   }
