@@ -112,6 +112,14 @@ export abstract class Utils {
     return this.mergeDeep(target, ...elements);
   }
 
+  public static randomInt(min: number, max: number) {
+    return Math.floor(Math.random() * (max - min)) + min;
+  }
+
+  public static randomFloat(min: number, max: number) {
+    return Math.random() * (max - min) + min;
+  }
+
   public static range(start: number, end?: number) {
     if (end === undefined) {
       end = start;
