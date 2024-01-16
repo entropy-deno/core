@@ -13,8 +13,7 @@ Deno.test('encrypter module', async (test) => {
 
   await test.step('encrypter properly compares hash with plain text', async () => {
     const hash = await encrypter.hash('test');
-    const equal = await encrypter.compareHash('test', hash);
 
-    expect(equal).toBe(true);
+    expect(await encrypter.compareHash('test', hash)).toBe(true);
   });
 });

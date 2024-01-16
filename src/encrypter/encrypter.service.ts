@@ -1,3 +1,4 @@
+import { compare as compareHash, hash } from 'https://deno.land/x/bcrypt@v0.4.1/mod.ts';
 import {
   decodeBase64,
   encodeBase64,
@@ -17,7 +18,7 @@ export class Encrypter {
   private readonly encoder = new TextEncoder();
 
   public async compareHash(plainText: string, hash: string): Promise<boolean> {
-    return await this.hash(plainText) === hash;
+    return await compareHash(plainText, hash);
   }
 
   public decodeBase64(encoded: string): string {
@@ -53,24 +54,6 @@ export class Encrypter {
   }
 
   public async hash(plainText: string): Promise<string> {
-    const keyBuffer = this.encoder.encode(
-      this.configurator.entries.encryption.key,
-    );
-
-    const buffer = this.encoder.encode(plainText);
-
-    const hmacKey = await crypto.subtle.importKey(
-      'raw',
-      keyBuffer,
-      { name: 'HMAC', hash: 'SHA-256' },
-      false,
-      ['sign'],
-    );
-
-    const signature = await crypto.subtle.sign('HMAC', hmacKey, buffer);
-
-    return [...new Uint8Array(signature)].map((byte) =>
-      byte.toString(16).padStart(2, '0')
-    ).join('');
+    return await hash(plainText);
   }
 }
