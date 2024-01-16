@@ -287,7 +287,6 @@ export class Validator {
           return this.patterns.username.test(value ?? '');
         },
       },
-      ...(this.configurator.entries.validatorRules ?? []),
     ];
   }
 
