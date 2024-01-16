@@ -1,4 +1,7 @@
-import { compare as compareHash, hash } from 'https://deno.land/x/bcrypt@v0.4.1/mod.ts';
+import {
+  compare as compareHash,
+  hash,
+} from 'https://deno.land/x/bcrypt@v0.4.1/mod.ts';
 import {
   decodeBase64,
   encodeBase64,
