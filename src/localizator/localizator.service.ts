@@ -4,13 +4,11 @@ import { inject } from '../injector/functions/inject.function.ts';
 export class Localizator {
   private readonly configurator = inject(Configurator);
 
-  private readonly defaultLocale = this.configurator.entries.locales.default;
-
   private translations = new Map<string, Map<string, string | string[]>>();
 
   private async loadTranslations(): Promise<void> {
     const supportedLocales = this.configurator.entries.locales.supported.filter(
-      (locale) => locale !== this.defaultLocale,
+      (locale) => locale !== this.configurator.entries.locales.default,
     );
 
     for (const locale of supportedLocales) {
@@ -36,7 +34,7 @@ export class Localizator {
 
   public all(locale: string): Record<string, string | string[]> {
     return Object.fromEntries(
-      locale === this.defaultLocale
+      locale === this.configurator.entries.locales.default
         ? new Map()
         : this.translations.get(locale) ?? new Map(),
     );

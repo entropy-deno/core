@@ -4,65 +4,71 @@ import { EnvVariable } from './types/env_variable.type.ts';
 import { Utils } from '../utils/utils.class.ts';
 
 export class Configurator {
-  private configuration: AppConfig = {
-    cache: {
-      enabled: true,
-      maxAge: 0,
-    },
-    contentSecurityPolicy: {
-      allowInlineScripts: false,
-      allowInlineStyles: true,
-      allowedOrigins: [],
-    },
-    cookies: {
-      maxAge: this.getEnv<number>('COOKIE_MAX_AGE') ?? 30,
-    },
-    cors: {
-      allowCredentials: false,
-      allowedHeaders: [],
-      allowedMethods: ['*'],
-      allowedOrigins: ['*'],
-      exposedHeaders: [],
-      maxAge: 0,
-    },
-    csrfProtection: true,
-    encryption: {
-      key: this.getEnv<string>('ENCRYPTION_KEY') ?? crypto.randomUUID(),
-    },
-    envFile: '.env',
-    host: this.getEnv<string>('HOST') ?? 'localhost',
-    isDenoDeploy: !!this.getEnv<string>('DENO_DEPLOYMENT_ID') ?? false,
-    isProduction: (this.getEnv<boolean>('PRODUCTION') ?? false) ||
-      (!!this.getEnv<string>('DENO_DEPLOYMENT_ID') ?? false),
-    locales: {
-      default: 'en',
-      supported: ['en'],
-    },
-    logger: {
-      enabled: true,
-      staticFileRequests: false,
-    },
-    port: this.getEnv<number>('PORT') ?? 5050,
-    seo: {
-      robots: false,
-      sitemap: false,
-      sitemapExcludeUrls: [],
-      sitemapUrls: [],
-    },
-    session: {
-      lifetime: this.getEnv<number>('SESSION_LIFETIME') ?? 30,
-    },
-    templateDirectives: [],
-    tls: {
-      cert: this.getEnv<string>('TLS_CERT') ?? false,
-      certFile: false,
-      enabled: false,
-      key: this.getEnv<string>('TLS_KEY') ?? false,
-      keyFile: false,
-    },
-    validatorRules: [],
-    webSocket: true,
-  };
+  private data?: AppConfig;
+
+  private get configuration(): AppConfig {
+    this.data = {
+      cache: {
+        enabled: true,
+        maxAge: 0,
+      },
+      contentSecurityPolicy: {
+        allowInlineScripts: false,
+        allowInlineStyles: true,
+        allowedOrigins: [],
+      },
+      cookies: {
+        maxAge: this.getEnv<number>('COOKIE_MAX_AGE') ?? 30,
+      },
+      cors: {
+        allowCredentials: false,
+        allowedHeaders: [],
+        allowedMethods: ['*'],
+        allowedOrigins: ['*'],
+        exposedHeaders: [],
+        maxAge: 0,
+      },
+      csrfProtection: true,
+      encryption: {
+        key: this.getEnv<string>('ENCRYPTION_KEY') ?? crypto.randomUUID(),
+      },
+      envFile: '.env',
+      host: this.getEnv<string>('HOST') ?? 'localhost',
+      isDenoDeploy: !!this.getEnv<string>('DENO_DEPLOYMENT_ID') ?? false,
+      isProduction: (this.getEnv<boolean>('PRODUCTION') ?? false) ||
+        (!!this.getEnv<string>('DENO_DEPLOYMENT_ID') ?? false),
+      locales: {
+        default: 'en',
+        supported: ['en'],
+      },
+      logger: {
+        enabled: true,
+        staticFileRequests: false,
+      },
+      port: this.getEnv<number>('PORT') ?? 5050,
+      seo: {
+        robots: false,
+        sitemap: false,
+        sitemapExcludeUrls: [],
+        sitemapUrls: [],
+      },
+      session: {
+        lifetime: this.getEnv<number>('SESSION_LIFETIME') ?? 30,
+      },
+      templateDirectives: [],
+      tls: {
+        cert: this.getEnv<string>('TLS_CERT') ?? false,
+        certFile: false,
+        enabled: false,
+        key: this.getEnv<string>('TLS_KEY') ?? false,
+        keyFile: false,
+      },
+      validatorRules: [],
+      webSocket: true,
+    };
+
+    return this.data;
+  }
 
   private validateConfiguration(): void {
     if (this.configuration.cookies.maxAge < 0) {
@@ -118,7 +124,7 @@ export class Configurator {
   }
 
   public setup(configuration: DeepPartial<AppConfig> = {}): void {
-    this.configuration = Utils.mergeDeep(this.configuration, configuration);
+    this.data = Utils.mergeDeep(this.configuration, configuration);
 
     this.validateConfiguration();
   }
