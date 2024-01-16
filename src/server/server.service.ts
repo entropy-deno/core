@@ -92,7 +92,10 @@ export class Server implements Disposable {
       Deno.exit(1);
     }
 
-    if (VERSION.includes('alpha') || VERSION.includes('beta')) {
+    if (
+      (VERSION.includes('alpha') || VERSION.includes('beta')) &&
+      !this.configurator.entries.isProduction
+    ) {
       this.logger.warn('Using a pre-release version of Entropy');
     }
   }
@@ -172,16 +175,16 @@ export class Server implements Disposable {
     const passedTime = performance.now() - performanceTimerStart;
 
     const responsePerformance = passedTime >= TimeUnit.Second
-      ? `${(passedTime / TimeUnit.Second).toFixed(1)}s`
-      : `${passedTime.toFixed(1)}ms`;
+      ? `~ ${(passedTime / TimeUnit.Second).toFixed(1)}s`
+      : `~ ${passedTime.toFixed(1)}ms`;
 
     this.logger.info(
       `%c[${status}] %c${richRequest.path()}${richRequest.queryString()}`,
       {
         additionalInfo: `${
-          responsePerformance.length < 5
+          responsePerformance.length < 7
             ? `${
-              ' '.repeat(5 - responsePerformance.length)
+              ' '.repeat(7 - responsePerformance.length)
             }${responsePerformance}`
             : responsePerformance
         }`,

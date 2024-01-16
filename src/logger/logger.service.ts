@@ -61,7 +61,7 @@ export class Logger {
         ? ` %c${
           this.configurator.entries.isDenoDeploy
             ? '• '
-            : (dotsLength ? `${'.'.repeat(dotsLength - 5)} ` : '')
+            : (dotsLength ? `${'.'.repeat(dotsLength - 6)} ` : '')
         }${additionalInfo}`
         : ''
     }`;
