@@ -39,8 +39,8 @@ export class Encrypter {
 
     let result = '';
 
-    for (let i = 0; i < buffer.length; ++i) {
-      result += (`0${buffer[i].toString(16)}`).slice(-2);
+    for (const char of buffer) {
+      result += (`0${char.toString(16)}`).slice(-2);
     }
 
     return result;
