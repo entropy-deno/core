@@ -1,7 +1,8 @@
+import { ClassDecorator } from '../../utils/types/class_decorator.type.ts';
 import { Reflector } from '../../utils/reflector.class.ts';
 
 export function NonSingleton(): ClassDecorator {
-  return (target: object) => {
-    Reflector.defineMetadata<boolean>('singleton', false, target);
+  return (originalClass) => {
+    Reflector.defineMetadata<boolean>('singleton', false, originalClass);
   };
 }

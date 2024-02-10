@@ -1,15 +1,16 @@
 import { Constructor } from '../../utils/interfaces/constructor.interface.ts';
+import { MethodDecorator } from '../../utils/types/method_decorator.type.ts';
 import { Middleware } from '../interfaces/middleware.interface.ts';
 import { Reflector } from '../../utils/reflector.class.ts';
 
 export function Use(middleware: Constructor<Middleware>[]): MethodDecorator {
-  return (_target, _methodName, descriptor) => {
+  return (originalMethod) => {
     Reflector.defineMetadata<Constructor<Middleware>[]>(
       'middleware',
       middleware,
-      descriptor.value as object,
+      originalMethod,
     );
 
-    return descriptor;
+    return originalMethod;
   };
 }

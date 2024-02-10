@@ -1,14 +1,15 @@
+import { MethodDecorator } from '../../utils/types/method_decorator.type.ts';
 import { Reflector } from '../../utils/reflector.class.ts';
 import { HttpStatus } from '../enums/http_status.enum.ts';
 
 export function StatusCode(statusCode: HttpStatus): MethodDecorator {
-  return (_target, _methodName, descriptor) => {
+  return (originalMethod) => {
     Reflector.defineMetadata<HttpStatus>(
       'statusCode',
       statusCode,
-      descriptor.value as object,
+      originalMethod,
     );
 
-    return descriptor;
+    return originalMethod;
   };
 }

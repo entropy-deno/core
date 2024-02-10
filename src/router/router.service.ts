@@ -12,6 +12,7 @@ import { HttpRequest } from '../http/http_request.class.ts';
 import { HttpStatus } from '../http/enums/http_status.enum.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { Json } from '../http/json.class.ts';
+import { MethodDecorator } from '../utils/types/method_decorator.type.ts';
 import { Middleware } from '../http/interfaces/middleware.interface.ts';
 import { Pipe } from '../pipes/interfaces/pipe.interface.ts';
 import { RedirectDestination } from './types/redirect_destination.type.ts';
@@ -434,7 +435,20 @@ export class Router {
       methods: EnumValuesUnion<HttpMethod>[],
       options: RouteOptions = {},
     ): MethodDecorator => {
-      return (_target, _methodName, descriptor) => {
+      return (originalMethod, context) => {
+        if (context.private) {
+          throw new Error(
+            `Controller route method ${context.name as string} must be public`,
+          );
+        }
+
+        if (context.static) {
+          throw new Error(
+            `Controller route method ${context
+              .name as string} cannot be static`,
+          );
+        }
+
         Reflector.defineMetadata<Partial<Route>>(
           'route',
           {
@@ -442,10 +456,10 @@ export class Router {
             path,
             ...options,
           },
-          descriptor.value as object,
+          originalMethod,
         );
 
-        return descriptor;
+        return originalMethod;
       };
     };
 

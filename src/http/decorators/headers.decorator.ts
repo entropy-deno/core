@@ -1,13 +1,14 @@
+import { MethodDecorator } from '../../utils/types/method_decorator.type.ts';
 import { Reflector } from '../../utils/reflector.class.ts';
 
 export function Headers(headers: Record<string, string>): MethodDecorator {
-  return (_target, _methodName, descriptor) => {
+  return (originalMethod) => {
     Reflector.defineMetadata<Record<string, string>>(
       'headers',
       headers,
-      descriptor.value as object,
+      originalMethod,
     );
 
-    return descriptor;
+    return originalMethod;
   };
 }

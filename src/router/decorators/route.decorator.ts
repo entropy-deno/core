@@ -1,6 +1,7 @@
 import { HttpMethod } from '../../http/enums/http_method.enum.ts';
 import { HttpStatus } from '../../http/enums/http_status.enum.ts';
 import { inject } from '../../injector/functions/inject.function.ts';
+import { MethodDecorator } from '../../utils/types/method_decorator.type.ts';
 import { Reflector } from '../../utils/reflector.class.ts';
 import { Router } from '../router.service.ts';
 
@@ -45,15 +46,15 @@ export const Methods = router.createRouteDecorator();
 export function Error(
   statusCode?: HttpStatus,
 ): MethodDecorator {
-  return (_target, _methodName, descriptor) => {
+  return (originalMethod) => {
     Reflector.defineMetadata<{ statusCode?: HttpStatus }>(
       'httpErrorHandler',
       {
         statusCode,
       },
-      descriptor.value as object,
+      originalMethod,
     );
 
-    return descriptor;
+    return originalMethod;
   };
 }

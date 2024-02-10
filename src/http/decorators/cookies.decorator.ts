@@ -1,13 +1,14 @@
+import { MethodDecorator } from '../../utils/types/method_decorator.type.ts';
 import { Reflector } from '../../utils/reflector.class.ts';
 
 export function Cookies(cookies: Record<string, string>): MethodDecorator {
-  return (_target, _methodName, descriptor) => {
+  return (originalMethod) => {
     Reflector.defineMetadata<Record<string, string>>(
       'cookies',
       cookies,
-      descriptor.value as object,
+      originalMethod,
     );
 
-    return descriptor;
+    return originalMethod;
   };
 }

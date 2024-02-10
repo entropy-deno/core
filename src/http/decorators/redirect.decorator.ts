@@ -1,14 +1,15 @@
+import { MethodDecorator } from '../../utils/types/method_decorator.type.ts';
 import { Reflector } from '../../utils/reflector.class.ts';
 import { RedirectDestination } from '../../router/types/redirect_destination.type.ts';
 
 export function Redirect(destination: RedirectDestination): MethodDecorator {
-  return (_target, _methodName, descriptor) => {
+  return (originalMethod) => {
     Reflector.defineMetadata<RedirectDestination>(
       'redirectDestination',
       destination,
-      descriptor.value as object,
+      originalMethod,
     );
 
-    return descriptor;
+    return originalMethod;
   };
 }

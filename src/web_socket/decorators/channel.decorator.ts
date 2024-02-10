@@ -1,7 +1,8 @@
+import { ClassDecorator } from '../../utils/types/class_decorator.type.ts';
 import { Reflector } from '../../utils/reflector.class.ts';
 
 export function Channel(name: string): ClassDecorator {
-  return (target: object) => {
-    Reflector.defineMetadata<string>('name', name, target);
+  return (originalClass) => {
+    Reflector.defineMetadata<string>('name', name, originalClass);
   };
 }

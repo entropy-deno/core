@@ -1,16 +1,17 @@
 import { inject } from '../../injector/functions/inject.function.ts';
+import { MethodDecorator } from '../../utils/types/method_decorator.type.ts';
 import { Scheduler } from '../scheduler.service.ts';
 
 export function Interval(milliseconds: number): MethodDecorator {
-  return (_target, _methodName, descriptor) => {
+  return (originalMethod) => {
     const scheduler = inject(Scheduler);
 
     const callback = () => {
-      (descriptor.value as () => unknown)();
+      originalMethod();
     };
 
     scheduler.interval(callback, milliseconds);
 
-    return descriptor;
+    return originalMethod;
   };
 }
