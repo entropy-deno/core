@@ -18,7 +18,7 @@
   </h4>
   <br>
   <a href="https://deno.land/x/entropy" target="_blank">
-    <img src="https://shield.deno.dev/deno/%5E1.39.0" alt="Required Deno version">
+    <img src="https://shield.deno.dev/deno/%5E1.40.0" alt="Required Deno version">
     &nbsp;
     <img src="https://shield.deno.dev/x/entropy" alt="Latest Entropy version">
   </a>
@@ -46,7 +46,7 @@ applications with awesome developer experience.
 
 To run Entropy, your environment has to meet following requirements:
 
-- Deno 1.39.0+
+- Deno 1.40.0+
 
 We recommend to always have the latest version of Deno installed. To update
 Deno, run the following command:

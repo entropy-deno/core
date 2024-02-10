@@ -1,4 +1,4 @@
-import { getCookies } from 'https://deno.land/std@0.212.0/http/cookie.ts';
+import { getCookies } from 'https://deno.land/std@0.215.0/http/cookie.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
 import { Encrypter } from '../encrypter/encrypter.service.ts';
 import { FormFile } from './form_file.class.ts';
