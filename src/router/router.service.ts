@@ -21,6 +21,7 @@ import { Route } from './interfaces/route.interface.ts';
 import { RouteOptions } from './interfaces/route_options.interface.ts';
 import { RoutePath } from './types/route_path.type.ts';
 import { RouteStore } from './route_store.service.ts';
+import { Scheduler } from '../scheduler/scheduler.service.ts';
 import { statusPage } from '../http/pages/status.page.ts';
 import { TemplateCompiler } from '../templates/template_compiler.service.ts';
 import { TimeUnit } from '../scheduler/enums/time_unit.enum.ts';
@@ -60,6 +61,8 @@ export class Router {
   private readonly errorHandler = inject(ErrorHandler);
 
   private readonly routeStore = inject(RouteStore);
+
+  private readonly scheduler = inject(Scheduler);
 
   private readonly validator = inject(Validator);
 
@@ -438,7 +441,8 @@ export class Router {
       return (originalMethod, context) => {
         if (context.private) {
           throw new Error(
-            `Controller route method ${context.name as string} must be public`,
+            `Controller route method ${context
+              .name as string} has to be public`,
           );
         }
 
@@ -503,6 +507,59 @@ export class Router {
       )[controllerRouteMethod] as (
         ...args: unknown[]
       ) => unknown;
+
+      const taskInterval = Reflector.getMetadata<number>(
+        'interval',
+        controllerMethod,
+      );
+
+      if (taskInterval) {
+        this.scheduler.interval(taskInterval, async () => {
+          const methodResult = controllerMethod.call(controllerInstance);
+
+          if (methodResult instanceof Promise) {
+            await methodResult;
+          }
+        });
+
+        continue;
+      }
+
+      const taskSchedule = Reflector.getMetadata<
+        [string, string | Deno.CronSchedule]
+      >(
+        'schedule',
+        controllerMethod,
+      );
+
+      if (taskSchedule) {
+        this.scheduler.schedule(taskSchedule[0], taskSchedule[1], async () => {
+          const methodResult = controllerMethod.call(controllerInstance);
+
+          if (methodResult instanceof Promise) {
+            await methodResult;
+          }
+        });
+
+        continue;
+      }
+
+      const taskTimeout = Reflector.getMetadata<number>(
+        'timeout',
+        controllerMethod,
+      );
+
+      if (taskTimeout) {
+        this.scheduler.timeout(taskTimeout, async () => {
+          const methodResult = controllerMethod.call(controllerInstance);
+
+          if (methodResult instanceof Promise) {
+            await methodResult;
+          }
+        });
+
+        continue;
+      }
 
       const handler = Reflector.getMetadata<{ statusCode?: HttpStatus }>(
         'httpErrorHandler',

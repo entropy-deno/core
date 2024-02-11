@@ -1,17 +1,23 @@
 export class Scheduler {
-  public interval(callback: () => void, milliseconds: number): void {
+  public interval(
+    milliseconds: number,
+    callback: () => void | Promise<void>,
+  ): void {
     setInterval(callback, milliseconds);
   }
 
   public schedule(
     identifier: string,
-    callback: () => void,
     schedule: string | Deno.CronSchedule,
+    callback: () => void | Promise<void>,
   ): void {
     Deno.cron(identifier, schedule, callback);
   }
 
-  public timeout(callback: () => void, milliseconds: number): void {
+  public timeout(
+    milliseconds: number,
+    callback: () => void | Promise<void>,
+  ): void {
     setTimeout(callback, milliseconds);
   }
 }

@@ -1,19 +1,16 @@
-import { inject } from '../../injector/functions/inject.function.ts';
 import { MethodDecorator } from '../../utils/types/method_decorator.type.ts';
-import { Scheduler } from '../scheduler.service.ts';
+import { Reflector } from '../../utils/reflector.class.ts';
 
 export function Schedule(
   identifier: string,
   schedule: string | Deno.CronSchedule,
 ): MethodDecorator {
   return (originalMethod) => {
-    const scheduler = inject(Scheduler);
-
-    const callback = () => {
-      originalMethod();
-    };
-
-    scheduler.schedule(identifier, callback, schedule);
+    Reflector.defineMetadata<[string, string | Deno.CronSchedule]>(
+      'schedule',
+      [identifier, schedule],
+      originalMethod,
+    );
 
     return originalMethod;
   };
