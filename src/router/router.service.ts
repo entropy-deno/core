@@ -81,16 +81,16 @@ export class Router {
 
     if (request.isAjaxRequest()) {
       return await this.createResponse(request, JSON.stringify(payload), {
-        statusCode,
         headers: {
           'content-type': 'application/json; charset=utf-8',
         },
+        statusCode,
       });
     }
 
     if (
-      this.customHttpHandlers.has(undefined) ||
-      this.customHttpHandlers.has(statusCode)
+      this.customHttpHandlers.has(statusCode) ||
+      this.customHttpHandlers.has(undefined)
     ) {
       const body = this.customHttpHandlers.get(
         this.customHttpHandlers.has(statusCode) ? statusCode : undefined,
@@ -193,12 +193,12 @@ export class Router {
         'autoplay=(self), camera=(), encrypted-media=(self), geolocation=(self), microphone=(), payment=(), sync-xhr=(self)',
       'referrer-policy': 'no-referrer',
       'strict-transport-security': 'max-age=31536000; includeSubDomains',
-      'x-content-type-options': 'nosniff',
-      'x-dns-prefetch-control': 'off',
-      'x-xss-protection': '0',
       ...(!cors.allowedMethods.includes('*') && {
         'vary': 'origin',
       }),
+      'x-content-type-options': 'nosniff',
+      'x-dns-prefetch-control': 'off',
+      'x-xss-protection': '0',
     };
 
     const { body: parsedBody, contentType } = await this.parseResponseBody(
@@ -257,8 +257,8 @@ export class Router {
 
   private async createSeoRobotsFile(request: HttpRequest): Promise<Response> {
     const directives: [string, string][] = [
-      ['User-agent', '*'],
       ['Allow', '*'],
+      ['User-agent', '*'],
     ];
 
     if (this.configurator.entries.seo.sitemap) {
@@ -281,8 +281,8 @@ export class Router {
   private async createSeoSitemapFile(request: HttpRequest): Promise<Response> {
     const directUrlInvalidChars = [
       '\\',
-      ':',
       '?',
+      ':',
       '*',
       '+',
       '^',
@@ -533,7 +533,7 @@ export class Router {
       );
 
       if (taskSchedule) {
-        this.scheduler.schedule(taskSchedule[0], taskSchedule[1], async () => {
+        this.scheduler.schedule(...taskSchedule, async () => {
           const methodResult = controllerMethod.call(controllerInstance);
 
           if (methodResult instanceof Promise) {
@@ -760,10 +760,10 @@ export class Router {
                       errors,
                     }),
                     {
-                      statusCode: HttpStatus.BadRequest,
                       headers: {
                         'content-type': 'application/json; charset=utf-8',
                       },
+                      statusCode: HttpStatus.BadRequest,
                     },
                   );
                 }

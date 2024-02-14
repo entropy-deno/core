@@ -450,7 +450,7 @@ export class Server implements Disposable {
         }
 
         throw new Error(
-          `Port ${this.configurator.entries.port} is already in use. Try port ${getAvailablePort()}`,
+          `Port ${this.configurator.entries.port} is already in use. Try out port ${getAvailablePort()}`,
         );
       }
 
