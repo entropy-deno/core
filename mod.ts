@@ -8,6 +8,7 @@
  * 
  * @module
  */
+export * from './src/auth/auth.module.ts';
 export * from './src/configurator/configurator.module.ts';
 export * from './src/constants.ts';
 export * from './src/encrypter/encrypter.module.ts';

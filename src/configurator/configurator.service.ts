@@ -37,6 +37,9 @@ export class Configurator {
       isDenoDeploy: !!this.getEnv<string>('DENO_DEPLOYMENT_ID') ?? false,
       isProduction: (this.getEnv<boolean>('PRODUCTION') ?? false) ||
         (!!this.getEnv<string>('DENO_DEPLOYMENT_ID') ?? false),
+      jwt: {
+        key: this.getEnv<string>('JWT_KEY') ?? null,
+      },
       locales: {
         default: 'en',
         supported: ['en'],

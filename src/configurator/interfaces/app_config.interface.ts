@@ -31,6 +31,9 @@ export interface AppConfig {
   host: string;
   isDenoDeploy: boolean;
   isProduction: boolean;
+  jwt: {
+    key: string | null;
+  };
   locales: {
     default: string;
     supported: string[];
