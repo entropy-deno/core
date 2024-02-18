@@ -16,7 +16,7 @@ Stack Trace:
     <link rel="preconnect" href="https://fonts.googleapis.com" @nonceProp>
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Roboto+Mono&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;700&family=Roboto+Mono&display=swap"
       @nonceProp
     >
 
@@ -31,16 +31,26 @@ Stack Trace:
         }
 
         :root {
-          --bg: #030303;
-          --bg-block: #12151b;
+          --bg: #fff;
+          --bg-block: #1c1a1f;
           --font-mono: 'Roboto Mono', monospace;
-          --font-sans: 'Inter', sans-serif;
+          --font-sans: 'Urbanist', sans-serif;
           --red: #f43f5e;
-          --text: #e2e6ec;
+          --text: #2e1065;
+          --text-button: #ecfccb;
           --text-gray: #c4cbd9;
-          --text-dark: #052133;
+          --text-dark: #2e1065;
           --selection: #c4b5fd;
-          --theme: #a78bfa;
+          --theme: #8b5cf6;
+        }
+
+        @media (prefers-color-scheme: dark) {
+          :root {
+            --bg: #131214;
+            --text: #e2e6ec;
+            --text-button: #1a2e05;
+            --theme: #a78bfa;
+          }
         }
 
         ::selection {
@@ -51,6 +61,8 @@ Stack Trace:
         body {
           font-family: var(--font-sans);
           font-size: 16px;
+          font-weight: 500;
+          letter-spacing: 0.1px;
           background: var(--bg);
           color: var(--text);
           display: grid;
@@ -159,11 +171,12 @@ Stack Trace:
           align-items: center;
           gap: 10px;
           border: none;
-          border-radius: 12px;
           font: inherit;
+          font-weight: 600;
           background: var(--theme);
-          color: var(--text-dark);
-          padding: 14px 18px;
+          color: var(--text-button);
+          border-radius: 25px;
+          padding: 14px 20px;
           text-decoration: none;
           margin-top: 12px;
           user-select: none;

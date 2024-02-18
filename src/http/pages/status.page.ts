@@ -11,7 +11,7 @@ export const statusPage = `<!doctype html>
     <link rel="preconnect" href="https://fonts.googleapis.com" @nonceProp>
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Urbanist:wght@600&display=swap"
       @nonceProp
     >
 
@@ -26,12 +26,20 @@ export const statusPage = `<!doctype html>
         }
 
         :root {
-          --bg: #030303;
-          --font-sans: 'Inter', sans-serif;
-          --text: #e2e6ec;
-          --text-dark: #052133;
+          --bg: #fff;
+          --font-sans: 'Urbanist', sans-serif;
+          --text: #2e1065;
+          --text-dark: #2e1065;
           --selection: #c4b5fd;
           --theme: #a78bfa;
+        }
+
+        @media (prefers-color-scheme: dark) {
+          :root {
+            --bg: #131214;
+            --text: #e2e6ec;
+            --theme: #a78bfa;
+          }
         }
 
         ::selection {
@@ -42,6 +50,8 @@ export const statusPage = `<!doctype html>
         body {
           font-family: var(--font-sans);
           font-size: 16px;
+          font-weight: 500;
+          letter-spacing: 0.1px;
           background: var(--bg);
           color: var(--text);
           display: grid;
