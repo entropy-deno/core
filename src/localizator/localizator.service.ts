@@ -32,12 +32,20 @@ export class Localizator {
     }
   }
 
-  public all(locale: string): Record<string, string | string[]> {
+  public async all(locale: string): Promise<Record<string, string | string[]>> {
+    if (!this.translations.size) {
+      await this.loadTranslations();
+    }
+
     return Object.fromEntries(
       locale === this.configurator.entries.locales.default
         ? new Map()
         : this.translations.get(locale) ?? new Map(),
     );
+  }
+
+  public async reload(): Promise<void> {
+    await this.loadTranslations();
   }
 
   public set(
@@ -52,11 +60,15 @@ export class Localizator {
     this.translations.get(locale)!.set(text, translation);
   }
 
-  public async setup(): Promise<void> {
-    await this.loadTranslations();
-  }
+  public async translate(
+    locale: string,
+    text: string,
+    quantity = 1,
+  ): Promise<string> {
+    if (!this.translations.size) {
+      await this.loadTranslations();
+    }
 
-  public translate(locale: string, text: string, quantity = 1): string {
     if (quantity > 1) {
       const key = [...this.translations.keys()].find((key) => {
         return key.startsWith(`${text}|`);

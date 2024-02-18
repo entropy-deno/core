@@ -5,10 +5,12 @@ import { inject } from '../injector/functions/inject.function.ts';
 Deno.test('localizator module', async (test) => {
   const localizator = inject(Localizator);
 
-  await test.step('localizator properly sets translations', () => {
+  await test.step('localizator properly sets translations', async () => {
     localizator.set('pl', 'hello world', 'witaj świecie');
 
-    expect(localizator.translate('pl', 'hello world')).toBe('witaj świecie');
+    expect(await localizator.translate('pl', 'hello world')).toBe(
+      'witaj świecie',
+    );
   });
 
   await test.step('localizator properly returns translation list', () => {

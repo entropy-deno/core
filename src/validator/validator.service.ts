@@ -360,12 +360,11 @@ export class Validator {
           }
 
           errors[fieldName].push(
-            this.localizator
-              .translate(
-                subject.locale ?? errorLocale ??
-                  this.configurator.entries.locales.default,
-                ruleObject.errorMessage,
-              )
+            (await this.localizator.translate(
+              subject.locale ?? errorLocale ??
+                this.configurator.entries.locales.default,
+              ruleObject.errorMessage,
+            ))
               .replaceAll(':field', fieldName)
               .replaceAll(
                 ':value',

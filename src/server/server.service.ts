@@ -380,8 +380,6 @@ export class Server implements Disposable {
 
     this.configurator.setup(this.options.config);
 
-    await this.localizator.setup();
-
     if (!this.configurator.entries.isDenoDeploy) {
       this.arguments.dev
         ? await this.setupDevelopmentEnvironment()
@@ -501,7 +499,7 @@ export class Server implements Disposable {
                     break;
 
                   case path.includes('locales'):
-                    await this.localizator.setup();
+                    await this.localizator.reload();
 
                     break;
 

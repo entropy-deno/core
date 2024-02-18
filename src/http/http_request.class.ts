@@ -363,8 +363,8 @@ export class HttpRequest {
     return this.sessionObject;
   }
 
-  public translate(text: string, quantity = 1): string {
-    return this.localizator.translate(this.locale, text, quantity);
+  public async translate(text: string, quantity = 1): Promise<string> {
+    return await this.localizator.translate(this.locale, text, quantity);
   }
 
   public url(): string {

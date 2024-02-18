@@ -457,8 +457,8 @@ export class TemplateCompiler {
       {},
     );
 
-    const translationCallback = (text: string, quantity = 1) => {
-      return this.options.request?.translate(text, quantity) ?? text;
+    const translationCallback = async (text: string, quantity = 1) => {
+      return await this.options.request?.translate(text, quantity) ?? text;
     };
 
     const globalVariables = {
