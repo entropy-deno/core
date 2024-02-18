@@ -1,7 +1,5 @@
-export type MethodDecorator<TTarget = unknown> = (
-  originalMethod: (...args: unknown[]) => unknown,
+export type MethodDecorator = (
+  originalMethod: object | ((...args: unknown[]) => unknown),
   context: ClassMethodDecoratorContext,
-) =>
-  | void
-  | ((...args: unknown[]) => unknown)
-  | TypedPropertyDescriptor<TTarget>;
+  // deno-lint-ignore no-explicit-any
+) => any;
