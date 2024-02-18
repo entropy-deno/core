@@ -1,6 +1,6 @@
 <div align="center">
   <br>
-  <img src="./.github/assets/logo_full.png" height="76" alt="Logo">
+  <img src="./.github/assets/logo_full.png" height="70" alt="Logo">
   <br>
   <br>
   <br>
