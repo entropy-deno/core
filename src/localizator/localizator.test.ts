@@ -13,8 +13,8 @@ Deno.test('localizator module', async (test) => {
     );
   });
 
-  await test.step('localizator properly returns translation list', () => {
-    expect(localizator.all('pl')).toEqual({
+  await test.step('localizator properly returns translation list', async () => {
+    expect(await localizator.all('pl')).toEqual({
       'hello world': 'witaj świecie',
     });
   });
