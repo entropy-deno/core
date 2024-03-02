@@ -1,13 +1,13 @@
 import {
   fromFileUrl,
   resolve as resolvePath,
-} from 'https://deno.land/std@0.216.0/path/mod.ts';
+} from 'https://deno.land/std@0.218.0/path/mod.ts';
 import {
   toCamelCase,
   toKebabCase,
   toPascalCase,
   toSnakeCase,
-} from 'https://deno.land/std@0.216.0/text/case.ts';
+} from 'https://deno.land/std@0.218.0/text/case.ts';
 
 export abstract class Utils {
   public static callerFile() {
