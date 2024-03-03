@@ -39,6 +39,7 @@
 [Deno](https://deno.com). It makes it easy to create fast and secure web
 applications with awesome developer experience.
 
+> [!NOTE]
 > Entropy is currently in the `beta` stage. Although it is already suitable for
 > creating apps, you may still encounter some bugs and breaking changes.
 
@@ -60,6 +61,7 @@ sudo deno upgrade
 
 ## Security
 
+> [!IMPORTANT]
 If you discovered any bug, please open new issue / pull request in the
 [repository](https://github.com/entropy-deno/core) or email me:
 dom.rajkowski@gmail.com. In case of security vulnerability, please contact
