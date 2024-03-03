@@ -39,9 +39,9 @@
 [Deno](https://deno.com). It makes it easy to create fast and secure web
 applications with awesome developer experience.
 
-> [!NOTE] Entropy is currently in the `beta` stage
-> Although it is already suitable for creating apps,
-> you may still encounter some bugs and breaking changes.
+> [!NOTE]
+> Entropy is currently in the `beta` stage. Although it is already suitable for
+> creating apps, you may still encounter some bugs and breaking changes.
 
 ## Requirements
 
@@ -49,8 +49,9 @@ To run Entropy, your environment has to meet following requirements:
 
 - Deno ^1.40.0
 
-> [!TIP] It is a good practice to always have the latest version of Deno
-> To update Deno, run the following command:
+> [!TIP]
+It is a good practice to always have the latest version of Deno installed. To update
+Deno, run the following command:
 
 ```shell
 deno upgrade
@@ -61,11 +62,11 @@ sudo deno upgrade
 
 ## Security
 
-> [!IMPORTANT] If you discovered any bug
-> Please open a new issue or pull
-> request in the [repository](https://github.com/entropy-deno/core) or email me:
-> dom.rajkowski@gmail.com. In case of security vulnerability, please contact
-> [me](https://github.com/dominiq007) directly.
+> [!IMPORTANT]
+If you discovered any bug, please open a new issue or pull request in the
+[repository](https://github.com/entropy-deno/core) or email me:
+dom.rajkowski@gmail.com. In case of security vulnerability, please contact
+[me](https://github.com/dominiq007) directly.
 
 ## Information
 
