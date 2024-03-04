@@ -14,7 +14,6 @@ jobs:
       id-token: write
 
     steps:
-      - uses: actions/checkout@v4
-
       - name: Publish package
+        uses: actions/checkout@v4
         run: deno publish
