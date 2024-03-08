@@ -1,4 +1,4 @@
-import { expect } from 'https://deno.land/std@0.218.0/expect/expect.ts';
+import { expect } from 'https://deno.land/std@0.219.0/expect/expect.ts';
 import { Localizator } from './localizator.service.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 

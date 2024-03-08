@@ -1,4 +1,4 @@
-import { expect } from 'https://deno.land/std@0.218.0/expect/expect.ts';
+import { expect } from 'https://deno.land/std@0.219.0/expect/expect.ts';
 import { HttpMethod } from './enums/http_method.enum.ts';
 import { HttpRequest } from './http_request.class.ts';
 

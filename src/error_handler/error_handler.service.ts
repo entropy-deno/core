@@ -1,4 +1,4 @@
-import { fromFileUrl } from 'https://deno.land/std@0.218.0/path/mod.ts';
+import { fromFileUrl } from 'https://deno.land/std@0.219.0/path/mod.ts';
 import { Configurator } from '../configurator/configurator.service.ts';
 import { inject } from '../injector/functions/inject.function.ts';
 import { Logger } from '../logger/logger.service.ts';
